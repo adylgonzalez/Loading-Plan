@@ -121,6 +121,12 @@
       "type": "2kg",
       "title": "terrius",
       "formula": "31*3+40+54*19+40+31"
+    },
+    {
+      "bales": "1150",
+      "type": "2kg",
+      "title": "tipper",
+      "formula": "77*10+76*5"
     }
   ],
   "cars": []
