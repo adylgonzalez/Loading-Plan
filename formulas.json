@@ -169,6 +169,12 @@
       "type": "2kg",
       "title": "-",
       "formula": "45*2+50*6+45*4+20"
+    },
+    {
+      "bales": "1200",
+      "type": "2kg",
+      "title": "Flat",
+      "formula": "48*25"
     }
   ],
   "cars": []
