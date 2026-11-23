@@ -177,23 +177,5 @@
       "formula": "48*25"
     }
   ],
-  "cars": [
-    {
-      "plate": "KDW 278U",
-      "date": "2026-11-23",
-      "dateDisplay": "23 Nov 2026",
-      "invoice": "",
-      "emptyBales": "5",
-      "seals": "",
-      "master": "",
-      "items": [
-        {
-          "product": "Ajab hbf",
-          "size": "2kg",
-          "bales": "1200",
-          "formula": "48*25"
-        }
-      ]
-    }
-  ]
+  "cars": []
 }
