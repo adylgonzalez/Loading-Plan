@@ -91,6 +91,12 @@
       "type": "2kg",
       "title": "gil",
       "formula": "46*5+56*12+50*5+48"
+    },
+    {
+      "bales": "1150",
+      "type": "2kg",
+      "title": "gil flat",
+      "formula": "64*16+63*2"
     }
   ],
   "cars": []
