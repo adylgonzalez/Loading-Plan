@@ -10,10 +10,7 @@ body{font-family:Arial;padding:0;background:#f2f2f2;margin:0}
 .top p{margin:4px 0 10px;font-size:13px;opacity:0.9}
 .topBtns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
 .topBtns button{width:auto;padding:10px 12px;font-size:12px;border-radius:20px}
-.btnCars{background:#ff9800;color:white}
-.btnSaved{background:white;color:#0b6e4f}
-.btnSync{background:#1a5276}
-.btnAdd{background:#333;color:white}
+.btnCars{background:#ff9800;color:white}.btnSaved{background:white;color:#0b6e4f}.btnSync{background:#1a5276}.btnAdd{background:#333;color:white}
 .wrap{padding:12px}
 input,textarea,button,select{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #ccc;font-size:16px;box-sizing:border-box}
 button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointer}
@@ -33,7 +30,7 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 .tag{display:inline-block;background:#fff3cd;padding:3px 8px;border-radius:12px;font-size:12px;font-weight:bold;margin:2px}
 .master{background:#e8f5e9;padding:10px;border-radius:8px;font-weight:bold;margin:8px 0}
 .detail{font-size:14px;line-height:1.6}
-.detail b{color:#333}
+.dateBadge{display:inline-block;background:#ff9800;color:white;padding:4px 10px;border-radius:20px;font-size:13px;font-weight:bold;margin-left:6px}
 </style>
 </head>
 <body>
@@ -51,10 +48,9 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 </div>
 
 <div class="wrap">
-<!-- ONLY SEARCH SHOWS ON HOME -->
 <div class="card">
 <b>🔍 Search Formula / Car</b>
-<input id="search" type="text" placeholder="Search by Plate e.g. KDQ 076M or Bales e.g. 590" oninput="show()">
+<input id="search" type="text" placeholder="Search by Plate e.g. KDQ 076M or Bales e.g. 1150" oninput="show()">
 <select id="searchType" onchange="show()">
 <option value="">All Types</option>
 <option value="2kg">2kg Only</option>
@@ -63,22 +59,25 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 </select>
 </div>
 
-<!-- CARS LOADED - BEFORE SAVED FORMULAS -->
+<!-- SEARCH RESULTS - APPEARS ONLY WHEN YOU SEARCH - THIS WAS THE BUG FIX -->
+<div class="card" id="searchResultsCard" style="display:none;border:2px solid #0b6e4f">
+<b>🎯 Search Results</b>
+<div id="searchResults"></div>
+<button style="background:#eee;color:#333" onclick="clearSearch()">Clear Search X</button>
+</div>
+
 <div class="card">
 <b>🚛 Cars Loaded</b> <span class="badge" id="carBadge">0 cars</span>
 <div id="carList" style="margin-top:10px"></div>
 </div>
-
 </div>
 
-<!-- HIDDEN: SAVED FORMULAS - ONLY WHEN CLICKED -->
 <div id="savedModal" class="modal"><div class="modalBox">
 <button class="closeBtn" onclick="closeModal('savedModal')">X</button>
 <h3>📋 Saved Formulas <span class="badge" id="countBadge">0</span></h3>
 <div id="list"></div>
 </div></div>
 
-<!-- HIDDEN: GITHUB SYNC -->
 <div id="syncModal" class="modal"><div class="modalBox">
 <button class="closeBtn" onclick="closeModal('syncModal')">X</button>
 <h3>☁️ GitHub Sync</h3>
@@ -89,39 +88,39 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 <div class="row"><button class="sync" onclick="saveSettings()">SAVE & SYNC</button><button class="sync" onclick="syncToGitHub()">SYNC NOW</button></div>
 </div></div>
 
-<!-- HIDDEN: ADD FORMULA -->
 <div id="addModal" class="modal"><div class="modalBox">
 <button class="closeBtn" onclick="closeModal('addModal')">X</button>
 <h3>➕ Add New Formula</h3>
-<input id="bales" type="number" placeholder="Total Bales e.g. 590">
+<input id="bales" type="number" placeholder="Total Bales e.g. 1150">
 <select id="type"><option value="2kg">2kg Bale</option><option value="1kg">1kg Bale</option><option value="0.5kg">0.5kg Bale</option></select>
-<input id="title" placeholder="Formula Name e.g. 590 Bales - Full Truck">
-<textarea id="formula" rows="4" placeholder="Write formula... e.g. 40x2 + 50x6"></textarea>
+<input id="title" placeholder="Formula Name">
+<textarea id="formula" rows="4" placeholder="Write formula..."></textarea>
 <button onclick="add()">+ SAVE FORMULA</button>
 </div></div>
 
-<!-- HIDDEN: ADD CAR LOADED -->
 <div id="addCarModal" class="modal"><div class="modalBox">
 <button class="closeBtn" onclick="closeModal('addCarModal')">X</button>
 <h3>🚛 Add Car Loaded</h3>
+<label class="small"><b>Date:</b></label>
+<input id="carDate" type="date">
 <input id="plate" placeholder="1. Number Plate e.g. KDQ 076M">
-<input id="invoice" placeholder="4. Invoice to be given e.g. INV 123 / Yes">
+<input id="invoice" placeholder="4. Invoice to be given e.g. INV 123">
 <input id="emptyBales" placeholder="5. Empty Bales to be given e.g. 20">
-<input id="seals" placeholder="6. Seals to be given e.g. 4 - Seal No. 001,002">
+<input id="seals" placeholder="6. Seals to be given e.g. 4 - Seal No.">
 <hr>
-<p><b>What it's carrying - Add one or more items (for mixed load)</b></p>
+<p><b>What it's carrying - Add one or more items</b></p>
 <div id="itemsContainer"></div>
 <button style="background:#ff9800" onclick="addItem()">+ Add Another Product (for mixed load)</button>
 <hr>
 <input id="masterFormula" placeholder="Master Loading Plan e.g. 40+45*4+50*20">
-<p class="small">For mixed load: Master counts 0.5kg as half. Example: 150 bales 0.5kg = 75 in master.</p>
 <button onclick="saveCar()">🚛 SAVE CAR LOADED</button>
 </div></div>
 
 <script>
 let data=[]; let cars=[]; let fileSha=null;
-function openModal(id){document.getElementById(id).style.display='block'; if(id=='addCarModal' && document.getElementById('itemsContainer').innerHTML=='') addItem();}
+function openModal(id){document.getElementById(id).style.display='block'; if(id=='addCarModal'){ if(document.getElementById('itemsContainer').innerHTML=='') addItem(); let d=document.getElementById('carDate'); if(!d.value) d.value=new Date().toISOString().slice(0,10); }}
 function closeModal(id){document.getElementById(id).style.display='none';}
+function clearSearch(){document.getElementById('search').value=''; document.getElementById('searchType').value=''; show();}
 window.onclick=function(e){if(e.target.classList.contains('modal')) e.target.style.display='none';}
 function toggleToken(){let t=document.getElementById('ghToken'); t.type=t.type==='password'?'text':'password';}
 function getSettings(){return{user:document.getElementById('ghUser').value.trim()||localStorage.getItem('ghUser')||'',repo:document.getElementById('ghRepo').value.trim()||'Loading-Plan',token:document.getElementById('ghToken').value.trim()||localStorage.getItem('ghToken')||''};}
@@ -131,38 +130,50 @@ async function loadFromGitHub(){let s=getSettings(); if(!s.user||!s.token){docum
 async function syncToGitHub(){let s=getSettings(); if(!s.user||!s.token){alert('Fill GitHub settings');return;} document.getElementById('syncStatus').innerText='Uploading...'; try{let getRes=await fetch(`https://api.github.com/repos/${s.user}/${s.repo}/contents/formulas.json`,{headers:{Authorization:'token '+s.token}}); fileSha=(await getRes.json()).sha; let content=btoa(unescape(encodeURIComponent(JSON.stringify({formulas:data,cars:cars},null,2)))); let res=await fetch(`https://api.github.com/repos/${s.user}/${s.repo}/contents/formulas.json`,{method:'PUT',headers:{Authorization:'token '+s.token},body:JSON.stringify({message:'Update '+new Date().toISOString(),content:content,sha:fileSha})}); if(!res.ok) throw new Error('GitHub rejected'); fileSha=(await res.json()).content.sha; document.getElementById('syncStatus').innerText='✅ Saved to GitHub!';}catch(e){alert(e.message);}}
 function addItem(product='',size='2kg',bales='',formula=''){
  let div=document.createElement('div'); div.className='itemBox';
- div.innerHTML=`<input class="pProduct" placeholder="2. What its carrying e.g. Ajab HBF" value="${product}"><select class="pSize"><option value="2kg" ${size=='2kg'?'selected':''}>2kg</option><option value="1kg" ${size=='1kg'?'selected':''}>1kg</option><option value="0.5kg" ${size=='0.5kg'?'selected':''}>0.5kg</option></select><input class="pBales" type="number" placeholder="3. Number of Bales e.g. 1145" value="${bales}"><input class="pFormula" placeholder="7. Formula Used for this product e.g. 40+45*4+50*18+25" value="${formula}"><button style="background:#c0392b;padding:8px" onclick="this.parentElement.remove()">Remove this product</button>`;
+ div.innerHTML=`<input class="pProduct" placeholder="2. What its carrying e.g. Ajab HBF" value="${product}"><select class="pSize"><option value="2kg" ${size=='2kg'?'selected':''}>2kg</option><option value="1kg" ${size=='1kg'?'selected':''}>1kg</option><option value="0.5kg" ${size=='0.5kg'?'selected':''}>0.5kg</option></select><input class="pBales" type="number" placeholder="3. Number of Bales e.g. 1145" value="${bales}"><input class="pFormula" placeholder="7. Formula Used for this product" value="${formula}"><button style="background:#c0392b;padding:8px" onclick="this.parentElement.remove()">Remove this product</button>`;
  document.getElementById('itemsContainer').appendChild(div);
 }
+function formatDate(d){ if(!d) return ''; try{ let dt=new Date(d+'T00:00:00'); return dt.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}); }catch(e){return d;} }
 async function saveCar(){
  let plate=document.getElementById('plate').value.trim(); if(!plate){alert('Enter Number Plate');return;}
- let items=[]; document.querySelectorAll('.itemBox').forEach(box=>{
-   let prod=box.querySelector('.pProduct').value; let sz=box.querySelector('.pSize').value; let bl=box.querySelector('.pBales').value; let fm=box.querySelector('.pFormula').value;
-   if(prod&&bl) items.push({product:prod,size:sz,bales:bl,formula:fm});
- });
+ let items=[]; document.querySelectorAll('.itemBox').forEach(box=>{ let prod=box.querySelector('.pProduct').value; let sz=box.querySelector('.pSize').value; let bl=box.querySelector('.pBales').value; let fm=box.querySelector('.pFormula').value; if(prod&&bl) items.push({product:prod,size:sz,bales:bl,formula:fm}); });
  if(items.length==0){alert('Add at least one product');return;}
- let car={plate:plate,invoice:document.getElementById('invoice').value,emptyBales:document.getElementById('emptyBales').value,seals:document.getElementById('seals').value,master:document.getElementById('masterFormula').value,items:items,date:new Date().toLocaleString()};
+ let carDate=document.getElementById('carDate').value || new Date().toISOString().slice(0,10);
+ let car={plate:plate,date:carDate,dateDisplay:formatDate(carDate),invoice:document.getElementById('invoice').value,emptyBales:document.getElementById('emptyBales').value,seals:document.getElementById('seals').value,master:document.getElementById('masterFormula').value,items:items};
  cars.unshift(car); localStorage.setItem('flourData',JSON.stringify({formulas:data,cars:cars})); show(); await syncToGitHub();
  document.getElementById('plate').value=''; document.getElementById('invoice').value=''; document.getElementById('emptyBales').value=''; document.getElementById('seals').value=''; document.getElementById('masterFormula').value=''; document.getElementById('itemsContainer').innerHTML=''; closeModal('addCarModal');
 }
 async function add(){let b=document.getElementById('bales').value; let ty=document.getElementById('type').value; let t=document.getElementById('title').value; let f=document.getElementById('formula').value; if(!b||!t||!f){alert('Fill all');return;} data.push({bales:b,type:ty,title:t,formula:f}); localStorage.setItem('flourData',JSON.stringify({formulas:data,cars:cars})); show(); await syncToGitHub(); document.getElementById('bales').value=''; document.getElementById('title').value=''; document.getElementById('formula').value=''; closeModal('addModal');}
+function carHtml(c,idx){
+ let itemsHtml=c.items.map(i=>`<div class="itemBox"><span class="tag">${i.size}</span> <b>${i.product} - ${i.bales} bales</b><br><span class="small">Individual Plan:</span> <b>${i.formula||' - '}</b></div>`).join('');
+ return `<div class="card" style="border:1px solid #eee"><span class="plate">${c.plate}</span> <span class="dateBadge">📅 ${c.dateDisplay||c.date||''}</span><div class="detail"><b>Invoice:</b> ${c.invoice||'-'}<br><b>Empty Bales:</b> ${c.emptyBales||'-'}<br><b>Seals:</b> ${c.seals||'-'}</div>${c.master?`<div class="master">MASTER: ${c.master}</div>`:''}${itemsHtml}<button class="del" onclick="delCar(${idx})">Delete Car</button></div>`;
+}
 function show(){
- let q=(document.getElementById('search').value||'').toLowerCase(); let qt=document.getElementById('searchType').value;
+ let q=(document.getElementById('search').value||'').toLowerCase().trim(); let qt=document.getElementById('searchType').value;
  document.getElementById('countBadge').innerText=data.length+' saved';
- // Formulas list (inside hidden modal)
- let fHtml=''; let filteredF=data.filter(d=>(!q||d.bales==q)&&(!qt||d.type==qt)); if(filteredF.length==0) fHtml='<p>No formula found.</p>';
- filteredF.forEach(d=>{let idx=data.indexOf(d); fHtml+=`<div class="card" style="border:1px solid #eee"><div class="bales">${d.bales} BALES - ${d.type}</div><b>${d.title}</b><p style="white-space:pre-wrap">${d.formula}</p><button class="del" onclick="delFormula(${idx})">Delete</button></div>`;});
+ // Saved modal always shows ALL formulas
+ let fHtml=''; if(data.length==0) fHtml='<p>No formula.</p>';
+ data.forEach(d=>{let idx=data.indexOf(d); fHtml+=`<div class="card" style="border:1px solid #eee"><div class="bales">${d.bales} BALES - ${d.type}</div><b>${d.title}</b><p style="white-space:pre-wrap">${d.formula}</p><button class="del" onclick="delFormula(${idx})">Delete</button></div>`;});
  document.getElementById('list').innerHTML=fHtml;
- // Cars list - visible on home
- let filteredC=cars.filter(c=>!q||c.plate.toLowerCase().includes(q)||c.items.some(i=>i.bales==q||i.product.toLowerCase().includes(q)));
+ // Cars list on home - filtered only if searching by plate/product/date
+ let filteredC=cars.filter(c=>!q||c.plate.toLowerCase().includes(q)||(c.date&&c.date.includes(q))||(c.dateDisplay&&c.dateDisplay.toLowerCase().includes(q))||c.items.some(i=>i.bales==q||i.product.toLowerCase().includes(q)));
  document.getElementById('carBadge').innerText=cars.length+' cars';
  let cHtml=''; if(filteredC.length==0) cHtml='<p>No car loaded yet. Click 🚛 + Add Car Loaded above.</p>';
- filteredC.forEach(c=>{
-   let idx=cars.indexOf(c);
-   let itemsHtml=c.items.map(i=>`<div class="itemBox"><span class="tag">${i.size}</span> <b>${i.product} - ${i.bales} bales</b><br><span class="small">Individual Plan:</span> <b>${i.formula||' - '}</b></div>`).join('');
-   cHtml+=`<div class="card" style="border:1px solid #eee"><span class="plate">${c.plate}</span> <span class="small">${c.date||''}</span><div class="detail"><b>Invoice:</b> ${c.invoice||'-'}<br><b>Empty Bales to be given:</b> ${c.emptyBales||'-'}<br><b>Seals to be given:</b> ${c.seals||'-'}</div>${c.master?`<div class="master">MASTER LOADING PLAN: ${c.master}</div>`:''}${itemsHtml}<button class="del" onclick="delCar(${idx})">Delete Car</button></div>`;
- });
+ filteredC.forEach(c=>{ cHtml+=carHtml(c,cars.indexOf(c)); });
  document.getElementById('carList').innerHTML=cHtml;
+ // SEARCH RESULTS - SHOWS BOTH FORMULAS + CARS WHEN YOU TYPE
+ if(q||qt){
+   document.getElementById('searchResultsCard').style.display='block';
+   let matchedF=data.filter(d=>(!q||d.bales==q||d.title.toLowerCase().includes(q)||d.formula.toLowerCase().includes(q))&&(!qt||d.type==qt));
+   let matchedC=cars.filter(c=>!q||c.plate.toLowerCase().includes(q)||c.items.some(i=>i.bales==q||i.product.toLowerCase().includes(q)));
+   let html='';
+   if(matchedF.length>0){ html+='<b>📋 Formulas found: '+matchedF.length+'</b>'; matchedF.forEach(d=>{ html+=`<div style="border:1px solid #ddd;padding:10px;border-radius:8px;margin:6px 0"><div class="bales">${d.bales} BALES - ${d.type}</div><b>${d.title}</b><p style="white-space:pre-wrap">${d.formula}</p></div>`; }); }
+   if(matchedC.length>0){ html+='<b>🚛 Cars found: '+matchedC.length+'</b>'; matchedC.forEach(c=>{ html+=carHtml(c,cars.indexOf(c)); }); }
+   if(matchedF.length==0 && matchedC.length==0) html='<p>No result for "'+q+'". Try different bales or plate. Check the filter - if you selected 2kg Only, a 1kg formula will not show.</p>';
+   document.getElementById('searchResults').innerHTML=html;
+ } else {
+   document.getElementById('searchResultsCard').style.display='none';
+ }
 }
 async function delFormula(i){if(confirm('Delete formula?')){data.splice(i,1); localStorage.setItem('flourData',JSON.stringify({formulas:data,cars:cars})); show(); await syncToGitHub();}}
 async function delCar(i){if(confirm('Delete this car?')){cars.splice(i,1); localStorage.setItem('flourData',JSON.stringify({formulas:data,cars:cars})); show(); await syncToGitHub();}}
@@ -170,7 +181,7 @@ loadSettings();
 let local=JSON.parse(localStorage.getItem('flourData')||'null');
 if(local&&local.cars){data=local.formulas||[]; cars=local.cars;}
 else if(local&&Array.isArray(local)){data=local; cars=[];}
-else{data=[{bales:"590",type:"2kg",title:"590 Bales - Full Load",formula:"40 x 2 = 80\n50 x 6 = 300\n45 x 4 = 180\n+ 30 = 590"}]; cars=[{plate:"KDQ 076M",invoice:"INV 123",emptyBales:"20",seals:"4 seals",master:"40+45*4+50*20",items:[{product:"Ajab HBF",size:"2kg",bales:"1145",formula:"40+45*4+50*18+25"},{product:"Ajab HBF",size:"0.5kg",bales:"150",formula:"25+50"}],date:"Example"}];}
+else{data=[{bales:"1150",type:"2kg",title:"1150 Bales",formula:"Example formula"}]; cars=[{plate:"KDQ 076M",date:"2026-11-23",dateDisplay:"23 Nov 2026",invoice:"INV 123",emptyBales:"20",seals:"4 seals",master:"40+45*4+50*20",items:[{product:"Ajab HBF",size:"2kg",bales:"1145",formula:"40+45*4+50*18+25"},{product:"Ajab HBF",size:"0.5kg",bales:"150",formula:"25+50"}]}];}
 show();
 if(localStorage.getItem('ghUser')) loadFromGitHub();
 </script>
