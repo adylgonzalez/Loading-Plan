@@ -43,6 +43,12 @@
       "type": "2kg",
       "title": "-",
       "formula": "44*5+48*16+54*3"
+    },
+    {
+      "bales": "1230",
+      "type": "2kg",
+      "title": "full KCV398A",
+      "formula": "40*5+52*10+51*10"
     }
   ],
   "cars": []
