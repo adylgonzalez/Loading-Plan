@@ -31,6 +31,12 @@
       "type": "2kg",
       "title": "10 wheeler",
       "formula": "40*2+50*6+45*4+30"
+    },
+    {
+      "bales": "1150",
+      "type": "2kg",
+      "title": "-",
+      "formula": "44*5+48*16+54*3"
     }
   ],
   "cars": []
