@@ -73,6 +73,12 @@
       "type": "1kg",
       "title": "Flat",
       "formula": "55*10+50*13"
+    },
+    {
+      "bales": "1230",
+      "type": "2kg",
+      "title": "-",
+      "formula": "50*6+52*12+51*6"
     }
   ],
   "cars": []
