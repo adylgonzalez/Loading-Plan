@@ -145,6 +145,12 @@
       "type": "1kg",
       "title": "-",
       "formula": "56*20+55*2"
+    },
+    {
+      "bales": "1200",
+      "type": "1kg",
+      "title": "-",
+      "formula": "53*4+52*19"
     }
   ],
   "cars": []
