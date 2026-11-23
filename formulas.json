@@ -55,6 +55,12 @@
       "type": "2kg",
       "title": "Flat",
       "formula": "50*24+30"
+    },
+    {
+      "bales": "1150",
+      "type": "2kg",
+      "title": "flat",
+      "formula": "46*25"
     }
   ],
   "cars": []
