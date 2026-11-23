@@ -33,6 +33,8 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 .dateBadge{display:inline-block;background:#ff9800;color:white;padding:4px 10px;border-radius:20px;font-size:13px;font-weight:bold;margin-left:6px}
 .calcPreview{background:#e8f5e9;padding:10px;border-radius:8px;font-weight:bold;margin:6px 0}
 .calcPreview.bad{background:#fde8e8;color:#c0392b}
+.formulaSelect{background:#fff3cd;border:1px solid #ff9800;font-weight:bold}
+.hint{font-size:12px;color:#666;margin:-2px 0 6px}
 </style>
 </head>
 <body>
@@ -114,13 +116,15 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 <div id="itemsContainer"></div>
 <button style="background:#ff9800" onclick="addItem()">+ Add Another Product (for mixed load)</button>
 <hr>
-<input id="masterFormula" placeholder="Master Loading Plan e.g. 40+45*4+50*20">
+<label class="small"><b>Master Loading Plan - pick from saved or type manually:</b></label>
+<select id="masterSelect" class="formulaSelect" onchange="pickMaster()"><option value="">-- Pick Master Formula (or type below) --</option></select>
+<input id="masterFormula" placeholder="Master Loading Plan e.g. 40+45*4+50*20" oninput="updateMasterSelect()">
 <button onclick="saveCar()">🚛 SAVE CAR LOADED</button>
 </div></div>
 
 <script>
 let data=[]; let cars=[]; let fileSha=null;
-function openModal(id){document.getElementById(id).style.display='block'; if(id=='addCarModal'){ if(document.getElementById('itemsContainer').innerHTML=='') addItem(); let d=document.getElementById('carDate'); if(!d.value) d.value=new Date().toISOString().slice(0,10); } if(id=='addModal') previewCalc();}
+function openModal(id){document.getElementById(id).style.display='block'; if(id=='addCarModal'){ if(document.getElementById('itemsContainer').innerHTML=='') addItem(); let d=document.getElementById('carDate'); if(!d.value) d.value=new Date().toISOString().slice(0,10); updateMasterSelect(); } if(id=='addModal') previewCalc();}
 function closeModal(id){document.getElementById(id).style.display='none';}
 function clearSearch(){document.getElementById('search').value=''; document.getElementById('searchType').value=''; show();}
 window.onclick=function(e){if(e.target.classList.contains('modal')) e.target.style.display='none';}
@@ -128,51 +132,84 @@ function toggleToken(){let t=document.getElementById('ghToken'); t.type=t.type==
 function getSettings(){return{user:document.getElementById('ghUser').value.trim()||localStorage.getItem('ghUser')||'',repo:document.getElementById('ghRepo').value.trim()||'Loading-Plan',token:document.getElementById('ghToken').value.trim()||localStorage.getItem('ghToken')||''};}
 function saveSettings(){let s=getSettings(); localStorage.setItem('ghUser',s.user); localStorage.setItem('ghRepo',s.repo); localStorage.setItem('ghToken',s.token); loadFromGitHub(); closeModal('syncModal');}
 function loadSettings(){document.getElementById('ghUser').value=localStorage.getItem('ghUser')||'adylgonzalez'; document.getElementById('ghRepo').value=localStorage.getItem('ghRepo')||'Loading-Plan'; document.getElementById('ghToken').value=localStorage.getItem('ghToken')||'';}
-async function loadFromGitHub(){let s=getSettings(); if(!s.user||!s.token){document.getElementById('syncStatus').innerText='Fill GitHub Sync'; show(); return;} document.getElementById('syncStatus').innerText='Loading...'; try{let res=await fetch(`https://api.github.com/repos/${s.user}/${s.repo}/contents/formulas.json`,{headers:{Authorization:'token '+s.token}}); if(!res.ok) throw new Error('Create formulas.json with []'); let json=await res.json(); fileSha=json.sha; let all=JSON.parse(atob(json.content.replace(/\n/g,''))); if(all.cars){cars=all.cars; data=all.formulas||[];}else{data=all; cars=[];} localStorage.setItem('flourData',JSON.stringify({formulas:data,cars:cars})); document.getElementById('syncStatus').innerText='✅ Synced: '+cars.length+' cars, '+data.length+' formulas'; show();}catch(e){document.getElementById('syncStatus').innerText='❌ '+e.message; show();}}
+async function loadFromGitHub(){let s=getSettings(); if(!s.user||!s.token){document.getElementById('syncStatus').innerText='Fill GitHub Sync'; show(); return;} document.getElementById('syncStatus').innerText='Loading...'; try{let res=await fetch(`https://api.github.com/repos/${s.user}/${s.repo}/contents/formulas.json`,{headers:{Authorization:'token '+s.token}}); if(!res.ok) throw new Error('Create formulas.json with []'); let json=await res.json(); fileSha=json.sha; let all=JSON.parse(atob(json.content.replace(/\n/g,''))); if(all.cars){cars=all.cars; data=all.formulas||[];}else{data=all; cars=[];} localStorage.setItem('flourData',JSON.stringify({formulas:data,cars:cars})); document.getElementById('syncStatus').innerText='✅ Synced: '+cars.length+' cars, '+data.length+' formulas'; show(); refreshAllFormulaDropdowns();}catch(e){document.getElementById('syncStatus').innerText='❌ '+e.message; show();}}
 async function syncToGitHub(){let s=getSettings(); if(!s.user||!s.token){alert('Fill GitHub settings');return;} document.getElementById('syncStatus').innerText='Uploading...'; try{let getRes=await fetch(`https://api.github.com/repos/${s.user}/${s.repo}/contents/formulas.json`,{headers:{Authorization:'token '+s.token}}); fileSha=(await getRes.json()).sha; let content=btoa(unescape(encodeURIComponent(JSON.stringify({formulas:data,cars:cars},null,2)))); let res=await fetch(`https://api.github.com/repos/${s.user}/${s.repo}/contents/formulas.json`,{method:'PUT',headers:{Authorization:'token '+s.token},body:JSON.stringify({message:'Update '+new Date().toISOString(),content:content,sha:fileSha})}); if(!res.ok) throw new Error('GitHub rejected'); fileSha=(await res.json()).content.sha; document.getElementById('syncStatus').innerText='✅ Saved to GitHub!';}catch(e){alert(e.message);}}
+// --- NEW: FORMULA DROPDOWN LOGIC ---
+function formulasForBales(bales, size){
+  if(!bales) return [];
+  // Exact bales match first, then same size
+  let exact = data.filter(d => d.bales == bales);
+  if(size) {
+    let sameSize = exact.filter(d => d.type == size);
+    if(sameSize.length>0) return sameSize;
+  }
+  return exact;
+}
+function updateFormulaDropdown(box){
+  let bales = box.querySelector('.pBales').value.trim();
+  let size = box.querySelector('.pSize').value;
+  let sel = box.querySelector('.pFormulaSelect');
+  let hint = box.querySelector('.formulaHint');
+  let matches = formulasForBales(bales, size);
+  if(!bales){
+    sel.innerHTML = '<option value="">-- First enter Number of Bales above --</option>';
+    hint.innerText = 'Enter bales to see saved formulas';
+    return;
+  }
+  if(matches.length==0){
+    sel.innerHTML = '<option value="">-- No saved formula for '+bales+' bales - type manually below --</option>';
+    hint.innerText = 'No saved formula for '+bales+' bales. Type manually.';
+    return;
+  }
+  sel.innerHTML = '<option value="">-- Pick saved formula for '+bales+' bales ('+matches.length+' found) --</option>' + matches.map((d,i)=>`<option value="${d.formula.replace(/"/g,'&quot;')}">${d.title} | ${d.type} | ${d.formula}</option>`).join('') + '<option value="__manual__">✏️ Type manually instead...</option>';
+  hint.innerText = 'Found '+matches.length+' formula(s) for '+bales+' bales - pick one or type manually';
+}
+function pickFormula(box){
+  let sel = box.querySelector('.pFormulaSelect');
+  let input = box.querySelector('.pFormula');
+  if(sel.value=='__manual__'){ input.value=''; input.focus(); sel.value=''; return; }
+  if(sel.value){ input.value = sel.value; }
+}
+function refreshAllFormulaDropdowns(){ document.querySelectorAll('.itemBox').forEach(box=>updateFormulaDropdown(box)); updateMasterSelect(); }
+function updateMasterSelect(){
+  let sel = document.getElementById('masterSelect');
+  if(!sel) return;
+  let totalBales = 0; document.querySelectorAll('.pBales').forEach(i=>{ totalBales += parseInt(i.value||0); });
+  let matches = totalBales ? data.filter(d=>d.bales==totalBales) : data;
+  let label = totalBales ? 'Pick Master for total '+totalBales+' bales' : 'Pick Master Formula (all saved)';
+  sel.innerHTML = '<option value="">-- '+label+' ('+matches.length+' found) --</option>' + matches.map(d=>`<option value="${d.formula.replace(/"/g,'&quot;')}">${d.title} | ${d.bales} bales | ${d.formula}</option>`).join('') + '<option value="__manual__">✏️ Type manually instead...</option>';
+}
+function pickMaster(){
+  let sel = document.getElementById('masterSelect');
+  let input = document.getElementById('masterFormula');
+  if(sel.value=='__manual__'){ input.value=''; input.focus(); sel.value=''; return; }
+  if(sel.value){ input.value = sel.value; }
+}
 function addItem(product='',size='2kg',bales='',formula=''){
  let div=document.createElement('div'); div.className='itemBox';
- div.innerHTML=`<input class="pProduct" placeholder="2. What its carrying e.g. Ajab HBF" value="${product}"><select class="pSize"><option value="2kg" ${size=='2kg'?'selected':''}>2kg</option><option value="1kg" ${size=='1kg'?'selected':''}>1kg</option><option value="0.5kg" ${size=='0.5kg'?'selected':''}>0.5kg</option></select><input class="pBales" type="number" placeholder="3. Number of Bales e.g. 1145" value="${bales}"><input class="pFormula" placeholder="7. Formula Used for this product" value="${formula}"><button style="background:#c0392b;padding:8px" onclick="this.parentElement.remove()">Remove this product</button>`;
+ div.innerHTML=`<input class="pProduct" placeholder="2. What its carrying e.g. Ajab HBF" value="${product}"><select class="pSize" onchange="updateFormulaDropdown(this.closest('.itemBox'))"><option value="2kg" ${size=='2kg'?'selected':''}>2kg</option><option value="1kg" ${size=='1kg'?'selected':''}>1kg</option><option value="0.5kg" ${size=='0.5kg'?'selected':''}>0.5kg</option></select><input class="pBales" type="number" placeholder="3. Number of Bales e.g. 1145" value="${bales}" oninput="updateFormulaDropdown(this.closest('.itemBox')); updateMasterSelect();"><label class="small"><b>7. Formula - Pick from saved OR type manually:</b></label><select class="pFormulaSelect formulaSelect" onchange="pickFormula(this.closest('.itemBox'))"><option value="">-- First enter Number of Bales above --</option></select><div class="hint formulaHint">Enter bales to see saved formulas</div><input class="pFormula" placeholder="7. Formula Used - type manually or pick above" value="${formula}"><button style="background:#c0392b;padding:8px" onclick="this.parentElement.remove(); updateMasterSelect();">Remove this product</button>`;
  document.getElementById('itemsContainer').appendChild(div);
+ if(bales) updateFormulaDropdown(div);
 }
 function formatDate(d){ if(!d) return ''; try{ let dt=new Date(d+'T00:00:00'); return dt.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}); }catch(e){return d;} }
 function normalizeFormula(str){ return str.toLowerCase().replace(/\s+/g,'').replace(/x/g,'*'); }
-// --- NEW: CALCULATE FORMULA TOTAL ---
 function calcFormulaTotal(formulaText){
   if(!formulaText) return null;
-  // Take each line, if line has = take left side, clean to only maths chars
   let lines = formulaText.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
   if(lines.length==0) return null;
-  // If single line, evaluate it directly
-  // If multi-line like "40x2\n50x6", sum each line's value. If line has =, use left side.
   let total = 0; let validLines = 0;
   for(let line of lines){
     let expr = line.split('=')[0];
-    // Keep only numbers + - * / ( ) . and x
     expr = expr.toLowerCase().replace(/x/g,'*').replace(/[^0-9+\-*/().]/g,'');
     if(!expr || !/[0-9]/.test(expr)) continue;
-    // Safety: only maths chars allowed
     if(!/^[0-9+\-*/().\s]+$/.test(expr)) continue;
-    try{
-      let val = Function('"use strict"; return ('+expr+')')();
-      if(typeof val === 'number' && isFinite(val)){ total += val; validLines++; }
-    }catch(e){ return null; }
+    try{ let val = Function('"use strict"; return ('+expr+')')(); if(typeof val === 'number' && isFinite(val)){ total += val; validLines++; } }catch(e){ return null; }
   }
   if(validLines==0) return null;
-  // If last line was a total like "590" alone and earlier lines were breakdown, the sum would double count.
-  // Handle: if lines.length>1 and last line is a single number that equals sum of previous lines, use last line.
-  // Our simple rule: if multi-line and last line is just a number, use that number as total.
   let last = lines[lines.length-1].split('=')[0].trim().toLowerCase().replace(/x/g,'*').replace(/[^0-9+\-*/().]/g,'');
   if(lines.length>1 && /^[0-9]+$/.test(last)){
-    let lastVal = parseFloat(last);
-    // If lastVal is close to sum of previous lines, it is the total, not an extra item
-    // We check by recalculating sum without last line
-    let sumPrev = 0;
-    for(let i=0;i<lines.length-1;i++){
-      let e = lines[i].split('=')[0].toLowerCase().replace(/x/g,'*').replace(/[^0-9+\-*/().]/g,'');
-      if(!e) continue;
-      try{ sumPrev += Function('"use strict"; return ('+e+')')(); }catch(e){}
-    }
+    let lastVal = parseFloat(last); let sumPrev = 0;
+    for(let i=0;i<lines.length-1;i++){ let e = lines[i].split('=')[0].toLowerCase().replace(/x/g,'*').replace(/[^0-9+\-*/().]/g,''); if(!e) continue; try{ sumPrev += Function('"use strict"; return ('+e+')')(); }catch(e){} }
     if(Math.abs(sumPrev - lastVal) < 0.01) return lastVal;
   }
   return total;
@@ -202,20 +239,12 @@ async function add(){
   let t=document.getElementById('title').value.trim();
   let f=document.getElementById('formula').value.trim();
   if(!b||!t||!f){alert('Fill all');return;}
-  // 1. CHECK FORMULA ADDS UP TO TOTAL BALES
   let total = calcFormulaTotal(f);
-  if(total===null){ alert('Could not calculate your formula.\n\nUse numbers like: 40+45*4+50*20\nOr 40*2 + 50*6'); return; }
-  if(Math.abs(total - parseFloat(b)) > 0.01){
-    alert('❌ WILL NOT SAVE!\n\nFormula adds up to: ' + total + '\nTotal Bales you entered: ' + b + '\nDifference: ' + (total - parseFloat(b)) + '\n\nFix the formula or the bales so they match.');
-    return;
-  }
-  // 2. CHECK DUPLICATE - FORMULA ONLY, Title ignored
+  if(total===null){ alert('Could not calculate your formula.\n\nUse numbers like: 40+45*4+50*20'); return; }
+  if(Math.abs(total - parseFloat(b)) > 0.01){ alert('❌ WILL NOT SAVE!\n\nFormula adds up to: ' + total + '\nTotal Bales you entered: ' + b + '\nDifference: ' + (total - parseFloat(b))); return; }
   let newNorm = normalizeFormula(f);
   let duplicate = data.find(d => normalizeFormula(d.formula) == newNorm);
-  if(duplicate){
-    alert('⚠️ Duplicate Formula! This formula already exists:\n\n' + duplicate.title + ' - ' + duplicate.bales + ' Bales\n' + duplicate.formula);
-    return;
-  }
+  if(duplicate){ alert('⚠️ Duplicate Formula! This formula already exists:\n\n' + duplicate.title + ' - ' + duplicate.bales + ' Bales\n' + duplicate.formula); return; }
   data.push({bales:b,type:ty,title:t,formula:f});
   localStorage.setItem('flourData',JSON.stringify({formulas:data,cars:cars}));
   show(); await syncToGitHub();
