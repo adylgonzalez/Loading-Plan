@@ -2,16 +2,17 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Flour Loading - Bales</title>
+<title>LOADING PLANS</title>
 <style>
 body{font-family:Arial;padding:0;background:#f2f2f2;margin:0}
 .top{background:#0b6e4f;color:white;padding:14px 12px;text-align:center;position:sticky;top:0;z-index:10}
-.top h2{margin:0;font-size:22px}
+.top h2{margin:0;font-size:24px;letter-spacing:1px}
 .top p{margin:4px 0 10px;font-size:13px;opacity:0.9}
-.topBtns{display:flex;gap:8px;justify-content:center}
-.topBtns button{width:auto;padding:10px 16px;font-size:14px;border-radius:20px}
+.topBtns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.topBtns button{width:auto;padding:10px 14px;font-size:13px;border-radius:20px}
+.btnSaved{background:white;color:#0b6e4f}
 .btnSync{background:#1a5276}
-.btnAdd{background:white;color:#0b6e4f}
+.btnAdd{background:#ff9800;color:white}
 .wrap{padding:12px}
 input,textarea,button,select{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #ccc;font-size:16px;box-sizing:border-box}
 button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointer}
@@ -19,10 +20,8 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 .bales{font-size:20px;font-weight:bold;color:#0b6e4f}
 .del{background:#c0392b;margin-top:8px}
 .small{color:#666;font-size:13px}
-.calc{background:#e8f5e9;padding:10px;border-radius:8px;margin:6px 0;font-weight:bold}
 .sync{background:#1a5276}
 .badge{display:inline-block;background:#e8f5e9;color:#0b6e4f;padding:4px 8px;border-radius:20px;font-size:12px;font-weight:bold}
-/* POPUP MODAL - HIDDEN BY DEFAULT */
 .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:100;overflow:auto}
 .modalBox{background:white;margin:15% auto 20px;padding:16px;border-radius:14px;width:92%;max-width:500px;position:relative}
 .closeBtn{background:#eee;color:#333;width:40px;position:absolute;right:10px;top:10px;padding:8px}
@@ -36,11 +35,12 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 </head>
 <body>
 
-<!-- TOP BAR - WITH BUTTONS NEXT TO TITLE -->
+<!-- TOP BAR - LOADING PLANS - SAVED FIRST, THEN SYNC -->
 <div class="top">
-<h2>🌾 Flour Loading - Bales</h2>
+<h2>📦 LOADING PLANS</h2>
 <p>2kg = 12 bags | 1kg = 24 bags | 0.5kg = 24 bags</p>
 <div class="topBtns">
+<button class="btnSaved" onclick="document.getElementById('savedSection').scrollIntoView({behavior:'smooth'})">📋 Saved Formulas</button>
 <button class="btnSync" onclick="openModal('syncModal')">☁️ GitHub Sync</button>
 <button class="btnAdd" onclick="openModal('addModal')">➕ Add Formula</button>
 </div>
@@ -48,7 +48,14 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 </div>
 
 <div class="wrap">
-<!-- ONLY SEARCH + SAVED ARE VISIBLE NOW -->
+
+<!-- 1. SAVED FORMULAS FIRST - BEFORE ANYTHING ELSE -->
+<div class="card" id="savedSection">
+<b>📋 Saved Formulas</b> <span class="badge" id="countBadge">0</span>
+<div id="list" style="margin-top:10px"></div>
+</div>
+
+<!-- 2. SEARCH AFTER SAVED -->
 <div class="card">
 <b>🔍 Search Formulas</b>
 <input id="search" type="number" placeholder="Search by Bales e.g. 590" oninput="show()">
@@ -60,10 +67,6 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 </select>
 </div>
 
-<div class="card">
-<b>📋 Saved Formulas</b> <span class="badge" id="countBadge">0</span>
-<div id="list" style="margin-top:10px"></div>
-</div>
 </div>
 
 <!-- HIDDEN POPUP 1: GITHUB SYNC -->
@@ -82,24 +85,22 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 <button class="sync" onclick="saveSettings()">SAVE & SYNC</button>
 <button class="sync" onclick="syncToGitHub()">SYNC NOW</button>
 </div>
-<div id="syncStatus2" class="small"></div>
 </div>
 </div>
 
-<!-- HIDDEN POPUP 2: ADD FORMULA -->
+<!-- HIDDEN POPUP 2: ADD FORMULA - NO TOTAL BAGS -->
 <div id="addModal" class="modal">
 <div class="modalBox">
 <button class="closeBtn" onclick="closeModal('addModal')">X</button>
 <h3>➕ Add New Formula</h3>
-<input id="bales" type="number" placeholder="Total Bales e.g. 590" oninput="calc()">
-<select id="type" onchange="calc()">
+<input id="bales" type="number" placeholder="Total Bales e.g. 590">
+<select id="type">
 <option value="2kg">Wheat / Maize - 2kg Bale (12 bags)</option>
 <option value="1kg">Wheat / Maize - 1kg Bale (24 bags)</option>
 <option value="0.5kg">Wheat / Maize - 0.5kg Bale (24 bags)</option>
 </select>
 <input id="title" placeholder="Formula Name e.g. 590 Bales - Full Truck">
-<textarea id="formula" rows="4" placeholder="Write formula... e.g. 40x2 + 50x6 + 45x4 + 30"></textarea>
-<div id="calcBox" class="calc">Enter bales to see total bags</div>
+<textarea id="formula" rows="5" placeholder="Write formula... e.g. 40x2 + 50x6 + 45x4 + 30"></textarea>
 <button onclick="add()">+ SAVE FORMULA TO GITHUB</button>
 </div>
 </div>
@@ -116,14 +117,12 @@ function saveSettings(){ let s=getSettings(); localStorage.setItem('ghUser',s.us
 function loadSettings(){ document.getElementById('ghUser').value=localStorage.getItem('ghUser')||'adylgonzalez'; document.getElementById('ghRepo').value=localStorage.getItem('ghRepo')||'Loading-Plan'; document.getElementById('ghToken').value=localStorage.getItem('ghToken')||''; }
 async function loadFromGitHub(){ let s=getSettings(); if(!s.user||!s.token){ document.getElementById('syncStatus').innerText='Fill GitHub Sync to connect'; show(); return; } document.getElementById('syncStatus').innerText='Loading from GitHub...'; try{ let res=await fetch(`https://api.github.com/repos/${s.user}/${s.repo}/contents/formulas.json`,{headers:{Authorization:'token '+s.token,Accept:'application/vnd.github.v3+json'}}); if(!res.ok) throw new Error('File not found. Create formulas.json with []'); let json=await res.json(); fileSha=json.sha; data=JSON.parse(atob(json.content.replace(/\n/g,''))); localStorage.setItem('flourBalesV3',JSON.stringify(data)); document.getElementById('syncStatus').innerText='✅ Synced: '+data.length+' formulas'; show(); }catch(e){ document.getElementById('syncStatus').innerText='❌ '+e.message; show(); } }
 async function syncToGitHub(){ let s=getSettings(); if(!s.user||!s.token){ alert('Fill GitHub settings first'); return; } document.getElementById('syncStatus').innerText='Uploading...'; try{ let getRes=await fetch(`https://api.github.com/repos/${s.user}/${s.repo}/contents/formulas.json`,{headers:{Authorization:'token '+s.token}}); let getJson=await getRes.json(); fileSha=getJson.sha; let content=btoa(unescape(encodeURIComponent(JSON.stringify(data,null,2)))); let res=await fetch(`https://api.github.com/repos/${s.user}/${s.repo}/contents/formulas.json`,{method:'PUT',headers:{Authorization:'token '+s.token,Accept:'application/vnd.github.v3+json'},body:JSON.stringify({message:'Update formulas '+new Date().toISOString(),content:content,sha:fileSha})}); if(!res.ok) throw new Error('GitHub rejected. Check token'); let j=await res.json(); fileSha=j.content.sha; document.getElementById('syncStatus').innerText='✅ Saved to GitHub!'; closeModal('syncModal'); }catch(e){ document.getElementById('syncStatus').innerText='❌ '+e.message; alert(e.message); } }
-function bagsPerBale(t){ if(t=="2kg") return 12; if(t=="1kg") return 24; return 24; }
-function calc(){ let b=document.getElementById('bales').value; let ty=document.getElementById('type').value; if(b){ let per=bagsPerBale(ty); document.getElementById('calcBox').innerHTML=b+" Bales of "+ty+" = "+(b*per)+" bags total"; } }
-async function add(){ let b=document.getElementById('bales').value; let ty=document.getElementById('type').value; let label=document.getElementById('type').options[document.getElementById('type').selectedIndex].text; let t=document.getElementById('title').value; let f=document.getElementById('formula').value; if(!b||!t||!f){ alert('Fill all fields'); return; } let per=bagsPerBale(ty); let auto="\n\nTotal Bags: "+b+" x "+per+" = "+(b*per)+" bags of "+ty; data.push({bales:b,type:ty,typeLabel:label,title:t,formula:f+auto}); localStorage.setItem('flourBalesV3',JSON.stringify(data)); show(); await syncToGitHub(); document.getElementById('bales').value=''; document.getElementById('title').value=''; document.getElementById('formula').value=''; closeModal('addModal'); }
+async function add(){ let b=document.getElementById('bales').value; let ty=document.getElementById('type').value; let label=document.getElementById('type').options[document.getElementById('type').selectedIndex].text; let t=document.getElementById('title').value; let f=document.getElementById('formula').value; if(!b||!t||!f){ alert('Fill all fields'); return; } data.push({bales:b,type:ty,typeLabel:label,title:t,formula:f}); localStorage.setItem('flourBalesV3',JSON.stringify(data)); show(); await syncToGitHub(); document.getElementById('bales').value=''; document.getElementById('title').value=''; document.getElementById('formula').value=''; closeModal('addModal'); }
 function show(){ let q=document.getElementById('search').value; let qt=document.getElementById('searchType').value; let filtered=data.filter(d=>(!q||d.bales==q)&&(!qt||d.type==qt)); document.getElementById('countBadge').innerText=data.length+' saved'; let html=''; if(filtered.length==0) html='<p>No formula found. Click ➕ Add Formula above.</p>'; filtered.forEach((d)=>{ let idx=data.indexOf(d); html+=`<div class="card" style="box-shadow:none;border:1px solid #eee"><div class="bales">${d.bales} BALES - ${d.type}</div><div class="small">${d.typeLabel}</div><b>${d.title}</b><p style="white-space:pre-wrap">${d.formula}</p><button class="del" onclick="del(${idx})">Delete</button></div>`; }); document.getElementById('list').innerHTML=html; }
 async function del(index){ if(confirm('Delete this?')){ data.splice(index,1); localStorage.setItem('flourBalesV3',JSON.stringify(data)); show(); await syncToGitHub(); } }
 loadSettings();
 let local=JSON.parse(localStorage.getItem('flourBalesV3')||'null');
-if(local&&local.length>0){ data=local; } else { data=[{bales:"590",type:"2kg",typeLabel:"Wheat / Maize - 2kg Bale (12 bags)",title:"590 Bales - Full Load",formula:"40 x 2 = 80\n50 x 6 = 300\n45 x 4 = 180\n+ 30 = 590 BALES\n\nTotal Bags: 590 x 12 = 7,080 bags of 2kg"}]; }
+if(local&&local.length>0){ data=local; } else { data=[{bales:"590",type:"2kg",typeLabel:"Wheat / Maize - 2kg Bale (12 bags)",title:"590 Bales - Full Load",formula:"40 x 2 = 80\n50 x 6 = 300\n45 x 4 = 180\n+ 30 = 590 BALES"}]; }
 show();
 if(localStorage.getItem('ghUser')) loadFromGitHub();
 </script>
