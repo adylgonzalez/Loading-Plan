@@ -69,41 +69,5 @@
       "formula": "30*3+35+45*2+55*17"
     }
   ],
-  "cars": [
-    {
-      "plate": "KCS 051Y",
-      "date": "2026-11-23",
-      "dateDisplay": "23 Nov 2026",
-      "invoice": "-",
-      "emptyBales": "",
-      "seals": "",
-      "master": "50*4+75*12+50",
-      "items": [
-        {
-          "product": "LOTUS HBF",
-          "size": "2kg",
-          "bales": "300",
-          "formula": ""
-        },
-        {
-          "product": "LOTUS HBF",
-          "size": "1kg",
-          "bales": "350",
-          "formula": ""
-        },
-        {
-          "product": "AJAB HBF",
-          "size": "1kg",
-          "bales": "200",
-          "formula": ""
-        },
-        {
-          "product": "AJAB HBF",
-          "size": "1kg",
-          "bales": "300",
-          "formula": ""
-        }
-      ]
-    }
-  ]
+  "cars": []
 }
