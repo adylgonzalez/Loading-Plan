@@ -151,6 +151,12 @@
       "type": "1kg",
       "title": "-",
       "formula": "53*4+52*19"
+    },
+    {
+      "bales": "1150",
+      "type": "1kg",
+      "title": "tipper",
+      "formula": "82+83*2+82*11"
     }
   ],
   "cars": []
