@@ -149,17 +149,12 @@ async function add(){
   let t=document.getElementById('title').value.trim();
   let f=document.getElementById('formula').value.trim();
   if(!b||!t||!f){alert('Fill all');return;}
+  // ONLY FORMULA MATTERS - Title and Bales are ignored for duplicate check
   let newNorm = normalizeFormula(f);
-  let duplicate = data.find(d => d.bales == b && d.type == ty && normalizeFormula(d.formula) == newNorm);
+  let duplicate = data.find(d => normalizeFormula(d.formula) == newNorm);
   if(duplicate){
-    alert('⚠️ Duplicate! This formula already exists:\n\n' + duplicate.title + '\n' + duplicate.formula + '\n\nChange bales, type or formula to save as new.');
+    alert('⚠️ Duplicate Formula! This formula already exists:\n\n' + duplicate.title + ' - ' + duplicate.bales + ' Bales\n' + duplicate.formula + '\n\nChange the formula to save as new.');
     return;
-  }
-  let sameTitle = data.find(d => d.title.toLowerCase() == t.toLowerCase());
-  if(sameTitle){
-    if(!confirm('⚠️ A formula with title "'+t+'" already exists.\n\nDo you still want to save it as a different formula?')){
-      return;
-    }
   }
   data.push({bales:b,type:ty,title:t,formula:f});
   localStorage.setItem('flourData',JSON.stringify({formulas:data,cars:cars}));
@@ -201,10 +196,10 @@ let local=JSON.parse(localStorage.getItem('flourData')||'null');
 if(local&&local.cars){data=local.formulas||[]; cars=local.cars;}
 else if(local&&Array.isArray(local)){data=local; cars=[];}
 else{data=[{bales:"1150",type:"2kg",title:"1150 Bales",formula:"Example formula"}]; cars=[{plate:"KDQ 076M",date:"2026-11-23",dateDisplay:"23 Nov 2026",invoice:"INV 123",emptyBales:"20",seals:"4 seals",master:"40+45*4+50*20",items:[{product:"Ajab HBF",size:"2kg",bales:"1145",formula:"40+45*4+50*18+25"},{product:"Ajab HBF",size:"0.5kg",bales:"150",formula:"25+50"}]}];}
-// Remove old duplicates on load
+// Remove old duplicates on load - FORMULA ONLY, Title ignored
 let seen = new Set();
 data = data.filter(d => {
-  let key = d.bales + '|' + d.type + '|' + d.formula.toLowerCase().replace(/\s+/g,'');
+  let key = normalizeFormula(d.formula);
   if(seen.has(key)) return false;
   seen.add(key);
   return true;
