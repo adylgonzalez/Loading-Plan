@@ -59,7 +59,6 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 </select>
 </div>
 
-<!-- SEARCH RESULTS - APPEARS ONLY WHEN YOU SEARCH - THIS WAS THE BUG FIX -->
 <div class="card" id="searchResultsCard" style="display:none;border:2px solid #0b6e4f">
 <b>🎯 Search Results</b>
 <div id="searchResults"></div>
@@ -134,6 +133,7 @@ function addItem(product='',size='2kg',bales='',formula=''){
  document.getElementById('itemsContainer').appendChild(div);
 }
 function formatDate(d){ if(!d) return ''; try{ let dt=new Date(d+'T00:00:00'); return dt.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}); }catch(e){return d;} }
+function normalizeFormula(str){ return str.toLowerCase().replace(/\s+/g,'').replace(/x/g,'*'); }
 async function saveCar(){
  let plate=document.getElementById('plate').value.trim(); if(!plate){alert('Enter Number Plate');return;}
  let items=[]; document.querySelectorAll('.itemBox').forEach(box=>{ let prod=box.querySelector('.pProduct').value; let sz=box.querySelector('.pSize').value; let bl=box.querySelector('.pBales').value; let fm=box.querySelector('.pFormula').value; if(prod&&bl) items.push({product:prod,size:sz,bales:bl,formula:fm}); });
@@ -143,7 +143,29 @@ async function saveCar(){
  cars.unshift(car); localStorage.setItem('flourData',JSON.stringify({formulas:data,cars:cars})); show(); await syncToGitHub();
  document.getElementById('plate').value=''; document.getElementById('invoice').value=''; document.getElementById('emptyBales').value=''; document.getElementById('seals').value=''; document.getElementById('masterFormula').value=''; document.getElementById('itemsContainer').innerHTML=''; closeModal('addCarModal');
 }
-async function add(){let b=document.getElementById('bales').value; let ty=document.getElementById('type').value; let t=document.getElementById('title').value; let f=document.getElementById('formula').value; if(!b||!t||!f){alert('Fill all');return;} data.push({bales:b,type:ty,title:t,formula:f}); localStorage.setItem('flourData',JSON.stringify({formulas:data,cars:cars})); show(); await syncToGitHub(); document.getElementById('bales').value=''; document.getElementById('title').value=''; document.getElementById('formula').value=''; closeModal('addModal');}
+async function add(){
+  let b=document.getElementById('bales').value.trim();
+  let ty=document.getElementById('type').value;
+  let t=document.getElementById('title').value.trim();
+  let f=document.getElementById('formula').value.trim();
+  if(!b||!t||!f){alert('Fill all');return;}
+  let newNorm = normalizeFormula(f);
+  let duplicate = data.find(d => d.bales == b && d.type == ty && normalizeFormula(d.formula) == newNorm);
+  if(duplicate){
+    alert('⚠️ Duplicate! This formula already exists:\n\n' + duplicate.title + '\n' + duplicate.formula + '\n\nChange bales, type or formula to save as new.');
+    return;
+  }
+  let sameTitle = data.find(d => d.title.toLowerCase() == t.toLowerCase());
+  if(sameTitle){
+    if(!confirm('⚠️ A formula with title "'+t+'" already exists.\n\nDo you still want to save it as a different formula?')){
+      return;
+    }
+  }
+  data.push({bales:b,type:ty,title:t,formula:f});
+  localStorage.setItem('flourData',JSON.stringify({formulas:data,cars:cars}));
+  show(); await syncToGitHub();
+  document.getElementById('bales').value=''; document.getElementById('title').value=''; document.getElementById('formula').value=''; closeModal('addModal');
+}
 function carHtml(c,idx){
  let itemsHtml=c.items.map(i=>`<div class="itemBox"><span class="tag">${i.size}</span> <b>${i.product} - ${i.bales} bales</b><br><span class="small">Individual Plan:</span> <b>${i.formula||' - '}</b></div>`).join('');
  return `<div class="card" style="border:1px solid #eee"><span class="plate">${c.plate}</span> <span class="dateBadge">📅 ${c.dateDisplay||c.date||''}</span><div class="detail"><b>Invoice:</b> ${c.invoice||'-'}<br><b>Empty Bales:</b> ${c.emptyBales||'-'}<br><b>Seals:</b> ${c.seals||'-'}</div>${c.master?`<div class="master">MASTER: ${c.master}</div>`:''}${itemsHtml}<button class="del" onclick="delCar(${idx})">Delete Car</button></div>`;
@@ -151,17 +173,14 @@ function carHtml(c,idx){
 function show(){
  let q=(document.getElementById('search').value||'').toLowerCase().trim(); let qt=document.getElementById('searchType').value;
  document.getElementById('countBadge').innerText=data.length+' saved';
- // Saved modal always shows ALL formulas
  let fHtml=''; if(data.length==0) fHtml='<p>No formula.</p>';
  data.forEach(d=>{let idx=data.indexOf(d); fHtml+=`<div class="card" style="border:1px solid #eee"><div class="bales">${d.bales} BALES - ${d.type}</div><b>${d.title}</b><p style="white-space:pre-wrap">${d.formula}</p><button class="del" onclick="delFormula(${idx})">Delete</button></div>`;});
  document.getElementById('list').innerHTML=fHtml;
- // Cars list on home - filtered only if searching by plate/product/date
  let filteredC=cars.filter(c=>!q||c.plate.toLowerCase().includes(q)||(c.date&&c.date.includes(q))||(c.dateDisplay&&c.dateDisplay.toLowerCase().includes(q))||c.items.some(i=>i.bales==q||i.product.toLowerCase().includes(q)));
  document.getElementById('carBadge').innerText=cars.length+' cars';
  let cHtml=''; if(filteredC.length==0) cHtml='<p>No car loaded yet. Click 🚛 + Add Car Loaded above.</p>';
  filteredC.forEach(c=>{ cHtml+=carHtml(c,cars.indexOf(c)); });
  document.getElementById('carList').innerHTML=cHtml;
- // SEARCH RESULTS - SHOWS BOTH FORMULAS + CARS WHEN YOU TYPE
  if(q||qt){
    document.getElementById('searchResultsCard').style.display='block';
    let matchedF=data.filter(d=>(!q||d.bales==q||d.title.toLowerCase().includes(q)||d.formula.toLowerCase().includes(q))&&(!qt||d.type==qt));
@@ -169,7 +188,7 @@ function show(){
    let html='';
    if(matchedF.length>0){ html+='<b>📋 Formulas found: '+matchedF.length+'</b>'; matchedF.forEach(d=>{ html+=`<div style="border:1px solid #ddd;padding:10px;border-radius:8px;margin:6px 0"><div class="bales">${d.bales} BALES - ${d.type}</div><b>${d.title}</b><p style="white-space:pre-wrap">${d.formula}</p></div>`; }); }
    if(matchedC.length>0){ html+='<b>🚛 Cars found: '+matchedC.length+'</b>'; matchedC.forEach(c=>{ html+=carHtml(c,cars.indexOf(c)); }); }
-   if(matchedF.length==0 && matchedC.length==0) html='<p>No result for "'+q+'". Try different bales or plate. Check the filter - if you selected 2kg Only, a 1kg formula will not show.</p>';
+   if(matchedF.length==0 && matchedC.length==0) html='<p>No result for "'+q+'". Try different bales or plate. Check filter - if you selected 2kg Only, a 1kg formula will not show.</p>';
    document.getElementById('searchResults').innerHTML=html;
  } else {
    document.getElementById('searchResultsCard').style.display='none';
@@ -182,6 +201,14 @@ let local=JSON.parse(localStorage.getItem('flourData')||'null');
 if(local&&local.cars){data=local.formulas||[]; cars=local.cars;}
 else if(local&&Array.isArray(local)){data=local; cars=[];}
 else{data=[{bales:"1150",type:"2kg",title:"1150 Bales",formula:"Example formula"}]; cars=[{plate:"KDQ 076M",date:"2026-11-23",dateDisplay:"23 Nov 2026",invoice:"INV 123",emptyBales:"20",seals:"4 seals",master:"40+45*4+50*20",items:[{product:"Ajab HBF",size:"2kg",bales:"1145",formula:"40+45*4+50*18+25"},{product:"Ajab HBF",size:"0.5kg",bales:"150",formula:"25+50"}]}];}
+// Remove old duplicates on load
+let seen = new Set();
+data = data.filter(d => {
+  let key = d.bales + '|' + d.type + '|' + d.formula.toLowerCase().replace(/\s+/g,'');
+  if(seen.has(key)) return false;
+  seen.add(key);
+  return true;
+});
 show();
 if(localStorage.getItem('ghUser')) loadFromGitHub();
 </script>
