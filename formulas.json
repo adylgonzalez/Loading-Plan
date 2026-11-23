@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "bales": "500",
+    "type": "1kg",
+    "typeLabel": "Wheat / Maize - 1kg Bale (24 bags)",
+    "title": "10 wheeler",
+    "formula": "50+45*10\n\nTotal Bags: 500 x 24 = 12000 bags of 1kg"
+  }
+]
