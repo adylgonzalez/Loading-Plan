@@ -67,6 +67,12 @@
       "type": "1kg",
       "title": "KDL916L",
       "formula": "30*3+35+45*2+55*17"
+    },
+    {
+      "bales": "1200",
+      "type": "1kg",
+      "title": "Flat",
+      "formula": "55*10+50*13"
     }
   ],
   "cars": []
