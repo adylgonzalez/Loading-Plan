@@ -31,6 +31,8 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 .master{background:#e8f5e9;padding:10px;border-radius:8px;font-weight:bold;margin:8px 0}
 .detail{font-size:14px;line-height:1.6}
 .dateBadge{display:inline-block;background:#ff9800;color:white;padding:4px 10px;border-radius:20px;font-size:13px;font-weight:bold;margin-left:6px}
+.calcPreview{background:#e8f5e9;padding:10px;border-radius:8px;font-weight:bold;margin:6px 0}
+.calcPreview.bad{background:#fde8e8;color:#c0392b}
 </style>
 </head>
 <body>
@@ -90,10 +92,11 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 <div id="addModal" class="modal"><div class="modalBox">
 <button class="closeBtn" onclick="closeModal('addModal')">X</button>
 <h3>➕ Add New Formula</h3>
-<input id="bales" type="number" placeholder="Total Bales e.g. 1150">
+<input id="bales" type="number" placeholder="Total Bales e.g. 1150" oninput="previewCalc()">
 <select id="type"><option value="2kg">2kg Bale</option><option value="1kg">1kg Bale</option><option value="0.5kg">0.5kg Bale</option></select>
 <input id="title" placeholder="Formula Name">
-<textarea id="formula" rows="4" placeholder="Write formula..."></textarea>
+<textarea id="formula" rows="4" placeholder="Write formula e.g. 40+45*4+50*20" oninput="previewCalc()"></textarea>
+<div id="calcPreview" class="calcPreview">Enter bales + formula to check if it adds up</div>
 <button onclick="add()">+ SAVE FORMULA</button>
 </div></div>
 
@@ -117,7 +120,7 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 
 <script>
 let data=[]; let cars=[]; let fileSha=null;
-function openModal(id){document.getElementById(id).style.display='block'; if(id=='addCarModal'){ if(document.getElementById('itemsContainer').innerHTML=='') addItem(); let d=document.getElementById('carDate'); if(!d.value) d.value=new Date().toISOString().slice(0,10); }}
+function openModal(id){document.getElementById(id).style.display='block'; if(id=='addCarModal'){ if(document.getElementById('itemsContainer').innerHTML=='') addItem(); let d=document.getElementById('carDate'); if(!d.value) d.value=new Date().toISOString().slice(0,10); } if(id=='addModal') previewCalc();}
 function closeModal(id){document.getElementById(id).style.display='none';}
 function clearSearch(){document.getElementById('search').value=''; document.getElementById('searchType').value=''; show();}
 window.onclick=function(e){if(e.target.classList.contains('modal')) e.target.style.display='none';}
@@ -134,6 +137,56 @@ function addItem(product='',size='2kg',bales='',formula=''){
 }
 function formatDate(d){ if(!d) return ''; try{ let dt=new Date(d+'T00:00:00'); return dt.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}); }catch(e){return d;} }
 function normalizeFormula(str){ return str.toLowerCase().replace(/\s+/g,'').replace(/x/g,'*'); }
+// --- NEW: CALCULATE FORMULA TOTAL ---
+function calcFormulaTotal(formulaText){
+  if(!formulaText) return null;
+  // Take each line, if line has = take left side, clean to only maths chars
+  let lines = formulaText.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
+  if(lines.length==0) return null;
+  // If single line, evaluate it directly
+  // If multi-line like "40x2\n50x6", sum each line's value. If line has =, use left side.
+  let total = 0; let validLines = 0;
+  for(let line of lines){
+    let expr = line.split('=')[0];
+    // Keep only numbers + - * / ( ) . and x
+    expr = expr.toLowerCase().replace(/x/g,'*').replace(/[^0-9+\-*/().]/g,'');
+    if(!expr || !/[0-9]/.test(expr)) continue;
+    // Safety: only maths chars allowed
+    if(!/^[0-9+\-*/().\s]+$/.test(expr)) continue;
+    try{
+      let val = Function('"use strict"; return ('+expr+')')();
+      if(typeof val === 'number' && isFinite(val)){ total += val; validLines++; }
+    }catch(e){ return null; }
+  }
+  if(validLines==0) return null;
+  // If last line was a total like "590" alone and earlier lines were breakdown, the sum would double count.
+  // Handle: if lines.length>1 and last line is a single number that equals sum of previous lines, use last line.
+  // Our simple rule: if multi-line and last line is just a number, use that number as total.
+  let last = lines[lines.length-1].split('=')[0].trim().toLowerCase().replace(/x/g,'*').replace(/[^0-9+\-*/().]/g,'');
+  if(lines.length>1 && /^[0-9]+$/.test(last)){
+    let lastVal = parseFloat(last);
+    // If lastVal is close to sum of previous lines, it is the total, not an extra item
+    // We check by recalculating sum without last line
+    let sumPrev = 0;
+    for(let i=0;i<lines.length-1;i++){
+      let e = lines[i].split('=')[0].toLowerCase().replace(/x/g,'*').replace(/[^0-9+\-*/().]/g,'');
+      if(!e) continue;
+      try{ sumPrev += Function('"use strict"; return ('+e+')')(); }catch(e){}
+    }
+    if(Math.abs(sumPrev - lastVal) < 0.01) return lastVal;
+  }
+  return total;
+}
+function previewCalc(){
+  let b = document.getElementById('bales').value;
+  let f = document.getElementById('formula').value;
+  let box = document.getElementById('calcPreview');
+  if(!b || !f){ box.innerHTML='Enter bales + formula to check if it adds up'; box.className='calcPreview'; return; }
+  let total = calcFormulaTotal(f);
+  if(total===null){ box.innerHTML='Could not calculate - use numbers like 40+45*4+50*20'; box.className='calcPreview bad'; return; }
+  if(Math.abs(total - parseFloat(b)) < 0.01){ box.innerHTML='✅ Formula = '+total+' | Total Bales = '+b+' - MATCHES, will save'; box.className='calcPreview'; }
+  else{ box.innerHTML='❌ Formula = '+total+' | Total Bales = '+b+' - DOES NOT MATCH (difference '+(total - parseFloat(b))+') - will NOT save'; box.className='calcPreview bad'; }
+}
 async function saveCar(){
  let plate=document.getElementById('plate').value.trim(); if(!plate){alert('Enter Number Plate');return;}
  let items=[]; document.querySelectorAll('.itemBox').forEach(box=>{ let prod=box.querySelector('.pProduct').value; let sz=box.querySelector('.pSize').value; let bl=box.querySelector('.pBales').value; let fm=box.querySelector('.pFormula').value; if(prod&&bl) items.push({product:prod,size:sz,bales:bl,formula:fm}); });
@@ -149,17 +202,24 @@ async function add(){
   let t=document.getElementById('title').value.trim();
   let f=document.getElementById('formula').value.trim();
   if(!b||!t||!f){alert('Fill all');return;}
-  // ONLY FORMULA MATTERS - Title and Bales are ignored for duplicate check
+  // 1. CHECK FORMULA ADDS UP TO TOTAL BALES
+  let total = calcFormulaTotal(f);
+  if(total===null){ alert('Could not calculate your formula.\n\nUse numbers like: 40+45*4+50*20\nOr 40*2 + 50*6'); return; }
+  if(Math.abs(total - parseFloat(b)) > 0.01){
+    alert('❌ WILL NOT SAVE!\n\nFormula adds up to: ' + total + '\nTotal Bales you entered: ' + b + '\nDifference: ' + (total - parseFloat(b)) + '\n\nFix the formula or the bales so they match.');
+    return;
+  }
+  // 2. CHECK DUPLICATE - FORMULA ONLY, Title ignored
   let newNorm = normalizeFormula(f);
   let duplicate = data.find(d => normalizeFormula(d.formula) == newNorm);
   if(duplicate){
-    alert('⚠️ Duplicate Formula! This formula already exists:\n\n' + duplicate.title + ' - ' + duplicate.bales + ' Bales\n' + duplicate.formula + '\n\nChange the formula to save as new.');
+    alert('⚠️ Duplicate Formula! This formula already exists:\n\n' + duplicate.title + ' - ' + duplicate.bales + ' Bales\n' + duplicate.formula);
     return;
   }
   data.push({bales:b,type:ty,title:t,formula:f});
   localStorage.setItem('flourData',JSON.stringify({formulas:data,cars:cars}));
   show(); await syncToGitHub();
-  document.getElementById('bales').value=''; document.getElementById('title').value=''; document.getElementById('formula').value=''; closeModal('addModal');
+  document.getElementById('bales').value=''; document.getElementById('title').value=''; document.getElementById('formula').value=''; document.getElementById('calcPreview').innerHTML='Enter bales + formula to check if it adds up'; closeModal('addModal');
 }
 function carHtml(c,idx){
  let itemsHtml=c.items.map(i=>`<div class="itemBox"><span class="tag">${i.size}</span> <b>${i.product} - ${i.bales} bales</b><br><span class="small">Individual Plan:</span> <b>${i.formula||' - '}</b></div>`).join('');
@@ -195,8 +255,7 @@ loadSettings();
 let local=JSON.parse(localStorage.getItem('flourData')||'null');
 if(local&&local.cars){data=local.formulas||[]; cars=local.cars;}
 else if(local&&Array.isArray(local)){data=local; cars=[];}
-else{data=[{bales:"1150",type:"2kg",title:"1150 Bales",formula:"Example formula"}]; cars=[{plate:"KDQ 076M",date:"2026-11-23",dateDisplay:"23 Nov 2026",invoice:"INV 123",emptyBales:"20",seals:"4 seals",master:"40+45*4+50*20",items:[{product:"Ajab HBF",size:"2kg",bales:"1145",formula:"40+45*4+50*18+25"},{product:"Ajab HBF",size:"0.5kg",bales:"150",formula:"25+50"}]}];}
-// Remove old duplicates on load - FORMULA ONLY, Title ignored
+else{data=[{bales:"1150",type:"2kg",title:"1150 Bales",formula:"40+45*4+50*20"}]; cars=[{plate:"KDQ 076M",date:"2026-11-23",dateDisplay:"23 Nov 2026",invoice:"INV 123",emptyBales:"20",seals:"4 seals",master:"40+45*4+50*20",items:[{product:"Ajab HBF",size:"2kg",bales:"1145",formula:"40+45*4+50*18+25"},{product:"Ajab HBF",size:"0.5kg",bales:"150",formula:"25+50"}]}];}
 let seen = new Set();
 data = data.filter(d => {
   let key = normalizeFormula(d.formula);
