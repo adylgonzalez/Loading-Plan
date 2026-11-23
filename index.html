@@ -9,38 +9,41 @@ body{font-family:Arial;padding:0;background:#f2f2f2;margin:0}
 .top h2{margin:0;font-size:24px;letter-spacing:1px}
 .top p{margin:4px 0 10px;font-size:13px;opacity:0.9}
 .topBtns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
-.topBtns button{width:auto;padding:10px 14px;font-size:13px;border-radius:20px}
+.topBtns button{width:auto;padding:10px 12px;font-size:12px;border-radius:20px}
+.btnCars{background:#ff9800;color:white}
 .btnSaved{background:white;color:#0b6e4f}
 .btnSync{background:#1a5276}
-.btnAdd{background:#ff9800;color:white}
+.btnAdd{background:#333;color:white}
 .wrap{padding:12px}
 input,textarea,button,select{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #ccc;font-size:16px;box-sizing:border-box}
 button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointer}
 .card{background:white;padding:14px;border-radius:12px;margin:12px 0;box-shadow:0 1px 5px #ccc}
-.bales{font-size:20px;font-weight:bold;color:#0b6e4f}
+.bales{font-size:19px;font-weight:bold;color:#0b6e4f}
+.plate{font-size:22px;font-weight:bold;background:#0b6e4f;color:white;display:inline-block;padding:4px 12px;border-radius:6px;letter-spacing:1px}
 .del{background:#c0392b;margin-top:8px}
 .small{color:#666;font-size:13px}
 .sync{background:#1a5276}
 .badge{display:inline-block;background:#e8f5e9;color:#0b6e4f;padding:4px 8px;border-radius:20px;font-size:12px;font-weight:bold}
 .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:100;overflow:auto}
-.modalBox{background:white;margin:15% auto 20px;padding:16px;border-radius:14px;width:92%;max-width:500px;position:relative}
+.modalBox{background:white;margin:5% auto 20px;padding:16px;border-radius:14px;width:92%;max-width:560px;position:relative}
 .closeBtn{background:#eee;color:#333;width:40px;position:absolute;right:10px;top:10px;padding:8px}
-.row{display:flex;gap:8px}
-.row button{flex:1}
-.settingsRow{display:flex;gap:6px;align-items:center}
-.settingsRow input{flex:1}
-.settingsRow button{width:48px}
-.eye{background:#666}
+.row{display:flex;gap:8px}.row button{flex:1}
+.settingsRow{display:flex;gap:6px;align-items:center}.settingsRow input{flex:1}.settingsRow button{width:48px}.eye{background:#666}
+.itemBox{border:1px solid #ddd;border-radius:8px;padding:10px;margin:8px 0;background:#fafafa}
+.tag{display:inline-block;background:#fff3cd;padding:3px 8px;border-radius:12px;font-size:12px;font-weight:bold;margin:2px}
+.master{background:#e8f5e9;padding:10px;border-radius:8px;font-weight:bold;margin:8px 0}
+.detail{font-size:14px;line-height:1.6}
+.detail b{color:#333}
 </style>
 </head>
 <body>
 
-<!-- TOP BAR - LOADING PLANS - SAVED FIRST, THEN SYNC -->
 <div class="top">
 <h2>📦 LOADING PLANS</h2>
 <p>2kg = 12 bags | 1kg = 24 bags | 0.5kg = 24 bags</p>
 <div class="topBtns">
-<button class="btnSaved" onclick="document.getElementById('savedSection').scrollIntoView({behavior:'smooth'})">📋 Saved Formulas</button>
+<button class="btnCars" onclick="openModal('addCarModal')">🚛 + Add Car Loaded</button>
+<button class="btnSaved" onclick="openModal('savedModal')">📋 Saved Formulas</button>
 <button class="btnSync" onclick="openModal('syncModal')">☁️ GitHub Sync</button>
 <button class="btnAdd" onclick="openModal('addModal')">➕ Add Formula</button>
 </div>
@@ -48,81 +51,126 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 </div>
 
 <div class="wrap">
-
-<!-- 1. SAVED FORMULAS FIRST - BEFORE ANYTHING ELSE -->
-<div class="card" id="savedSection">
-<b>📋 Saved Formulas</b> <span class="badge" id="countBadge">0</span>
-<div id="list" style="margin-top:10px"></div>
-</div>
-
-<!-- 2. SEARCH AFTER SAVED -->
+<!-- ONLY SEARCH SHOWS ON HOME -->
 <div class="card">
-<b>🔍 Search Formulas</b>
-<input id="search" type="number" placeholder="Search by Bales e.g. 590" oninput="show()">
+<b>🔍 Search Formula / Car</b>
+<input id="search" type="text" placeholder="Search by Plate e.g. KDQ 076M or Bales e.g. 590" oninput="show()">
 <select id="searchType" onchange="show()">
 <option value="">All Types</option>
-<option value="2kg">2kg Bales Only</option>
-<option value="1kg">1kg Bales Only</option>
-<option value="0.5kg">0.5kg Bales Only</option>
+<option value="2kg">2kg Only</option>
+<option value="1kg">1kg Only</option>
+<option value="0.5kg">0.5kg Only</option>
 </select>
 </div>
 
+<!-- CARS LOADED - BEFORE SAVED FORMULAS -->
+<div class="card">
+<b>🚛 Cars Loaded</b> <span class="badge" id="carBadge">0 cars</span>
+<div id="carList" style="margin-top:10px"></div>
 </div>
 
-<!-- HIDDEN POPUP 1: GITHUB SYNC -->
-<div id="syncModal" class="modal">
-<div class="modalBox">
+</div>
+
+<!-- HIDDEN: SAVED FORMULAS - ONLY WHEN CLICKED -->
+<div id="savedModal" class="modal"><div class="modalBox">
+<button class="closeBtn" onclick="closeModal('savedModal')">X</button>
+<h3>📋 Saved Formulas <span class="badge" id="countBadge">0</span></h3>
+<div id="list"></div>
+</div></div>
+
+<!-- HIDDEN: GITHUB SYNC -->
+<div id="syncModal" class="modal"><div class="modalBox">
 <button class="closeBtn" onclick="closeModal('syncModal')">X</button>
 <h3>☁️ GitHub Sync</h3>
-<p class="small">Token is hidden •••••• Saved only in this browser</p>
-<input id="ghUser" placeholder="GitHub Username" value="adylgonzalez">
-<input id="ghRepo" placeholder="Repo Name" value="Loading-Plan">
-<div class="settingsRow">
-<input id="ghToken" type="password" placeholder="GitHub Token ghp_...">
-<button class="eye" onclick="toggleToken()">👁️</button>
-</div>
-<div class="row">
-<button class="sync" onclick="saveSettings()">SAVE & SYNC</button>
-<button class="sync" onclick="syncToGitHub()">SYNC NOW</button>
-</div>
-</div>
-</div>
+<p class="small">Token hidden •••••• Saved only in this browser</p>
+<input id="ghUser" value="adylgonzalez">
+<input id="ghRepo" value="Loading-Plan">
+<div class="settingsRow"><input id="ghToken" type="password" placeholder="GitHub Token ghp_..."><button class="eye" onclick="toggleToken()">👁️</button></div>
+<div class="row"><button class="sync" onclick="saveSettings()">SAVE & SYNC</button><button class="sync" onclick="syncToGitHub()">SYNC NOW</button></div>
+</div></div>
 
-<!-- HIDDEN POPUP 2: ADD FORMULA - NO TOTAL BAGS -->
-<div id="addModal" class="modal">
-<div class="modalBox">
+<!-- HIDDEN: ADD FORMULA -->
+<div id="addModal" class="modal"><div class="modalBox">
 <button class="closeBtn" onclick="closeModal('addModal')">X</button>
 <h3>➕ Add New Formula</h3>
 <input id="bales" type="number" placeholder="Total Bales e.g. 590">
-<select id="type">
-<option value="2kg">Wheat / Maize - 2kg Bale (12 bags)</option>
-<option value="1kg">Wheat / Maize - 1kg Bale (24 bags)</option>
-<option value="0.5kg">Wheat / Maize - 0.5kg Bale (24 bags)</option>
-</select>
+<select id="type"><option value="2kg">2kg Bale</option><option value="1kg">1kg Bale</option><option value="0.5kg">0.5kg Bale</option></select>
 <input id="title" placeholder="Formula Name e.g. 590 Bales - Full Truck">
-<textarea id="formula" rows="5" placeholder="Write formula... e.g. 40x2 + 50x6 + 45x4 + 30"></textarea>
-<button onclick="add()">+ SAVE FORMULA TO GITHUB</button>
-</div>
-</div>
+<textarea id="formula" rows="4" placeholder="Write formula... e.g. 40x2 + 50x6"></textarea>
+<button onclick="add()">+ SAVE FORMULA</button>
+</div></div>
+
+<!-- HIDDEN: ADD CAR LOADED -->
+<div id="addCarModal" class="modal"><div class="modalBox">
+<button class="closeBtn" onclick="closeModal('addCarModal')">X</button>
+<h3>🚛 Add Car Loaded</h3>
+<input id="plate" placeholder="1. Number Plate e.g. KDQ 076M">
+<input id="invoice" placeholder="4. Invoice to be given e.g. INV 123 / Yes">
+<input id="emptyBales" placeholder="5. Empty Bales to be given e.g. 20">
+<input id="seals" placeholder="6. Seals to be given e.g. 4 - Seal No. 001,002">
+<hr>
+<p><b>What it's carrying - Add one or more items (for mixed load)</b></p>
+<div id="itemsContainer"></div>
+<button style="background:#ff9800" onclick="addItem()">+ Add Another Product (for mixed load)</button>
+<hr>
+<input id="masterFormula" placeholder="Master Loading Plan e.g. 40+45*4+50*20">
+<p class="small">For mixed load: Master counts 0.5kg as half. Example: 150 bales 0.5kg = 75 in master.</p>
+<button onclick="saveCar()">🚛 SAVE CAR LOADED</button>
+</div></div>
 
 <script>
-let data = [];
-let fileSha = null;
-function openModal(id){ document.getElementById(id).style.display='block'; }
-function closeModal(id){ document.getElementById(id).style.display='none'; }
-window.onclick = function(e){ if(e.target.classList.contains('modal')) e.target.style.display='none'; }
-function toggleToken(){ let t=document.getElementById('ghToken'); t.type=t.type==='password'?'text':'password'; }
-function getSettings(){ return { user: document.getElementById('ghUser').value.trim() || localStorage.getItem('ghUser') || '', repo: document.getElementById('ghRepo').value.trim() || 'Loading-Plan', token: document.getElementById('ghToken').value.trim() || localStorage.getItem('ghToken') || '' }; }
-function saveSettings(){ let s=getSettings(); localStorage.setItem('ghUser',s.user); localStorage.setItem('ghRepo',s.repo); localStorage.setItem('ghToken',s.token); loadFromGitHub(); closeModal('syncModal'); }
-function loadSettings(){ document.getElementById('ghUser').value=localStorage.getItem('ghUser')||'adylgonzalez'; document.getElementById('ghRepo').value=localStorage.getItem('ghRepo')||'Loading-Plan'; document.getElementById('ghToken').value=localStorage.getItem('ghToken')||''; }
-async function loadFromGitHub(){ let s=getSettings(); if(!s.user||!s.token){ document.getElementById('syncStatus').innerText='Fill GitHub Sync to connect'; show(); return; } document.getElementById('syncStatus').innerText='Loading from GitHub...'; try{ let res=await fetch(`https://api.github.com/repos/${s.user}/${s.repo}/contents/formulas.json`,{headers:{Authorization:'token '+s.token,Accept:'application/vnd.github.v3+json'}}); if(!res.ok) throw new Error('File not found. Create formulas.json with []'); let json=await res.json(); fileSha=json.sha; data=JSON.parse(atob(json.content.replace(/\n/g,''))); localStorage.setItem('flourBalesV3',JSON.stringify(data)); document.getElementById('syncStatus').innerText='✅ Synced: '+data.length+' formulas'; show(); }catch(e){ document.getElementById('syncStatus').innerText='❌ '+e.message; show(); } }
-async function syncToGitHub(){ let s=getSettings(); if(!s.user||!s.token){ alert('Fill GitHub settings first'); return; } document.getElementById('syncStatus').innerText='Uploading...'; try{ let getRes=await fetch(`https://api.github.com/repos/${s.user}/${s.repo}/contents/formulas.json`,{headers:{Authorization:'token '+s.token}}); let getJson=await getRes.json(); fileSha=getJson.sha; let content=btoa(unescape(encodeURIComponent(JSON.stringify(data,null,2)))); let res=await fetch(`https://api.github.com/repos/${s.user}/${s.repo}/contents/formulas.json`,{method:'PUT',headers:{Authorization:'token '+s.token,Accept:'application/vnd.github.v3+json'},body:JSON.stringify({message:'Update formulas '+new Date().toISOString(),content:content,sha:fileSha})}); if(!res.ok) throw new Error('GitHub rejected. Check token'); let j=await res.json(); fileSha=j.content.sha; document.getElementById('syncStatus').innerText='✅ Saved to GitHub!'; closeModal('syncModal'); }catch(e){ document.getElementById('syncStatus').innerText='❌ '+e.message; alert(e.message); } }
-async function add(){ let b=document.getElementById('bales').value; let ty=document.getElementById('type').value; let label=document.getElementById('type').options[document.getElementById('type').selectedIndex].text; let t=document.getElementById('title').value; let f=document.getElementById('formula').value; if(!b||!t||!f){ alert('Fill all fields'); return; } data.push({bales:b,type:ty,typeLabel:label,title:t,formula:f}); localStorage.setItem('flourBalesV3',JSON.stringify(data)); show(); await syncToGitHub(); document.getElementById('bales').value=''; document.getElementById('title').value=''; document.getElementById('formula').value=''; closeModal('addModal'); }
-function show(){ let q=document.getElementById('search').value; let qt=document.getElementById('searchType').value; let filtered=data.filter(d=>(!q||d.bales==q)&&(!qt||d.type==qt)); document.getElementById('countBadge').innerText=data.length+' saved'; let html=''; if(filtered.length==0) html='<p>No formula found. Click ➕ Add Formula above.</p>'; filtered.forEach((d)=>{ let idx=data.indexOf(d); html+=`<div class="card" style="box-shadow:none;border:1px solid #eee"><div class="bales">${d.bales} BALES - ${d.type}</div><div class="small">${d.typeLabel}</div><b>${d.title}</b><p style="white-space:pre-wrap">${d.formula}</p><button class="del" onclick="del(${idx})">Delete</button></div>`; }); document.getElementById('list').innerHTML=html; }
-async function del(index){ if(confirm('Delete this?')){ data.splice(index,1); localStorage.setItem('flourBalesV3',JSON.stringify(data)); show(); await syncToGitHub(); } }
+let data=[]; let cars=[]; let fileSha=null;
+function openModal(id){document.getElementById(id).style.display='block'; if(id=='addCarModal' && document.getElementById('itemsContainer').innerHTML=='') addItem();}
+function closeModal(id){document.getElementById(id).style.display='none';}
+window.onclick=function(e){if(e.target.classList.contains('modal')) e.target.style.display='none';}
+function toggleToken(){let t=document.getElementById('ghToken'); t.type=t.type==='password'?'text':'password';}
+function getSettings(){return{user:document.getElementById('ghUser').value.trim()||localStorage.getItem('ghUser')||'',repo:document.getElementById('ghRepo').value.trim()||'Loading-Plan',token:document.getElementById('ghToken').value.trim()||localStorage.getItem('ghToken')||''};}
+function saveSettings(){let s=getSettings(); localStorage.setItem('ghUser',s.user); localStorage.setItem('ghRepo',s.repo); localStorage.setItem('ghToken',s.token); loadFromGitHub(); closeModal('syncModal');}
+function loadSettings(){document.getElementById('ghUser').value=localStorage.getItem('ghUser')||'adylgonzalez'; document.getElementById('ghRepo').value=localStorage.getItem('ghRepo')||'Loading-Plan'; document.getElementById('ghToken').value=localStorage.getItem('ghToken')||'';}
+async function loadFromGitHub(){let s=getSettings(); if(!s.user||!s.token){document.getElementById('syncStatus').innerText='Fill GitHub Sync'; show(); return;} document.getElementById('syncStatus').innerText='Loading...'; try{let res=await fetch(`https://api.github.com/repos/${s.user}/${s.repo}/contents/formulas.json`,{headers:{Authorization:'token '+s.token}}); if(!res.ok) throw new Error('Create formulas.json with []'); let json=await res.json(); fileSha=json.sha; let all=JSON.parse(atob(json.content.replace(/\n/g,''))); if(all.cars){cars=all.cars; data=all.formulas||[];}else{data=all; cars=[];} localStorage.setItem('flourData',JSON.stringify({formulas:data,cars:cars})); document.getElementById('syncStatus').innerText='✅ Synced: '+cars.length+' cars, '+data.length+' formulas'; show();}catch(e){document.getElementById('syncStatus').innerText='❌ '+e.message; show();}}
+async function syncToGitHub(){let s=getSettings(); if(!s.user||!s.token){alert('Fill GitHub settings');return;} document.getElementById('syncStatus').innerText='Uploading...'; try{let getRes=await fetch(`https://api.github.com/repos/${s.user}/${s.repo}/contents/formulas.json`,{headers:{Authorization:'token '+s.token}}); fileSha=(await getRes.json()).sha; let content=btoa(unescape(encodeURIComponent(JSON.stringify({formulas:data,cars:cars},null,2)))); let res=await fetch(`https://api.github.com/repos/${s.user}/${s.repo}/contents/formulas.json`,{method:'PUT',headers:{Authorization:'token '+s.token},body:JSON.stringify({message:'Update '+new Date().toISOString(),content:content,sha:fileSha})}); if(!res.ok) throw new Error('GitHub rejected'); fileSha=(await res.json()).content.sha; document.getElementById('syncStatus').innerText='✅ Saved to GitHub!';}catch(e){alert(e.message);}}
+function addItem(product='',size='2kg',bales='',formula=''){
+ let div=document.createElement('div'); div.className='itemBox';
+ div.innerHTML=`<input class="pProduct" placeholder="2. What its carrying e.g. Ajab HBF" value="${product}"><select class="pSize"><option value="2kg" ${size=='2kg'?'selected':''}>2kg</option><option value="1kg" ${size=='1kg'?'selected':''}>1kg</option><option value="0.5kg" ${size=='0.5kg'?'selected':''}>0.5kg</option></select><input class="pBales" type="number" placeholder="3. Number of Bales e.g. 1145" value="${bales}"><input class="pFormula" placeholder="7. Formula Used for this product e.g. 40+45*4+50*18+25" value="${formula}"><button style="background:#c0392b;padding:8px" onclick="this.parentElement.remove()">Remove this product</button>`;
+ document.getElementById('itemsContainer').appendChild(div);
+}
+async function saveCar(){
+ let plate=document.getElementById('plate').value.trim(); if(!plate){alert('Enter Number Plate');return;}
+ let items=[]; document.querySelectorAll('.itemBox').forEach(box=>{
+   let prod=box.querySelector('.pProduct').value; let sz=box.querySelector('.pSize').value; let bl=box.querySelector('.pBales').value; let fm=box.querySelector('.pFormula').value;
+   if(prod&&bl) items.push({product:prod,size:sz,bales:bl,formula:fm});
+ });
+ if(items.length==0){alert('Add at least one product');return;}
+ let car={plate:plate,invoice:document.getElementById('invoice').value,emptyBales:document.getElementById('emptyBales').value,seals:document.getElementById('seals').value,master:document.getElementById('masterFormula').value,items:items,date:new Date().toLocaleString()};
+ cars.unshift(car); localStorage.setItem('flourData',JSON.stringify({formulas:data,cars:cars})); show(); await syncToGitHub();
+ document.getElementById('plate').value=''; document.getElementById('invoice').value=''; document.getElementById('emptyBales').value=''; document.getElementById('seals').value=''; document.getElementById('masterFormula').value=''; document.getElementById('itemsContainer').innerHTML=''; closeModal('addCarModal');
+}
+async function add(){let b=document.getElementById('bales').value; let ty=document.getElementById('type').value; let t=document.getElementById('title').value; let f=document.getElementById('formula').value; if(!b||!t||!f){alert('Fill all');return;} data.push({bales:b,type:ty,title:t,formula:f}); localStorage.setItem('flourData',JSON.stringify({formulas:data,cars:cars})); show(); await syncToGitHub(); document.getElementById('bales').value=''; document.getElementById('title').value=''; document.getElementById('formula').value=''; closeModal('addModal');}
+function show(){
+ let q=(document.getElementById('search').value||'').toLowerCase(); let qt=document.getElementById('searchType').value;
+ document.getElementById('countBadge').innerText=data.length+' saved';
+ // Formulas list (inside hidden modal)
+ let fHtml=''; let filteredF=data.filter(d=>(!q||d.bales==q)&&(!qt||d.type==qt)); if(filteredF.length==0) fHtml='<p>No formula found.</p>';
+ filteredF.forEach(d=>{let idx=data.indexOf(d); fHtml+=`<div class="card" style="border:1px solid #eee"><div class="bales">${d.bales} BALES - ${d.type}</div><b>${d.title}</b><p style="white-space:pre-wrap">${d.formula}</p><button class="del" onclick="delFormula(${idx})">Delete</button></div>`;});
+ document.getElementById('list').innerHTML=fHtml;
+ // Cars list - visible on home
+ let filteredC=cars.filter(c=>!q||c.plate.toLowerCase().includes(q)||c.items.some(i=>i.bales==q||i.product.toLowerCase().includes(q)));
+ document.getElementById('carBadge').innerText=cars.length+' cars';
+ let cHtml=''; if(filteredC.length==0) cHtml='<p>No car loaded yet. Click 🚛 + Add Car Loaded above.</p>';
+ filteredC.forEach(c=>{
+   let idx=cars.indexOf(c);
+   let itemsHtml=c.items.map(i=>`<div class="itemBox"><span class="tag">${i.size}</span> <b>${i.product} - ${i.bales} bales</b><br><span class="small">Individual Plan:</span> <b>${i.formula||' - '}</b></div>`).join('');
+   cHtml+=`<div class="card" style="border:1px solid #eee"><span class="plate">${c.plate}</span> <span class="small">${c.date||''}</span><div class="detail"><b>Invoice:</b> ${c.invoice||'-'}<br><b>Empty Bales to be given:</b> ${c.emptyBales||'-'}<br><b>Seals to be given:</b> ${c.seals||'-'}</div>${c.master?`<div class="master">MASTER LOADING PLAN: ${c.master}</div>`:''}${itemsHtml}<button class="del" onclick="delCar(${idx})">Delete Car</button></div>`;
+ });
+ document.getElementById('carList').innerHTML=cHtml;
+}
+async function delFormula(i){if(confirm('Delete formula?')){data.splice(i,1); localStorage.setItem('flourData',JSON.stringify({formulas:data,cars:cars})); show(); await syncToGitHub();}}
+async function delCar(i){if(confirm('Delete this car?')){cars.splice(i,1); localStorage.setItem('flourData',JSON.stringify({formulas:data,cars:cars})); show(); await syncToGitHub();}}
 loadSettings();
-let local=JSON.parse(localStorage.getItem('flourBalesV3')||'null');
-if(local&&local.length>0){ data=local; } else { data=[{bales:"590",type:"2kg",typeLabel:"Wheat / Maize - 2kg Bale (12 bags)",title:"590 Bales - Full Load",formula:"40 x 2 = 80\n50 x 6 = 300\n45 x 4 = 180\n+ 30 = 590 BALES"}]; }
+let local=JSON.parse(localStorage.getItem('flourData')||'null');
+if(local&&local.cars){data=local.formulas||[]; cars=local.cars;}
+else if(local&&Array.isArray(local)){data=local; cars=[];}
+else{data=[{bales:"590",type:"2kg",title:"590 Bales - Full Load",formula:"40 x 2 = 80\n50 x 6 = 300\n45 x 4 = 180\n+ 30 = 590"}]; cars=[{plate:"KDQ 076M",invoice:"INV 123",emptyBales:"20",seals:"4 seals",master:"40+45*4+50*20",items:[{product:"Ajab HBF",size:"2kg",bales:"1145",formula:"40+45*4+50*18+25"},{product:"Ajab HBF",size:"0.5kg",bales:"150",formula:"25+50"}],date:"Example"}];}
 show();
 if(localStorage.getItem('ghUser')) loadFromGitHub();
 </script>
