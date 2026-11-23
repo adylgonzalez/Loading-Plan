@@ -25,6 +25,12 @@
       "type": "0.5kg",
       "title": "GIL",
       "formula": "90*5+99*18+68"
+    },
+    {
+      "bales": "590",
+      "type": "2kg",
+      "title": "10 wheeler",
+      "formula": "40*2+50*6+45*4+30"
     }
   ],
   "cars": []
