@@ -133,6 +133,12 @@
       "type": "2kg",
       "title": "-",
       "formula": "50*5+55*10+50*8"
+    },
+    {
+      "bales": "1200",
+      "type": "2kg",
+      "title": "-",
+      "formula": "50*24"
     }
   ],
   "cars": []
