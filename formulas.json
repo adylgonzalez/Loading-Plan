@@ -127,6 +127,12 @@
       "type": "2kg",
       "title": "tipper",
       "formula": "77*10+76*5"
+    },
+    {
+      "bales": "1200",
+      "type": "2kg",
+      "title": "-",
+      "formula": "50*5+55*10+50*8"
     }
   ],
   "cars": []
