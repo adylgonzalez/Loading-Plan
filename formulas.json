@@ -211,6 +211,12 @@
       "type": "2kg",
       "title": "Kcs063y",
       "formula": "45*3+65*15+40"
+    },
+    {
+      "bales": "1200",
+      "type": "2kg",
+      "title": "Kdm178k",
+      "formula": "40*3+50*20+40*2"
     }
   ],
   "cars": []
