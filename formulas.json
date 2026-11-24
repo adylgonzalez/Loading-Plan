@@ -235,6 +235,12 @@
       "type": "2kg",
       "title": "Kcj793a",
       "formula": "48*22+47*2"
+    },
+    {
+      "bales": "1150",
+      "type": "2kg",
+      "title": "Kcs062y",
+      "formula": "43*3+55*18+31"
     }
   ],
   "cars": []
