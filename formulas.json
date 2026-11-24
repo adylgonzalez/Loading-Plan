@@ -223,6 +223,12 @@
       "type": "2kg",
       "title": "Kdu993r",
       "formula": "50*5+49*20"
+    },
+    {
+      "bales": "1200",
+      "type": "2kg",
+      "title": "Kcy991t",
+      "formula": "53*22+34"
     }
   ],
   "cars": []
