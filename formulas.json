@@ -193,6 +193,12 @@
       "type": "1kg",
       "title": "Kdw247a",
       "formula": "30*3+35+55*17+45*2"
+    },
+    {
+      "bales": "1230",
+      "type": "2kg",
+      "title": "Kdp647q",
+      "formula": "56*5+50*19"
     }
   ],
   "cars": []
