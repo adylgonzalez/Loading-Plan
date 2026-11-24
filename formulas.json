@@ -175,6 +175,12 @@
       "type": "2kg",
       "title": "Flat",
       "formula": "48*25"
+    },
+    {
+      "bales": "1230",
+      "type": "1kg",
+      "title": "Kdx 151m",
+      "formula": "40*3+57*14+58*4+40*2"
     }
   ],
   "cars": []
