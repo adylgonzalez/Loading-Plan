@@ -44,7 +44,12 @@
       "bales": "1150",
       "type": "2kg",
       "title": "-",
-      "formula": "44*5+48*16+54*3"
+      "formula": "44*5+48*16+54*3",
+      "plate": "KDY 530H",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
     },
     {
       "bales": "1150",
