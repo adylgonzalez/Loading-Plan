@@ -1,6 +1,17 @@
 {
   "formulas": [
     {
+      "bales": "1150",
+      "type": "2kg",
+      "title": ".",
+      "formula": "70*10+63*5+45*3",
+      "plate": "KCS 058Y",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
+    },
+    {
       "bales": "1200",
       "type": "2kg",
       "title": ".",
