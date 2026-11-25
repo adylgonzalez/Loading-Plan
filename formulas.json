@@ -310,7 +310,12 @@
       "bales": "1200",
       "type": "2kg",
       "title": "Flat",
-      "formula": "48*25"
+      "formula": "48*25",
+      "plate": "KBQ 709U",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
     },
     {
       "bales": "1230",
