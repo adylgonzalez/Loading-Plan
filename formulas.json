@@ -372,7 +372,12 @@
       "bales": "1150",
       "type": "2kg",
       "title": "Kcs062y",
-      "formula": "43*3+55*18+31"
+      "formula": "43*3+55*18+31",
+      "plate": "KCS 062Y",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
     }
   ]
 }
