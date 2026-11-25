@@ -215,7 +215,12 @@
       "bales": "1150",
       "type": "1kg",
       "title": "Kdw247a",
-      "formula": "30*3+35+55*17+45*2"
+      "formula": "30*3+35+55*17+45*2",
+      "plate": "KDW 247A",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
     },
     {
       "bales": "1230",
