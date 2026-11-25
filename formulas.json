@@ -1,6 +1,17 @@
 {
   "formulas": [
     {
+      "bales": "960",
+      "type": "2kg",
+      "title": ".",
+      "formula": "80*12",
+      "plate": "KBK 513T",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
+    },
+    {
       "bales": "1230",
       "type": "1kg",
       "title": ".",
