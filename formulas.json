@@ -48,7 +48,12 @@
       "bales": "590",
       "type": "2kg",
       "title": "10 wheeler",
-      "formula": "40*2+50*6+45*4+30"
+      "formula": "40*2+50*6+45*4+30",
+      "plate": "KCY 203W",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
     },
     {
       "bales": "1150",
