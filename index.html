@@ -37,6 +37,9 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 .editingBanner{background:#fff3cd;border:1px solid #ff9800;padding:10px;border-radius:8px;font-weight:bold;margin:6px 0;display:none}
 .homeHint{text-align:center;color:#666;font-size:13px;padding:10px}
 .sectionLabel{font-size:12px;font-weight:bold;color:#0b6e4f;margin-top:10px;text-transform:uppercase}
+.templatePanel{background:#f0f7f4;border:1px solid #0b6e4f;border-radius:10px;padding:8px;margin:2px 0 8px;max-height:340px;overflow-y:auto}
+.templateBtn{background:white;color:#333;border:1px solid #cce5d9;text-align:left;padding:10px;margin:6px 0;font-weight:normal;line-height:1.35}
+.templateBtn:active{background:#e8f5e9}
 </style>
 </head>
 <body>
@@ -125,7 +128,8 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 <textarea id="formula" rows="4" placeholder="Write formula e.g. 40+45*4+50*20" oninput="previewCalc()"></textarea>
 <div id="calcPreview" class="calcPreview">Enter bales + formula to check if it adds up</div>
 <div class="sectionLabel">Car / Loading Details</div>
-<input id="plate" placeholder="Number Plate e.g. KDQ 076M">
+<input id="plate" placeholder="Number Plate e.g. KDQ 076M" oninput="renderTemplates()" autocomplete="off">
+<div id="templatePanel" class="templatePanel" style="display:none"></div>
 <label class="small" for="date"><b>Date (optional):</b></label>
 <input id="date" type="date">
 <input id="bay" placeholder="Bay (optional) e.g. Bay 1 / Bay 2">
@@ -187,6 +191,7 @@ let selectedDate = '';
 let dirty = localStorage.getItem('flourDirty') === '1';
 let syncing = false;
 let syncTimer = null;
+let currentTemplates = [];
 
 // ---------- modals ----------
 function openModal(id){
@@ -413,6 +418,74 @@ function previewCalc(){
   }
 }
 
+// ---------- plate templates ----------
+function renderTemplates(){
+  const panel = document.getElementById('templatePanel');
+  if(!panel) return;
+  if(editingIndex >= 0){ panel.style.display = 'none'; currentTemplates = []; return; }
+  const typed = (document.getElementById('plate').value || '').trim().toLowerCase();
+  if(typed.length < 2){ panel.style.display = 'none'; panel.innerHTML = ''; currentTemplates = []; return; }
+
+  const matches = data
+    .filter(d => (d.plate || '').toLowerCase().includes(typed))
+    .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+  if(!matches.length){
+    panel.innerHTML = '<div class="small" style="padding:4px">🆕 New plate — no previous loads, enter manually</div>';
+    panel.style.display = 'block';
+    currentTemplates = [];
+    return;
+  }
+
+  const map = new Map();
+  matches.forEach(d => {
+    const key = (d.type || '') + '|' + d.bales + '|' + normalizeFormula(d.formula);
+    if(!map.has(key)){
+      map.set(key, Object.assign({}, d, {count: 0, lastDate: d.date || ''}));
+    }
+    const t = map.get(key);
+    t.count++;
+    if((d.date || '') > t.lastDate) t.lastDate = d.date || '';
+  });
+
+  currentTemplates = Array.from(map.values())
+    .sort((a, b) => (b.lastDate || '').localeCompare(a.lastDate || ''))
+    .slice(0, 8);
+
+  const todayD = todayStr();
+  let html = '<div class="sectionLabel" style="margin-top:2px">🚚 Previous loads for this plate</div>';
+  currentTemplates.forEach((t, k) => {
+    const kg = totalKg(t);
+    const key = (t.type || '') + '|' + t.bales + '|' + normalizeFormula(t.formula);
+    const isToday = matches.some(d =>
+      ((d.type || '') + '|' + d.bales + '|' + normalizeFormula(d.formula)) === key && d.date === todayD
+    );
+    html += '<button type="button" class="templateBtn" onclick="applyTemplate(' + k + ')">' +
+      '<div style="font-weight:bold;color:#0b6e4f">' +
+        (parseInt(t.bales, 10) || 0).toLocaleString() + ' bales · ' + esc(t.type || '?') + ' · ' + (kg / 1000).toFixed(2) + ' t' +
+        (isToday ? ' <span style="color:#c0392b">⚠️ already today</span>' : '') +
+      '</div>' +
+      '<div><b>' + esc(t.title || '') + '</b></div>' +
+      '<div class="small" style="white-space:pre-wrap;margin:2px 0">' + esc(t.formula || '') + '</div>' +
+      '<div class="small">' + t.count + '× · last ' + esc(formatDate(t.lastDate) || 'no date') +
+        (t.bay ? ' · ' + esc(t.bay) : '') + '</div>' +
+    '</button>';
+  });
+  panel.innerHTML = html;
+  panel.style.display = 'block';
+}
+function applyTemplate(k){
+  const t = currentTemplates[k];
+  if(!t) return;
+  document.getElementById('bales').value = t.bales;
+  document.getElementById('type').value = t.type || '2kg';
+  document.getElementById('title').value = t.title || '';
+  document.getElementById('formula').value = t.formula || '';
+  document.getElementById('bay').value = t.bay || '';
+  // intentionally NOT filling invoice (unique per load) or date (should be day of loading)
+  previewCalc();
+}
+
 // ---------- add / edit / delete ----------
 function openAddFormula(){
   editingIndex = -1;
@@ -430,6 +503,8 @@ function openAddFormula(){
   document.getElementById('date').value = '';
   document.getElementById('calcPreview').innerHTML = 'Enter bales + formula to check if it adds up';
   document.getElementById('calcPreview').className = 'calcPreview';
+  document.getElementById('templatePanel').style.display = 'none';
+  currentTemplates = [];
   openModal('addModal');
 }
 function editFormula(i){
@@ -449,6 +524,8 @@ function editFormula(i){
   document.getElementById('date').value = d.date || '';
   document.getElementById('bay').value = d.bay || '';
   document.getElementById('invoice').value = d.invoice || '';
+  document.getElementById('templatePanel').style.display = 'none';
+  currentTemplates = [];
   openModal('addModal');
   previewCalc();
 }
@@ -466,6 +543,8 @@ function cancelEdit(){
   document.getElementById('bay').value = '';
   document.getElementById('invoice').value = '';
   document.getElementById('date').value = '';
+  document.getElementById('templatePanel').style.display = 'none';
+  currentTemplates = [];
   closeModal('addModal');
 }
 function add(){
@@ -512,7 +591,6 @@ function add(){
   localStorage.setItem('flourData', JSON.stringify({formulas: data}));
   markDirty(true);
 
-  // reset form
   document.getElementById('bales').value = '';
   document.getElementById('type').value = '2kg';
   document.getElementById('title').value = '';
@@ -525,6 +603,8 @@ function add(){
   document.getElementById('editingBanner').style.display = 'none';
   document.getElementById('saveFormulaBtn').innerText = '+ SAVE FORMULA';
   document.getElementById('cancelEditBtn').style.display = 'none';
+  document.getElementById('templatePanel').style.display = 'none';
+  currentTemplates = [];
   closeModal('addModal');
 
   show();
