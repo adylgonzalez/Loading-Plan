@@ -84,7 +84,12 @@
       "bales": "1150",
       "type": "1kg",
       "title": "KDL916L",
-      "formula": "30*3+35+45*2+55*17"
+      "formula": "30*3+35+45*2+55*17",
+      "plate": "KDL 916L",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
     },
     {
       "bales": "1200",
