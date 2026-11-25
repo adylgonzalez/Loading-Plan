@@ -1,6 +1,17 @@
 {
   "formulas": [
     {
+      "bales": "1230",
+      "type": "2kg",
+      "title": "T",
+      "formula": "80*5+83*10",
+      "plate": "KDX 906X",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
+    },
+    {
       "bales": "710",
       "type": "2kg",
       "title": ".",
