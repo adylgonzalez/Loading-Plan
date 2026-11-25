@@ -1,6 +1,17 @@
 {
   "formulas": [
     {
+      "bales": "1230",
+      "type": "1kg",
+      "title": ".",
+      "formula": "40*3+57*14+58*4+40*2",
+      "plate": "KCY 939Q",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
+    },
+    {
       "bales": "1120",
       "type": "2kg",
       "title": "GIL",
