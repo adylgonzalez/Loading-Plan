@@ -1,6 +1,17 @@
 {
   "formulas": [
     {
+      "bales": "1250",
+      "type": "2kg",
+      "title": ".",
+      "formula": "52*22+53*2",
+      "plate": "KDW 102T",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
+    },
+    {
       "bales": "1150",
       "type": "2kg",
       "title": ".",
