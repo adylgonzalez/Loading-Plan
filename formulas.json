@@ -403,7 +403,12 @@
       "bales": "1200",
       "type": "2kg",
       "title": "-",
-      "formula": "50*24"
+      "formula": "50*24",
+      "plate": "KCL 192Z",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
     },
     {
       "bales": "1230",
