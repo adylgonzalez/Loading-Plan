@@ -1,6 +1,17 @@
 {
   "formulas": [
     {
+      "bales": "1200",
+      "type": "2kg",
+      "title": ".",
+      "formula": "53*22+34",
+      "plate": "KCY 991R",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
+    },
+    {
       "bales": "1150",
       "type": "2kg",
       "title": ".",
