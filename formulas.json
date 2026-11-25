@@ -384,7 +384,12 @@
       "bales": "1200",
       "type": "1kg",
       "title": "Flat",
-      "formula": "55*10+50*13"
+      "formula": "55*10+50*13",
+      "plate": "KBT 950F",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
     },
     {
       "bales": "1230",
