@@ -1,6 +1,17 @@
 {
   "formulas": [
     {
+      "bales": "1230",
+      "type": "2kg",
+      "title": ".",
+      "formula": "50*5+49*20",
+      "plate": "KBU 159S",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
+    },
+    {
       "bales": "1150",
       "type": "2kg",
       "title": ".",
