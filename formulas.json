@@ -73,7 +73,12 @@
       "bales": "1150",
       "type": "2kg",
       "title": "flat",
-      "formula": "46*25"
+      "formula": "46*25",
+      "plate": "KCM 585Z",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
     },
     {
       "bales": "1150",
