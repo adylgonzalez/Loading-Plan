@@ -232,7 +232,12 @@
       "bales": "1150",
       "type": "2kg",
       "title": "Kbq753b",
-      "formula": "30*4+40*2+50*19"
+      "formula": "30*4+40*2+50*19",
+      "plate": "KBQ 753B",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
     },
     {
       "bales": "1150",
