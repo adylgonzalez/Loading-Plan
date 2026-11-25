@@ -98,7 +98,12 @@
       "bales": "1230",
       "type": "2kg",
       "title": "Flat",
-      "formula": "50*24+30"
+      "formula": "50*24+30",
+      "plate": "KDX 466Q",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
     },
     {
       "bales": "1150",
