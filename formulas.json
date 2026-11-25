@@ -1,6 +1,17 @@
 {
   "formulas": [
     {
+      "bales": "1230",
+      "type": "2kg",
+      "title": ".",
+      "formula": "34*3+44*6+54*16",
+      "plate": "KDX 619T",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
+    },
+    {
       "bales": "1220",
       "type": "2kg",
       "title": ".",
