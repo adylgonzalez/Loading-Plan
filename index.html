@@ -28,7 +28,6 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 .closeBtn{background:#eee;color:#333;width:40px;position:absolute;right:10px;top:10px;padding:8px}
 .row{display:flex;gap:8px}.row button{flex:1}
 .settingsRow{display:flex;gap:6px;align-items:center}.settingsRow input{flex:1}.settingsRow button{width:48px}.eye{background:#666}
-.tag{display:inline-block;background:#fff3cd;padding:3px 8px;border-radius:12px;font-size:12px;font-weight:bold;margin:2px}
 .detail{font-size:14px;line-height:1.6}
 .dateBadge{display:inline-block;background:#ff9800;color:white;padding:4px 10px;border-radius:20px;font-size:13px;font-weight:bold}
 .dateBtn{background:#fff3cd;color:#333;border:1px solid #ff9800;text-align:left}
@@ -44,6 +43,18 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 .dateTimeRow{display:flex;gap:8px;align-items:flex-end}
 .dateTimeRow > div{flex:1}
 .dateTimeRow input{margin:4px 0}
+.lineBlock{background:#f9f9f9;border:1px solid #ddd;border-radius:8px;padding:8px;margin:8px 0}
+.lineBlock .row{gap:6px}
+.lineBlock input,.lineBlock select,.lineBlock textarea{margin:4px 0;padding:10px}
+.lineTitle,.lineFormula{font-size:15px}
+.lineHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
+.lineNum{font-size:12px;font-weight:bold;color:#0b6e4f}
+.lineRemove{background:#c0392b;color:white;border:none;padding:4px 8px;border-radius:6px;font-size:11px;width:auto;cursor:pointer}
+.totalsBar{background:#0b6e4f;color:white;padding:10px;border-radius:8px;font-weight:bold;margin:8px 0;text-align:center}
+.groupLine{background:#f9f9f9;padding:8px;border-radius:6px;margin:4px 0}
+.groupLine .small{white-space:pre-wrap;font-family:monospace}
+.splitBox{background:#f0f7f4;border:2px dashed #6a1b9a;border-radius:10px;padding:10px;margin:8px 0}
+.splitHint{font-size:12px;color:#4a148c;line-height:1.4;margin:4px 0 8px}
 </style>
 </head>
 <body>
@@ -52,8 +63,8 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 <h2>📦 LOADING PLANS</h2>
 <p>2kg = 12 bags (24kg) · 1kg = 24 bags (24kg) · 0.5kg = 24 bags (12kg)</p>
 <div class="topBtns">
-<button class="btnAdd" onclick="openAddFormula()">➕ Add Formula</button>
-<button class="btnSaved" onclick="openModal('savedModal')">📋 Saved Formulas</button>
+<button class="btnAdd" onclick="openAddFormula()">➕ Add Load</button>
+<button class="btnSaved" onclick="openModal('savedModal')">📋 Saved</button>
 <button class="btnDate" onclick="openModal('dateModal')">📅 By Date <span id="dateBadgeTop">0</span></button>
 <button class="btnExport" onclick="openModal('exportModal')">📤 Export</button>
 <button class="btnSync" onclick="openModal('syncModal')">☁️ GitHub Sync</button>
@@ -63,8 +74,8 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 
 <div class="wrap">
 <div class="card">
-<b>🔍 Search Formula / Plate / Bay / Date</b>
-<input id="search" type="text" placeholder="Search by Plate e.g. KDQ 076M or Bales e.g. 1150 or Bay e.g. Bay 1" oninput="show()">
+<b>🔍 Search Plate / Formula / Bay / Date</b>
+<input id="search" type="text" placeholder="Search by Plate e.g. KDH 826A or Bales e.g. 1150 or Bay e.g. Bay 1" oninput="show()">
 <select id="searchType" onchange="show()">
 <option value="">All Types</option>
 <option value="2kg">2kg Only</option>
@@ -79,13 +90,13 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 <button style="background:#eee;color:#333" onclick="clearSearch()">Clear Search X</button>
 </div>
 
-<div class="homeHint">👆 Use Search above, or tap <b>📋 Saved Formulas</b> / <b>📅 By Date</b> to view all</div>
+<div class="homeHint">👆 Use Search above, or tap <b>📋 Saved</b> / <b>📅 By Date</b> to view all</div>
 </div>
 
 <div id="dateModal" class="modal"><div class="modalBox">
 <button class="closeBtn" onclick="closeModal('dateModal')">X</button>
 <h3>📅 By Date</h3>
-<p class="small">Tap a date to see formulas + cars used on that date. Formulas without a date show under "No Date".</p>
+<p class="small">Tap a date to see loads and cars for that day.</p>
 <input id="dateFilter" type="date" onchange="showDates(this.value)">
 <div id="dateList"></div>
 <div id="dateResults"></div>
@@ -93,7 +104,7 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 
 <div id="savedModal" class="modal"><div class="modalBox">
 <button class="closeBtn" onclick="closeModal('savedModal')">X</button>
-<h3>📋 Saved Formulas <span class="badge" id="countBadge">0</span></h3>
+<h3>📋 Saved Loads <span class="badge" id="countBadge">0</span></h3>
 <div id="list"></div>
 </div></div>
 
@@ -118,808 +129,779 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 <div class="settingsRow"><input id="ghToken" type="password" placeholder="GitHub Token ghp_..."><button class="eye" onclick="toggleToken()" aria-label="Show or hide token">👁️</button></div>
 <button class="sync" onclick="saveOnly()">💾 SAVE SETTINGS</button>
 <div class="row"><button class="sync" onclick="pullFromGH()">⬇️ PULL</button><button class="sync" onclick="pushToGH()">⬆️ PUSH</button></div>
-<p class="small">PULL downloads formulas from GitHub. PUSH uploads local formulas to GitHub.</p>
+<p class="small">PULL downloads from GitHub. PUSH uploads local to GitHub.</p>
 </div></div>
 
 <div id="addModal" class="modal"><div class="modalBox">
 <button class="closeBtn" onclick="closeModal('addModal'); cancelEdit();">X</button>
-<h3 id="addModalTitle">➕ Add New Formula</h3>
+<h3 id="addModalTitle">➕ Add Load</h3>
 <div id="editingBanner" class="editingBanner" style="display:none">✏️ Editing</div>
 
 <div class="sectionLabel">🚚 Number Plate</div>
-<input id="plate" placeholder="Number Plate e.g. KDQ 076M" oninput="renderTemplates()" autocomplete="off">
+<input id="plate" placeholder="Number Plate e.g. KDH 826A" oninput="renderTemplates()" autocomplete="off">
 <div id="templatePanel" class="templatePanel" style="display:none"></div>
 
 <div class="sectionLabel">📅 Date &amp; Time (optional)</div>
 <div class="dateTimeRow">
-  <div>
-    <label class="small" for="date">Date</label>
-    <input id="date" type="date">
-  </div>
-  <div>
-    <label class="small" for="time">Time</label>
-    <input id="time" type="time">
-  </div>
+  <div><label class="small" for="date">Date</label><input id="date" type="date"></div>
+  <div><label class="small" for="time">Time</label><input id="time" type="time"></div>
 </div>
 
-<div class="sectionLabel">📦 Formula Details</div>
-<input id="bales" type="number" placeholder="Total Bales e.g. 1150" oninput="previewCalc()">
-<select id="type" onchange="previewCalc()"><option value="2kg">2kg Bale</option><option value="1kg">1kg Bale</option><option value="0.5kg">0.5kg Bale</option></select>
-<input id="title" placeholder="Formula Name e.g. Ajab HBF">
-<textarea id="formula" rows="4" placeholder="Write formula e.g. 40+45*4+50*20" oninput="previewCalc()"></textarea>
-<div id="calcPreview" class="calcPreview">Enter bales + formula to check if it adds up</div>
+<div class="sectionLabel">🎯 Master Plan (truck arrangement)</div>
+<input id="masterPlan" placeholder="e.g. 55*8+54*15" oninput="previewAll(); previewSplit()">
+<div id="masterPreview" class="calcPreview">Enter master plan to verify total (optional)</div>
+
+<div class="splitBox">
+  <div class="splitHint">⚡ <b>Auto-split:</b> 2kg fills from the top of the master in order. When a line would overshoot, it splits — the rest of that line + everything after goes to 1kg.</div>
+  <input id="splitTitle" placeholder="Product name for both lines e.g. Ajab premium maize">
+  <input id="splitTarget2kg" type="number" placeholder="2kg bales total e.g. 850" oninput="previewSplit()">
+  <div id="splitPreview" class="calcPreview">Enter master plan + 2kg total to auto-split</div>
+  <button type="button" onclick="applySplit()" style="background:#6a1b9a">⚡ Fill Lines with 2kg + 1kg Split</button>
+</div>
+
+<div class="sectionLabel">📦 Order Lines</div>
+<div id="linesContainer"></div>
+<button type="button" onclick="addLineBlock()" style="background:#1a5276;margin-top:4px">➕ Add another line</button>
+
+<div id="totalPreview" class="totalsBar">Total: 0 bales — 0.00 t</div>
 
 <div class="sectionLabel">📍 Other Details (optional)</div>
 <input id="bay" placeholder="Bay (optional) e.g. Bay 1 / Bay 2">
 <input id="invoice" placeholder="Invoice (optional) e.g. INV 123">
 
-<button id="saveFormulaBtn" onclick="add()">+ SAVE FORMULA</button>
-<button id="cancelEditBtn" style="background:#eee;color:#333;display:none" onclick="cancelEdit()">Cancel Edit - Add as New Instead</button>
+<button id="saveFormulaBtn" onclick="add()">+ SAVE LOAD</button>
+<button id="cancelEditBtn" style="background:#eee;color:#333;display:none" onclick="cancelEdit()">Cancel Edit</button>
 </div></div>
 
 <script>
-// ---------- helpers ----------
 const KG_PER_BALE = {'2kg':24, '1kg':24, '0.5kg':12};
-
-function esc(s){
-  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-function totalKg(d){
-  const bags = parseInt(d.bales, 10) || 0;
-  return bags * (KG_PER_BALE[d.type] || 0);
-}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function totalKg(d){return (parseInt(d.bales,10)||0)*(KG_PER_BALE[d.type]||0);}
 function dateSummaryLine(items){
-  const byType = {};
-  items.forEach(d => {
-    const t = d.type || '?';
-    byType[t] = (byType[t] || 0) + (parseInt(d.bales, 10) || 0);
-  });
-  const kg = items.reduce((s, d) => s + totalKg(d), 0);
-  const parts = Object.keys(byType).map(t => byType[t].toLocaleString() + ' × ' + t);
-  return parts.join(' + ') + ' = ' + (kg / 1000).toFixed(2) + ' t';
+  const byType={};
+  items.forEach(d=>{const t=d.type||'?';byType[t]=(byType[t]||0)+(parseInt(d.bales,10)||0);});
+  const kg=items.reduce((s,d)=>s+totalKg(d),0);
+  return Object.keys(byType).map(t=>byType[t].toLocaleString()+' × '+t).join(' + ')+' = '+(kg/1000).toFixed(2)+' t';
 }
-function b64ToUtf8(b64){
-  const bin = atob(b64);
-  const bytes = new Uint8Array(bin.length);
-  for(let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  return new TextDecoder('utf-8').decode(bytes);
-}
-function utf8ToB64(str){
-  const bytes = new TextEncoder().encode(str);
-  let bin = '';
-  for(let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
-  return btoa(bin);
-}
-function todayStr(){
-  const d = new Date();
-  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-}
-function nowTimeStr(){
-  const d = new Date();
-  return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
-}
-function formatDate(d){
-  if(!d) return '';
-  try{
-    const dt = new Date(d + 'T00:00:00');
-    return dt.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
-  }catch(e){ return d; }
-}
-function sortedForExport(items){
-  return [...items].sort((a, b) => {
-    const da = (a.date || '') + ' ' + (a.time || '');
-    const db = (b.date || '') + ' ' + (b.time || '');
-    return da.localeCompare(db);
-  });
-}
+function b64ToUtf8(b64){const bin=atob(b64);const bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);return new TextDecoder('utf-8').decode(bytes);}
+function utf8ToB64(str){const bytes=new TextEncoder().encode(str);let bin='';for(let i=0;i<bytes.length;i++)bin+=String.fromCharCode(bytes[i]);return btoa(bin);}
+function todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function nowTimeStr(){const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+function formatDate(d){if(!d)return '';try{return new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});}catch(e){return d;}}
+function sortedForExport(items){return [...items].sort((a,b)=>((a.date||'')+' '+(a.time||'')).localeCompare((b.date||'')+' '+(b.time||'')));}
 
-// ---------- state ----------
-let data = [];
-let fileSha = null;
-let editingIndex = -1;
-let selectedDate = '';
-let dirty = localStorage.getItem('flourDirty') === '1';
-let syncing = false;
-let syncTimer = null;
-let currentTemplates = [];
+let data=[];
+let fileSha=null;
+let editingOriginalIndex=-1;
+let editingGroupId=null;
+let selectedDate='';
+let dirty=localStorage.getItem('flourDirty')==='1';
+let syncing=false;
+let syncTimer=null;
+let currentTemplates=[];
+let lineCounter=0;
 
-// ---------- modals ----------
-function openModal(id){
-  document.getElementById(id).style.display = 'block';
-  if(id == 'addModal') previewCalc();
-  if(id == 'dateModal') showDates(selectedDate || '');
-  if(id == 'exportModal') updateExportInfo();
-}
-function closeModal(id){ document.getElementById(id).style.display = 'none'; }
-function clearSearch(){
-  document.getElementById('search').value = '';
-  document.getElementById('searchType').value = '';
-  show();
-}
-window.onclick = function(e){ if(e.target.classList.contains('modal')) e.target.style.display = 'none'; };
-function toggleToken(){
-  const t = document.getElementById('ghToken');
-  t.type = t.type === 'password' ? 'text' : 'password';
-}
+function openModal(id){document.getElementById(id).style.display='block';if(id==='addModal')previewAll();if(id==='dateModal')showDates(selectedDate||'');if(id==='exportModal')updateExportInfo();}
+function closeModal(id){document.getElementById(id).style.display='none';}
+function clearSearch(){document.getElementById('search').value='';document.getElementById('searchType').value='';show();}
+window.onclick=function(e){if(e.target.classList.contains('modal'))e.target.style.display='none';};
+function toggleToken(){const t=document.getElementById('ghToken');t.type=t.type==='password'?'text':'password';}
 
-// ---------- settings / sync ----------
-function getSettings(){
-  return {
-    user: localStorage.getItem('ghUser') || '',
-    repo: localStorage.getItem('ghRepo') || 'Loading-Plan',
-    token: localStorage.getItem('ghToken') || ''
-  };
-}
-function saveSettingsToStorage(){
-  localStorage.setItem('ghUser', document.getElementById('ghUser').value.trim());
-  localStorage.setItem('ghRepo', document.getElementById('ghRepo').value.trim() || 'Loading-Plan');
-  localStorage.setItem('ghToken', document.getElementById('ghToken').value.trim());
-  updateSyncStatus();
-}
-function loadSettings(){
-  document.getElementById('ghUser').value = localStorage.getItem('ghUser') || 'adylgonzalez';
-  document.getElementById('ghRepo').value = localStorage.getItem('ghRepo') || 'Loading-Plan';
-  document.getElementById('ghToken').value = localStorage.getItem('ghToken') || '';
-}
-function markDirty(v){
-  dirty = !!v;
-  localStorage.setItem('flourDirty', dirty ? '1' : '0');
-}
+function getSettings(){return{user:localStorage.getItem('ghUser')||'',repo:localStorage.getItem('ghRepo')||'Loading-Plan',token:localStorage.getItem('ghToken')||''};}
+function saveSettingsToStorage(){localStorage.setItem('ghUser',document.getElementById('ghUser').value.trim());localStorage.setItem('ghRepo',document.getElementById('ghRepo').value.trim()||'Loading-Plan');localStorage.setItem('ghToken',document.getElementById('ghToken').value.trim());updateSyncStatus();}
+function loadSettings(){document.getElementById('ghUser').value=localStorage.getItem('ghUser')||'adylgonzalez';document.getElementById('ghRepo').value=localStorage.getItem('ghRepo')||'Loading-Plan';document.getElementById('ghToken').value=localStorage.getItem('ghToken')||'';}
+function markDirty(v){dirty=!!v;localStorage.setItem('flourDirty',dirty?'1':'0');}
 function updateSyncStatus(){
-  if(syncing) return;
-  const el = document.getElementById('syncStatus');
-  const btn = document.querySelector('.btnSync');
-  const s = getSettings();
-  if(!s.user || !s.token){
-    el.innerText = '⚠️ GitHub not set up — data saved on this device only';
-    if(btn) btn.style.background = '#666';
-    return;
-  }
-  if(dirty){
-    el.innerText = '⚠️ Unsynced changes — tap ☁️ GitHub Sync → PUSH';
-    if(btn) btn.style.background = '#c0392b';
-    return;
-  }
-  el.innerText = '✅ Synced — ' + data.length + ' formula(s)';
-  if(btn) btn.style.background = '#1a5276';
+  if(syncing)return;
+  const el=document.getElementById('syncStatus'),btn=document.querySelector('.btnSync'),s=getSettings();
+  if(!s.user||!s.token){el.innerText='⚠️ GitHub not set up — data saved on this device only';if(btn)btn.style.background='#666';return;}
+  if(dirty){el.innerText='⚠️ Unsynced changes — tap ☁️ GitHub Sync → PUSH';if(btn)btn.style.background='#c0392b';return;}
+  el.innerText='✅ Synced — '+data.length+' line(s)';if(btn)btn.style.background='#1a5276';
 }
 async function loadFromGitHub(){
-  const s = getSettings();
-  if(!s.user || !s.token){ updateSyncStatus(); show(); return; }
-  const status = document.getElementById('syncStatus');
-  syncing = true;
-  status.innerText = '🔄 Loading from GitHub...';
+  const s=getSettings();if(!s.user||!s.token){updateSyncStatus();show();return;}
+  const status=document.getElementById('syncStatus');syncing=true;status.innerText='🔄 Loading from GitHub...';
   try{
-    const res = await fetch('https://api.github.com/repos/' + s.user + '/' + s.repo + '/contents/formulas.json', {
-      headers: { Authorization: 'Bearer ' + s.token }
-    });
-    if(res.status === 404){
-      fileSha = null;
-      syncing = false;
-      if(data.length){
-        markDirty(true);
-        status.innerText = '⚠️ GitHub file not found — tap SYNC NOW to upload your ' + data.length + ' formula(s)';
-      } else {
-        updateSyncStatus();
-      }
-      show();
-      return;
-    }
-    if(!res.ok) throw new Error('Load failed (' + res.status + ')');
-    const json = await res.json();
-    fileSha = json.sha;
-    const all = JSON.parse(b64ToUtf8(json.content.replace(/\n/g, '')));
-    const remote = all.formulas || (Array.isArray(all) ? all : []);
-    syncing = false;
-    if(dirty){
-      status.innerText = '⚠️ Unsynced local changes — remote has ' + remote.length + '. Tap SYNC NOW to push.';
-      show();
-      return;
-    }
-    if(remote.length === 0 && data.length > 0){
-      markDirty(true);
-      status.innerText = '⚠️ GitHub is empty — tap SYNC NOW to upload your ' + data.length + ' formula(s)';
-      show();
-      return;
-    }
-    data = remote;
-    localStorage.setItem('flourData', JSON.stringify({formulas: data}));
-    updateSyncStatus();
-    show();
-  }catch(e){
-    syncing = false;
-    status.innerText = '❌ ' + e.message;
-    show();
-  }
+    const res=await fetch('https://api.github.com/repos/'+s.user+'/'+s.repo+'/contents/formulas.json',{headers:{Authorization:'Bearer '+s.token}});
+    if(res.status===404){fileSha=null;syncing=false;if(data.length){markDirty(true);status.innerText='⚠️ GitHub file not found — tap PUSH to upload';}else{updateSyncStatus();}show();return;}
+    if(!res.ok)throw new Error('Load failed ('+res.status+')');
+    const json=await res.json();fileSha=json.sha;
+    const all=JSON.parse(b64ToUtf8(json.content.replace(/\n/g,'')));const remote=all.formulas||(Array.isArray(all)?all:[]);
+    syncing=false;
+    if(dirty){status.innerText='⚠️ Unsynced local changes — tap PUSH to upload';show();return;}
+    if(remote.length===0&&data.length>0){markDirty(true);status.innerText='⚠️ GitHub empty — tap PUSH to upload';show();return;}
+    data=remote;localStorage.setItem('flourData',JSON.stringify({formulas:data}));updateSyncStatus();show();
+  }catch(e){syncing=false;status.innerText='❌ '+e.message;show();}
 }
 async function syncToGitHub(){
-  const s = getSettings();
-  const status = document.getElementById('syncStatus');
-  if(!s.user || !s.token){
-    updateSyncStatus();
-    return;
-  }
-  if(syncing){ status.innerText = '🔄 Sync already running...'; return; }
-  syncing = true;
-  status.innerText = '🔄 Uploading...';
+  const s=getSettings();const status=document.getElementById('syncStatus');
+  if(!s.user||!s.token){updateSyncStatus();return;}
+  if(syncing){status.innerText='🔄 Sync already running...';return;}
+  syncing=true;status.innerText='🔄 Uploading...';
   try{
-    const getRes = await fetch('https://api.github.com/repos/' + s.user + '/' + s.repo + '/contents/formulas.json', {
-      headers: { Authorization: 'Bearer ' + s.token }
-    });
-    if(getRes.ok){
-      const g = await getRes.json();
-      fileSha = g.sha;
-    } else if(getRes.status === 404){
-      fileSha = null;
-    } else {
-      throw new Error('GitHub read failed (' + getRes.status + ')');
-    }
-    const content = utf8ToB64(JSON.stringify({formulas: data}, null, 2));
-    const body = { message: 'Update ' + new Date().toISOString(), content: content };
-    if(fileSha) body.sha = fileSha;
-    const res = await fetch('https://api.github.com/repos/' + s.user + '/' + s.repo + '/contents/formulas.json', {
-      method: 'PUT',
-      headers: { Authorization: 'Bearer ' + s.token, 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    if(!res.ok){
-      const errText = await res.text();
-      throw new Error('GitHub rejected (' + res.status + ') ' + errText.slice(0, 80));
-    }
-    const out = await res.json();
-    fileSha = out.content.sha;
-    markDirty(false);
-    syncing = false;
-    updateSyncStatus();
-  }catch(e){
-    syncing = false;
-    status.innerText = '❌ Sync failed: ' + e.message;
-  }
+    const getRes=await fetch('https://api.github.com/repos/'+s.user+'/'+s.repo+'/contents/formulas.json',{headers:{Authorization:'Bearer '+s.token}});
+    if(getRes.ok){const g=await getRes.json();fileSha=g.sha;}else if(getRes.status===404){fileSha=null;}else{throw new Error('GitHub read failed ('+getRes.status+')');}
+    const content=utf8ToB64(JSON.stringify({formulas:data},null,2));
+    const body={message:'Update '+new Date().toISOString(),content};
+    if(fileSha)body.sha=fileSha;
+    const res=await fetch('https://api.github.com/repos/'+s.user+'/'+s.repo+'/contents/formulas.json',{method:'PUT',headers:{Authorization:'Bearer '+s.token,'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(!res.ok){const errText=await res.text();throw new Error('GitHub rejected ('+res.status+') '+errText.slice(0,80));}
+    const out=await res.json();fileSha=out.content.sha;markDirty(false);syncing=false;updateSyncStatus();
+  }catch(e){syncing=false;status.innerText='❌ Sync failed: '+e.message;}
 }
-function scheduleSync(){
-  clearTimeout(syncTimer);
-  const s = getSettings();
-  if(!s.user || !s.token) return;
-  syncTimer = setTimeout(() => syncToGitHub(), 1000);
-}
-function saveOnly(){
-  saveSettingsToStorage();
-  closeModal('syncModal');
-}
-function pullFromGH(){
-  saveSettingsToStorage();
-  loadFromGitHub();
-}
-function pushToGH(){
-  saveSettingsToStorage();
-  syncToGitHub();
-}
+function scheduleSync(){clearTimeout(syncTimer);const s=getSettings();if(!s.user||!s.token)return;syncTimer=setTimeout(()=>syncToGitHub(),1000);}
+function saveOnly(){saveSettingsToStorage();closeModal('syncModal');}
+function pullFromGH(){saveSettingsToStorage();loadFromGitHub();}
+function pushToGH(){saveSettingsToStorage();syncToGitHub();}
 
-// ---------- formula engine ----------
-function normalizeFormula(str){
-  return (str || '').toLowerCase().replace(/\s+/g, '').replace(/x/g, '*');
-}
+function normalizeFormula(str){return (str||'').toLowerCase().replace(/\s+/g,'').replace(/x/g,'*');}
 function calcFormulaTotal(formulaText){
-  if(!formulaText) return null;
-  const lines = formulaText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-  if(lines.length == 0) return null;
-  let total = 0;
-  let validLines = 0;
-  for(let line of lines){
-    let expr = line.split('=')[0];
-    expr = expr.toLowerCase().replace(/x/g, '*').replace(/[^0-9+\-*/().]/g, '');
-    if(!expr || !/[0-9]/.test(expr)) continue;
-    if(!/^[0-9+\-*/().\s]+$/.test(expr)) continue;
-    try{
-      const val = Function('"use strict"; return (' + expr + ')')();
-      if(typeof val === 'number' && isFinite(val)){ total += val; validLines++; }
-    }catch(e){ return null; }
+  if(!formulaText)return null;
+  const lines=formulaText.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
+  if(lines.length===0)return null;
+  let total=0,validLines=0;
+  for(const line of lines){
+    let expr=line.split('=')[0].toLowerCase().replace(/x/g,'*').replace(/[^0-9+\-*/().]/g,'');
+    if(!expr||!/[0-9]/.test(expr))continue;
+    if(!/^[0-9+\-*/().\s]+$/.test(expr))continue;
+    try{const val=Function('"use strict"; return ('+expr+')')();if(typeof val==='number'&&isFinite(val)){total+=val;validLines++;}}catch(e){return null;}
   }
-  if(validLines == 0) return null;
-  const last = lines[lines.length - 1].split('=')[0].trim().toLowerCase().replace(/x/g, '*').replace(/[^0-9+\-*/().]/g, '');
-  if(lines.length > 1 && /^[0-9]+$/.test(last)){
-    const lastVal = parseFloat(last);
-    let sumPrev = 0;
-    for(let i = 0; i < lines.length - 1; i++){
-      const e = lines[i].split('=')[0].toLowerCase().replace(/x/g, '*').replace(/[^0-9+\-*/().]/g, '');
-      if(!e) continue;
-      try{ sumPrev += Function('"use strict"; return (' + e + ')')(); }catch(err){}
-    }
-    if(Math.abs(sumPrev - lastVal) < 0.01) return lastVal;
+  if(validLines===0)return null;
+  const last=lines[lines.length-1].split('=')[0].trim().toLowerCase().replace(/x/g,'*').replace(/[^0-9+\-*/().]/g,'');
+  if(lines.length>1&&/^[0-9]+$/.test(last)){
+    const lastVal=parseFloat(last);let sumPrev=0;
+    for(let i=0;i<lines.length-1;i++){const e=lines[i].split('=')[0].toLowerCase().replace(/x/g,'*').replace(/[^0-9+\-*/().]/g,'');if(!e)continue;try{sumPrev+=Function('"use strict"; return ('+e+')')();}catch(err){}}
+    if(Math.abs(sumPrev-lastVal)<0.01)return lastVal;
   }
   return total;
 }
-function previewCalc(){
-  const b = document.getElementById('bales').value;
-  const f = document.getElementById('formula').value;
-  const ty = document.getElementById('type').value;
-  const box = document.getElementById('calcPreview');
-  if(!b || !f){ box.innerHTML = 'Enter bales + formula to check if it adds up'; box.className = 'calcPreview'; return; }
-  const total = calcFormulaTotal(f);
-  if(total === null){ box.innerHTML = 'Could not calculate — use numbers like 40+45*4+50*20'; box.className = 'calcPreview bad'; return; }
-  const kgB = KG_PER_BALE[ty] || 0;
-  if(Math.abs(total - parseFloat(b)) < 0.01){
-    const kg = (parseFloat(b) || 0) * kgB;
-    box.innerHTML = '✅ Formula = ' + total + ' bales · ' + ty + ' × ' + kgB + ' kg = ' + (kg / 1000).toFixed(2) + ' t — matches';
-    box.className = 'calcPreview';
-  } else {
-    box.innerHTML = '❌ Formula = ' + total + ' · Bales = ' + b + ' — difference ' + (total - parseFloat(b));
-    box.className = 'calcPreview bad';
-  }
-}
 
-// ---------- plate templates ----------
-function renderTemplates(){
-  const panel = document.getElementById('templatePanel');
-  if(!panel) return;
-  if(editingIndex >= 0){ panel.style.display = 'none'; currentTemplates = []; return; }
-  const typed = (document.getElementById('plate').value || '').trim().toLowerCase();
-  if(typed.length < 2){ panel.style.display = 'none'; panel.innerHTML = ''; currentTemplates = []; return; }
-
-  const matches = data
-    .filter(d => (d.plate || '').toLowerCase().includes(typed))
-    .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-
-  if(!matches.length){
-    panel.innerHTML = '<div class="small" style="padding:4px">🆕 New plate — no previous loads, enter manually</div>';
-    panel.style.display = 'block';
-    currentTemplates = [];
-    return;
-  }
-
-  const map = new Map();
-  matches.forEach(d => {
-    const key = (d.type || '') + '|' + d.bales + '|' + normalizeFormula(d.formula);
-    if(!map.has(key)){
-      map.set(key, Object.assign({}, d, {count: 0, lastDate: d.date || ''}));
+// ---------- MASTER SPLIT ENGINE ----------
+function parseMasterLines(masterText){
+  if(!masterText)return [];
+  const terms=masterText.split('+').map(t=>t.trim()).filter(t=>t);
+  const lines=[];
+  for(const term of terms){
+    const cleanTerm=term.split('=')[0].trim();
+    const m=cleanTerm.match(/^(\d+(?:\.\d+)?)\s*[x*]\s*(\d+)$/i);
+    if(m){
+      const value=parseFloat(m[1]);
+      const count=parseInt(m[2]);
+      for(let i=0;i<count;i++)lines.push(value);
+    }else{
+      const num=parseFloat(cleanTerm);
+      if(!isNaN(num))lines.push(num);
     }
-    const t = map.get(key);
-    t.count++;
-    if((d.date || '') > t.lastDate) t.lastDate = d.date || '';
-  });
-
-  currentTemplates = Array.from(map.values())
-    .sort((a, b) => (b.lastDate || '').localeCompare(a.lastDate || ''))
-    .slice(0, 8);
-
-  const todayD = todayStr();
-  let html = '<div class="sectionLabel" style="margin-top:2px">🚚 Previous loads for this plate</div>';
-  currentTemplates.forEach((t, k) => {
-    const kg = totalKg(t);
-    const key = (t.type || '') + '|' + t.bales + '|' + normalizeFormula(t.formula);
-    const isToday = matches.some(d =>
-      ((d.type || '') + '|' + d.bales + '|' + normalizeFormula(d.formula)) === key && d.date === todayD
-    );
-    html += '<button type="button" class="templateBtn" onclick="applyTemplate(' + k + ')">' +
-      '<div style="font-weight:bold;color:#0b6e4f">' +
-        (parseInt(t.bales, 10) || 0).toLocaleString() + ' bales · ' + esc(t.type || '?') + ' · ' + (kg / 1000).toFixed(2) + ' t' +
-        (isToday ? ' <span style="color:#c0392b">⚠️ already today</span>' : '') +
-      '</div>' +
-      '<div><b>' + esc(t.title || '') + '</b></div>' +
-      '<div class="small" style="white-space:pre-wrap;margin:2px 0">' + esc(t.formula || '') + '</div>' +
-      '<div class="small">' + t.count + '× · last ' + esc(formatDate(t.lastDate) || 'no date') +
-        (t.bay ? ' · ' + esc(t.bay) : '') + '</div>' +
-    '</button>';
-  });
-  panel.innerHTML = html;
-  panel.style.display = 'block';
-}
-function applyTemplate(k){
-  const t = currentTemplates[k];
-  if(!t) return;
-  document.getElementById('bales').value = t.bales;
-  document.getElementById('type').value = t.type || '2kg';
-  document.getElementById('title').value = t.title || '';
-  document.getElementById('formula').value = t.formula || '';
-  document.getElementById('bay').value = t.bay || '';
-  previewCalc();
-}
-
-// ---------- add / edit / duplicate / delete ----------
-function openAddFormula(){
-  editingIndex = -1;
-  document.getElementById('addModalTitle').innerText = '➕ Add New Formula';
-  document.getElementById('editingBanner').style.display = 'none';
-  document.getElementById('saveFormulaBtn').innerText = '+ SAVE FORMULA';
-  document.getElementById('cancelEditBtn').style.display = 'none';
-  document.getElementById('plate').value = '';
-  document.getElementById('bales').value = '';
-  document.getElementById('type').value = '2kg';
-  document.getElementById('title').value = '';
-  document.getElementById('formula').value = '';
-  document.getElementById('bay').value = '';
-  document.getElementById('invoice').value = '';
-  document.getElementById('date').value = todayStr();
-  document.getElementById('time').value = nowTimeStr();
-  document.getElementById('calcPreview').innerHTML = 'Enter bales + formula to check if it adds up';
-  document.getElementById('calcPreview').className = 'calcPreview';
-  document.getElementById('templatePanel').style.display = 'none';
-  currentTemplates = [];
-  openModal('addModal');
-}
-function editFormula(i){
-  const d = data[i];
-  editingIndex = i;
-  closeModal('savedModal'); closeModal('dateModal');
-  document.getElementById('addModalTitle').innerText = '✏️ Edit Formula';
-  document.getElementById('editingBanner').style.display = 'block';
-  document.getElementById('editingBanner').innerText = '✏️ Editing: ' + d.title + ' - ' + d.bales + ' Bales';
-  document.getElementById('saveFormulaBtn').innerText = '💾 UPDATE FORMULA';
-  document.getElementById('cancelEditBtn').style.display = 'block';
-  document.getElementById('plate').value = d.plate || '';
-  document.getElementById('bales').value = d.bales;
-  document.getElementById('type').value = d.type || '2kg';
-  document.getElementById('title').value = d.title;
-  document.getElementById('formula').value = d.formula;
-  document.getElementById('date').value = d.date || '';
-  document.getElementById('time').value = d.time || '';
-  document.getElementById('bay').value = d.bay || '';
-  document.getElementById('invoice').value = d.invoice || '';
-  document.getElementById('templatePanel').style.display = 'none';
-  currentTemplates = [];
-  openModal('addModal');
-  previewCalc();
-}
-function duplicateFormula(i){
-  const d = data[i];
-  editingIndex = -1;
-  closeModal('savedModal'); closeModal('dateModal');
-  document.getElementById('addModalTitle').innerText = '📋 Duplicate Load';
-  document.getElementById('editingBanner').style.display = 'none';
-  document.getElementById('saveFormulaBtn').innerText = '+ SAVE FORMULA';
-  document.getElementById('cancelEditBtn').style.display = 'none';
-  document.getElementById('plate').value = d.plate || '';
-  document.getElementById('bales').value = d.bales || '';
-  document.getElementById('type').value = d.type || '2kg';
-  document.getElementById('title').value = d.title || '';
-  document.getElementById('formula').value = d.formula || '';
-  document.getElementById('bay').value = d.bay || '';
-  document.getElementById('invoice').value = '';
-  document.getElementById('date').value = todayStr();
-  document.getElementById('time').value = nowTimeStr();
-  document.getElementById('templatePanel').style.display = 'none';
-  currentTemplates = [];
-  openModal('addModal');
-  previewCalc();
-}
-function cancelEdit(){
-  editingIndex = -1;
-  document.getElementById('addModalTitle').innerText = '➕ Add New Formula';
-  document.getElementById('editingBanner').style.display = 'none';
-  document.getElementById('saveFormulaBtn').innerText = '+ SAVE FORMULA';
-  document.getElementById('cancelEditBtn').style.display = 'none';
-  document.getElementById('plate').value = '';
-  document.getElementById('bales').value = '';
-  document.getElementById('type').value = '2kg';
-  document.getElementById('title').value = '';
-  document.getElementById('formula').value = '';
-  document.getElementById('bay').value = '';
-  document.getElementById('invoice').value = '';
-  document.getElementById('date').value = '';
-  document.getElementById('time').value = '';
-  document.getElementById('templatePanel').style.display = 'none';
-  currentTemplates = [];
-  closeModal('addModal');
-}
-function add(){
-  const b = document.getElementById('bales').value.trim();
-  const ty = document.getElementById('type').value;
-  const t = document.getElementById('title').value.trim();
-  const f = document.getElementById('formula').value.trim();
-  const plate = document.getElementById('plate').value.trim();
-  const dateVal = document.getElementById('date').value;
-  const timeVal = document.getElementById('time').value;
-  const bay = document.getElementById('bay').value.trim();
-  const invoice = document.getElementById('invoice').value.trim();
-
-  if(!b || !t || !f){ alert('Fill Bales, Title and Formula'); return; }
-  if(!plate){ alert('Enter Number Plate'); return; }
-
-  const total = calcFormulaTotal(f);
-  if(total === null){ alert('Could not calculate your formula.\n\nUse numbers like: 40+45*4+50*20'); return; }
-  if(Math.abs(total - parseFloat(b)) > 0.01){
-    alert('❌ WILL NOT SAVE!\n\nFormula adds up to: ' + total + '\nTotal Bales you entered: ' + b + '\nDifference: ' + (total - parseFloat(b)));
-    return;
   }
-
-  const newNorm = normalizeFormula(f);
-  const dup = data.findIndex((d, idx) =>
-    idx !== editingIndex &&
-    normalizeFormula(d.formula) == newNorm &&
-    d.plate == plate &&
-    (d.date || '') == (dateVal || '')
-  );
-  if(dup !== -1){
-    alert('⚠️ Duplicate! Same formula already exists for this plate + date:\n\n' +
-      data[dup].title + ' - ' + data[dup].bales + ' Bales\n' + data[dup].formula);
-    return;
+  return lines;
+}
+function groupLines(lines){
+  if(!lines.length)return '';
+  const parts=[];
+  let i=0;
+  while(i<lines.length){
+    const v=lines[i];
+    let j=i;
+    while(j<lines.length&&lines[j]===v)j++;
+    const count=j-i;
+    parts.push(count===1?String(v):v+'*'+count);
+    i=j;
   }
-
-  const entry = {
-    bales: b, type: ty, title: t, formula: f, plate: plate,
-    date: dateVal || '', dateDisplay: dateVal ? formatDate(dateVal) : '',
-    time: timeVal || '',
-    bay: bay || '', invoice: invoice
+  return parts.join('+');
+}
+function splitMaster(masterText,target2kg){
+  const lines=parseMasterLines(masterText);
+  if(!lines.length)return{error:'No valid lines in master plan'};
+  const total=lines.reduce((s,v)=>s+v,0);
+  if(isNaN(target2kg))return{error:'2kg total not a number'};
+  if(target2kg<0)return{error:'2kg total cannot be negative'};
+  if(target2kg>total)return{error:'2kg total ('+target2kg+') exceeds master total ('+total+')'};
+  if(target2kg===0)return{lines2kg:[],lines1kg:lines.slice(),formula2kg:'',formula1kg:groupLines(lines),total2kg:0,total1kg:total,total};
+  if(target2kg===total)return{lines2kg:lines.slice(),lines1kg:[],formula2kg:groupLines(lines),formula1kg:'',total2kg:total,total1kg:0,total};
+  let running=0,splitIndex=-1,partialAmount=0;
+  for(let i=0;i<lines.length;i++){
+    if(running+lines[i]===target2kg){running+=lines[i];splitIndex=i+1;partialAmount=0;break;}
+    else if(running+lines[i]>target2kg){splitIndex=i;partialAmount=target2kg-running;break;}
+    else{running+=lines[i];}
+  }
+  const lines2kg=[];
+  for(let i=0;i<splitIndex;i++)lines2kg.push(lines[i]);
+  if(partialAmount>0)lines2kg.push(partialAmount);
+  const lines1kg=[];
+  if(partialAmount>0){
+    lines1kg.push(lines[splitIndex]-partialAmount);
+    for(let i=splitIndex+1;i<lines.length;i++)lines1kg.push(lines[i]);
+  }else{
+    for(let i=splitIndex;i<lines.length;i++)lines1kg.push(lines[i]);
+  }
+  return{
+    lines2kg,lines1kg,
+    formula2kg:groupLines(lines2kg),
+    formula1kg:groupLines(lines1kg),
+    total2kg:lines2kg.reduce((s,v)=>s+v,0),
+    total1kg:lines1kg.reduce((s,v)=>s+v,0),
+    total
   };
-  if(editingIndex >= 0){ data[editingIndex] = entry; editingIndex = -1; }
-  else { data.unshift(entry); }
-
-  localStorage.setItem('flourData', JSON.stringify({formulas: data}));
-  markDirty(true);
-
-  document.getElementById('plate').value = '';
-  document.getElementById('bales').value = '';
-  document.getElementById('type').value = '2kg';
-  document.getElementById('title').value = '';
-  document.getElementById('formula').value = '';
-  document.getElementById('bay').value = '';
-  document.getElementById('invoice').value = '';
-  document.getElementById('date').value = '';
-  document.getElementById('time').value = '';
-  document.getElementById('addModalTitle').innerText = '➕ Add New Formula';
-  document.getElementById('editingBanner').style.display = 'none';
-  document.getElementById('saveFormulaBtn').innerText = '+ SAVE FORMULA';
-  document.getElementById('cancelEditBtn').style.display = 'none';
-  document.getElementById('templatePanel').style.display = 'none';
-  currentTemplates = [];
-  closeModal('addModal');
-
-  show();
-  updateSyncStatus();
-  scheduleSync();
 }
-function delFormula(i){
-  if(!confirm('Delete formula?')) return;
-  data.splice(i, 1);
-  localStorage.setItem('flourData', JSON.stringify({formulas: data}));
-  markDirty(true);
-  show();
-  updateSyncStatus();
-  scheduleSync();
+function previewSplit(){
+  const master=(document.getElementById('masterPlan').value||'').trim();
+  const target2kg=parseFloat(document.getElementById('splitTarget2kg').value);
+  const box=document.getElementById('splitPreview');
+  if(!master||isNaN(target2kg)){
+    box.textContent='Enter master plan + 2kg total to auto-split';
+    box.className='calcPreview';
+    return;
+  }
+  const r=splitMaster(master,target2kg);
+  if(r.error){
+    box.textContent='❌ '+r.error;
+    box.className='calcPreview bad';
+    return;
+  }
+  let html='✅ <b>2kg:</b> <code>'+esc(r.formula2kg||'(none)')+'</code> = '+r.total2kg+' bales';
+  if(r.total1kg>0)html+='<br>✅ <b>1kg:</b> <code>'+esc(r.formula1kg)+'</code> = '+r.total1kg+' bales';
+  html+='<br><small>Master total: '+r.total+'</small>';
+  box.innerHTML=html;
+  box.className='calcPreview';
+}
+function applySplit(){
+  const master=(document.getElementById('masterPlan').value||'').trim();
+  const target2kg=parseFloat(document.getElementById('splitTarget2kg').value);
+  const title=(document.getElementById('splitTitle').value||'').trim();
+  if(!master||isNaN(target2kg)){alert('Enter master plan + 2kg total first');return;}
+  const r=splitMaster(master,target2kg);
+  if(r.error){alert(r.error);return;}
+  clearLines();
+  if(r.total2kg>0){
+    addLineBlock({type:'2kg',bales:String(r.total2kg),title:title,formula:r.formula2kg});
+  }
+  if(r.total1kg>0){
+    addLineBlock({type:'1kg',bales:String(r.total1kg),title:title,formula:r.formula1kg});
+  }
+  if(!r.total2kg&&!r.total1kg){addLineBlock();}
+  previewAll();
 }
 
-// ---------- rendering ----------
-function formulaCard(d, idx, withDup){
-  const kg = totalKg(d);
-  const t = (kg / 1000).toFixed(2);
-  const balesNum = (parseInt(d.bales, 10) || 0).toLocaleString();
-  let dateLine = '';
-  if(d.dateDisplay && d.time) dateLine = '📅 ' + d.dateDisplay + ' · ' + d.time;
-  else if(d.dateDisplay) dateLine = '📅 ' + d.dateDisplay;
-  else if(d.time) dateLine = '🕐 ' + d.time;
-  const dupBtn = withDup ? `<button class="dupBtn" onclick="duplicateFormula(${idx})">📋 Duplicate</button>` : '';
-  return `<div class="card" style="border:1px solid #eee">
-    <div class="bales">${balesNum} BALES · ${esc(d.type || '?')} · ${t} t</div>
-    <b>${esc(d.title || '')}</b>
-    <p style="white-space:pre-wrap">${esc(d.formula || '')}</p>
-    <div class="detail">
-      <span class="plate">${esc(d.plate || '-')}</span>
-      ${dateLine ? `<span class="dateBadge">${esc(dateLine)}</span>` : ''}
-      <br><b>Bay:</b> ${esc(d.bay || '-')}
-      <br><b>Invoice:</b> ${esc(d.invoice || '-')}
+// ---------- LINE BLOCKS ----------
+function addLineBlock(prefill){
+  lineCounter++;
+  const id='line'+lineCounter;
+  const container=document.getElementById('linesContainer');
+  const div=document.createElement('div');
+  div.className='lineBlock';div.id=id;
+  div.innerHTML=`
+    <div class="lineHeader">
+      <span class="lineNum">Line</span>
+      <button type="button" class="lineRemove" onclick="removeLineBlock('${id}')" style="display:none">✕ Remove</button>
     </div>
     <div class="row">
-      <button class="editBtn" onclick="editFormula(${idx})">✏️ Edit</button>
-      <button class="del" onclick="delFormula(${idx})">Delete</button>
+      <div style="flex:1"><label class="small">Type</label><select class="lineType" onchange="previewAll()"><option value="2kg">2kg</option><option value="1kg">1kg</option><option value="0.5kg">0.5kg</option></select></div>
+      <div style="flex:1"><label class="small">Bales</label><input class="lineBales" type="number" oninput="previewAll()"></div>
     </div>
-    ${dupBtn}
-  </div>`;
+    <input class="lineTitle" placeholder="Formula name e.g. Ajab premium maize">
+    <textarea class="lineFormula" rows="2" placeholder="e.g. 30+40*2+52*11+51*2+16" oninput="previewAll()"></textarea>
+    <div class="linePreview calcPreview" style="margin:4px 0">—</div>
+  `;
+  container.appendChild(div);
+  if(prefill){
+    div.querySelector('.lineType').value=prefill.type||'2kg';
+    div.querySelector('.lineBales').value=prefill.bales||'';
+    div.querySelector('.lineTitle').value=prefill.title||'';
+    div.querySelector('.lineFormula').value=prefill.formula||'';
+  }
+  updateLineLabels();updateRemoveButtons();previewAll();
+}
+function removeLineBlock(id){
+  const container=document.getElementById('linesContainer');
+  if(container.children.length<=1)return;
+  document.getElementById(id).remove();
+  updateLineLabels();updateRemoveButtons();previewAll();
+}
+function clearLines(){document.getElementById('linesContainer').innerHTML='';lineCounter=0;}
+function updateLineLabels(){
+  document.querySelectorAll('.lineBlock').forEach((b,i)=>{const lbl=b.querySelector('.lineNum');if(lbl)lbl.textContent='Line '+(i+1);});
+}
+function updateRemoveButtons(){
+  const blocks=document.querySelectorAll('.lineBlock');const show=blocks.length>1;
+  blocks.forEach(b=>{const btn=b.querySelector('.lineRemove');if(btn)btn.style.display=show?'block':'none';});
+}
+function getLines(){
+  return Array.from(document.querySelectorAll('.lineBlock')).map(b=>({
+    type:b.querySelector('.lineType').value,
+    bales:b.querySelector('.lineBales').value.trim(),
+    title:b.querySelector('.lineTitle').value.trim(),
+    formula:b.querySelector('.lineFormula').value.trim(),
+    previewEl:b.querySelector('.linePreview')
+  }));
+}
+function previewAll(){
+  const lines=getLines();
+  let totalBales=0,totalKgAll=0;
+  lines.forEach(line=>{
+    if(!line.bales||!line.formula){line.previewEl.textContent='—';line.previewEl.className='linePreview calcPreview';return;}
+    const total=calcFormulaTotal(line.formula);
+    if(total===null){line.previewEl.textContent='❌ Could not calculate';line.previewEl.className='linePreview calcPreview bad';return;}
+    if(Math.abs(total-parseFloat(line.bales))>0.01){
+      line.previewEl.innerHTML='❌ Formula = '+total+', bales = '+line.bales+', diff '+(total-parseFloat(line.bales));
+      line.previewEl.className='linePreview calcPreview bad';
+    }else{
+      const kg=(parseFloat(line.bales)||0)*(KG_PER_BALE[line.type]||0);
+      line.previewEl.innerHTML='✅ '+total+' × '+line.type+' = '+(kg/1000).toFixed(2)+' t';
+      line.previewEl.className='linePreview calcPreview';
+    }
+    totalBales+=parseFloat(line.bales)||0;
+    totalKgAll+=(parseFloat(line.bales)||0)*(KG_PER_BALE[line.type]||0);
+  });
+  document.getElementById('totalPreview').innerHTML='Total: <b>'+totalBales.toLocaleString()+'</b> bales — <b>'+(totalKgAll/1000).toFixed(2)+'</b> t';
+  const master=document.getElementById('masterPlan').value.trim();
+  const masterEl=document.getElementById('masterPreview');
+  if(!master){masterEl.textContent='Enter master plan to verify total (optional)';masterEl.className='calcPreview';return;}
+  const masterTotal=calcFormulaTotal(master);
+  if(masterTotal===null){masterEl.textContent='❌ Could not calculate master plan';masterEl.className='calcPreview bad';}
+  else if(Math.abs(masterTotal-totalBales)<0.01){masterEl.innerHTML='✅ Master = '+masterTotal+' — matches total '+totalBales;masterEl.className='calcPreview';}
+  else{masterEl.innerHTML='⚠️ Master = '+masterTotal+', lines total = '+totalBales+', diff '+(masterTotal-totalBales);masterEl.className='calcPreview bad';}
+}
+
+// ---------- TEMPLATES ----------
+function renderTemplates(){
+  const panel=document.getElementById('templatePanel');
+  if(!panel)return;
+  if(editingOriginalIndex>=0||editingGroupId){panel.style.display='none';currentTemplates=[];return;}
+  const typed=(document.getElementById('plate').value||'').trim().toLowerCase();
+  if(typed.length<2){panel.style.display='none';panel.innerHTML='';currentTemplates=[];return;}
+  const matching=data.map((d,i)=>({d,i})).filter(x=>(x.d.plate||'').toLowerCase().includes(typed));
+  if(!matching.length){panel.innerHTML='<div class="small" style="padding:4px">🆕 New plate — no previous loads</div>';panel.style.display='block';currentTemplates=[];return;}
+  const groups=new Map();const singles=[];
+  matching.forEach(x=>{if(x.d.groupId){if(!groups.has(x.d.groupId))groups.set(x.d.groupId,[]);groups.get(x.d.groupId).push(x);}else singles.push(x);});
+  const multiDedup=new Map();
+  groups.forEach((lines,gid)=>{
+    if(lines.length>=2){
+      const key=lines.map(l=>(l.d.type||'')+'|'+l.d.bales+'|'+normalizeFormula(l.d.formula)).sort().join('::');
+      const lastDate=lines.reduce((m,l)=>(l.d.date||'')>m?l.d.date:m,'');
+      const masterLine=lines.find(l=>l.d.masterFormula);
+      if(!multiDedup.has(key))multiDedup.set(key,{type:'multi',key,lines:lines.map(l=>l.d),masterFormula:masterLine?masterLine.d.masterFormula:'',count:0,lastDate:''});
+      const e=multiDedup.get(key);e.count++;if(lastDate>e.lastDate)e.lastDate=lastDate;
+    }else{singles.push(lines[0]);}
+  });
+  const singleDedup=new Map();
+  singles.forEach(x=>{
+    const key=(x.d.type||'')+'|'+x.d.bales+'|'+normalizeFormula(x.d.formula);
+    if(!singleDedup.has(key))singleDedup.set(key,{type:'single',key,d:x.d,count:0,lastDate:x.d.date||''});
+    const e=singleDedup.get(key);e.count++;if((x.d.date||'')>e.lastDate)e.lastDate=x.d.date||'';
+  });
+  const templates=[...multiDedup.values(),...singleDedup.values()];
+  templates.sort((a,b)=>(b.lastDate||'').localeCompare(a.lastDate||''));
+  currentTemplates=templates.slice(0,8);
+  const todayD=todayStr();
+  let html='<div class="sectionLabel" style="margin-top:2px">🚚 Previous loads for this plate</div>';
+  currentTemplates.forEach((t,k)=>{
+    if(t.type==='multi'){
+      const totalBalesV=t.lines.reduce((s,d)=>s+(parseInt(d.bales,10)||0),0);
+      const totalKgV=t.lines.reduce((s,d)=>s+totalKg(d),0);
+      const isToday=t.lastDate===todayD;
+      html+='<button type="button" class="templateBtn" onclick="applyTemplate('+k+')">'+
+        '<div style="font-weight:bold;color:#0b6e4f">📦 '+totalBalesV.toLocaleString()+' bales · '+t.lines.length+' lines · '+(totalKgV/1000).toFixed(2)+' t'+(isToday?' <span style="color:#c0392b">⚠️ already today</span>':'')+'</div>'+
+        t.lines.map(d=>'<div class="small">· '+(parseInt(d.bales,10)||0).toLocaleString()+' × '+esc(d.type||'?')+' — '+esc(d.title||'')+'</div>').join('')+
+        '<div class="small">'+t.count+'× · last '+esc(formatDate(t.lastDate)||'no date')+'</div>'+
+      '</button>';
+    }else{
+      const d=t.d;const kg=totalKg(d);const isToday=t.lastDate===todayD;
+      html+='<button type="button" class="templateBtn" onclick="applyTemplate('+k+')">'+
+        '<div style="font-weight:bold;color:#0b6e4f">'+(parseInt(d.bales,10)||0).toLocaleString()+' bales · '+esc(d.type||'?')+' · '+(kg/1000).toFixed(2)+' t'+(isToday?' <span style="color:#c0392b">⚠️ already today</span>':'')+'</div>'+
+        '<div><b>'+esc(d.title||'')+'</b></div>'+
+        '<div class="small" style="white-space:pre-wrap;margin:2px 0">'+esc(d.formula||'')+'</div>'+
+        '<div class="small">'+t.count+'× · last '+esc(formatDate(t.lastDate)||'no date')+(d.bay?' · '+esc(d.bay):'')+'</div>'+
+      '</button>';
+    }
+  });
+  panel.innerHTML=html;panel.style.display='block';
+}
+function applyTemplate(k){
+  const t=currentTemplates[k];if(!t)return;
+  if(t.type==='multi'){
+    clearLines();
+    t.lines.forEach(d=>addLineBlock(d));
+    document.getElementById('masterPlan').value=t.masterFormula||'';
+    const twoKgLine=t.lines.find(l=>l.type==='2kg');
+    if(twoKgLine)document.getElementById('splitTarget2kg').value=twoKgLine.bales;
+  }else{
+    const firstBlock=document.querySelector('.lineBlock');
+    if(firstBlock){
+      firstBlock.querySelector('.lineType').value=t.d.type||'2kg';
+      firstBlock.querySelector('.lineBales').value=t.d.bales||'';
+      firstBlock.querySelector('.lineTitle').value=t.d.title||'';
+      firstBlock.querySelector('.lineFormula').value=t.d.formula||'';
+    }
+    document.getElementById('masterPlan').value=t.d.masterFormula||'';
+  }
+  previewAll();previewSplit();
+}
+
+// ---------- OPEN / EDIT / DUPLICATE / CANCEL ----------
+function resetAddForm(){
+  document.getElementById('plate').value='';
+  document.getElementById('date').value=todayStr();
+  document.getElementById('time').value=nowTimeStr();
+  document.getElementById('bay').value='';
+  document.getElementById('invoice').value='';
+  document.getElementById('masterPlan').value='';
+  document.getElementById('splitTarget2kg').value='';
+  document.getElementById('splitTitle').value='';
+  document.getElementById('templatePanel').style.display='none';
+  document.getElementById('editingBanner').style.display='none';
+  document.getElementById('addModalTitle').innerText='➕ Add Load';
+  document.getElementById('saveFormulaBtn').innerText='+ SAVE LOAD';
+  document.getElementById('cancelEditBtn').style.display='none';
+  clearLines();addLineBlock();previewAll();previewSplit();
+}
+function openAddFormula(){editingOriginalIndex=-1;editingGroupId=null;resetAddForm();openModal('addModal');}
+function editFormula(i){
+  const d=data[i];
+  closeModal('savedModal');closeModal('dateModal');
+  if(d.groupId){
+    const lines=data.map((g,idx)=>({g,idx})).filter(x=>x.g.groupId===d.groupId);
+    editingOriginalIndex=-1;editingGroupId=d.groupId;
+    const first=lines[0].g;
+    document.getElementById('plate').value=first.plate||'';
+    document.getElementById('date').value=first.date||'';
+    document.getElementById('time').value=first.time||'';
+    document.getElementById('bay').value=first.bay||'';
+    document.getElementById('invoice').value=first.invoice||'';
+    const masterLine=lines.find(x=>x.g.masterFormula);
+    document.getElementById('masterPlan').value=masterLine?masterLine.g.masterFormula:'';
+    const twoKgLine=lines.find(x=>x.g.type==='2kg');
+    document.getElementById('splitTarget2kg').value=twoKgLine?twoKgLine.g.bales:'';
+    document.getElementById('splitTitle').value=first.title||'';
+    clearLines();lines.forEach(x=>addLineBlock(x.g));
+    document.getElementById('addModalTitle').innerText='✏️ Edit Load';
+    document.getElementById('editingBanner').style.display='block';
+    document.getElementById('editingBanner').innerText='✏️ Editing load for '+first.plate;
+  }else{
+    editingOriginalIndex=i;editingGroupId=null;
+    document.getElementById('plate').value=d.plate||'';
+    document.getElementById('date').value=d.date||'';
+    document.getElementById('time').value=d.time||'';
+    document.getElementById('bay').value=d.bay||'';
+    document.getElementById('invoice').value=d.invoice||'';
+    document.getElementById('masterPlan').value=d.masterFormula||'';
+    document.getElementById('splitTarget2kg').value=(d.type==='2kg'?d.bales:'')||'';
+    document.getElementById('splitTitle').value=d.title||'';
+    clearLines();addLineBlock(d);
+    document.getElementById('addModalTitle').innerText='✏️ Edit Load';
+    document.getElementById('editingBanner').style.display='block';
+    document.getElementById('editingBanner').innerText='✏️ Editing load for '+(d.plate||'');
+  }
+  document.getElementById('saveFormulaBtn').innerText='💾 UPDATE LOAD';
+  document.getElementById('cancelEditBtn').style.display='block';
+  document.getElementById('templatePanel').style.display='none';
+  openModal('addModal');previewAll();previewSplit();
+}
+function duplicateFormula(i){const d=data[i];if(d.groupId)duplicateGroup(d.groupId);else duplicateGroup(null,[{d,i}]);}
+function duplicateGroup(groupId,override){
+  let lines;
+  if(override)lines=override;
+  else lines=data.map((d,i)=>({d,i})).filter(x=>x.d.groupId===groupId);
+  if(!lines.length)return;
+  closeModal('savedModal');closeModal('dateModal');
+  editingOriginalIndex=-1;editingGroupId=null;
+  const first=lines[0].d;
+  document.getElementById('plate').value=first.plate||'';
+  document.getElementById('date').value=todayStr();
+  document.getElementById('time').value=nowTimeStr();
+  document.getElementById('bay').value=first.bay||'';
+  document.getElementById('invoice').value='';
+  const masterLine=lines.find(x=>x.d.masterFormula);
+  document.getElementById('masterPlan').value=masterLine?masterLine.d.masterFormula:'';
+  const twoKgLine=lines.find(x=>x.d.type==='2kg');
+  document.getElementById('splitTarget2kg').value=twoKgLine?twoKgLine.d.bales:'';
+  document.getElementById('splitTitle').value=first.title||'';
+  clearLines();lines.forEach(x=>addLineBlock(x.d));
+  document.getElementById('addModalTitle').innerText='📋 Duplicate Load';
+  document.getElementById('editingBanner').style.display='none';
+  document.getElementById('saveFormulaBtn').innerText='+ SAVE LOAD';
+  document.getElementById('cancelEditBtn').style.display='none';
+  document.getElementById('templatePanel').style.display='none';
+  openModal('addModal');previewAll();previewSplit();
+}
+function cancelEdit(){editingOriginalIndex=-1;editingGroupId=null;resetAddForm();closeModal('addModal');}
+
+// ---------- SAVE ----------
+function add(){
+  const plate=document.getElementById('plate').value.trim();
+  const dateVal=document.getElementById('date').value;
+  const timeVal=document.getElementById('time').value;
+  const bay=document.getElementById('bay').value.trim();
+  const invoice=document.getElementById('invoice').value.trim();
+  const masterPlan=document.getElementById('masterPlan').value.trim();
+  if(!plate){alert('Enter Number Plate');return;}
+  const lines=getLines();
+  for(let i=0;i<lines.length;i++){
+    const ln=lines[i];
+    if(!ln.bales||!ln.title||!ln.formula){alert('Line '+(i+1)+': fill Bales, Title, and Formula');return;}
+    const total=calcFormulaTotal(ln.formula);
+    if(total===null){alert('Line '+(i+1)+': could not calculate formula');return;}
+    if(Math.abs(total-parseFloat(ln.bales))>0.01){alert('Line '+(i+1)+': Formula = '+total+' but Bales = '+ln.bales);return;}
+  }
+  const totalBales=lines.reduce((s,l)=>s+(parseFloat(l.bales)||0),0);
+  if(masterPlan){
+    const masterTotal=calcFormulaTotal(masterPlan);
+    if(masterTotal!==null&&Math.abs(masterTotal-totalBales)>0.01){
+      if(!confirm('Master plan = '+masterTotal+', lines total = '+totalBales+'. Save anyway?'))return;
+    }
+  }
+  const currentGroupId=editingGroupId||null;
+  for(const ln of lines){
+    const newNorm=normalizeFormula(ln.formula);
+    const dup=data.findIndex((d,i)=>{
+      if(i===editingOriginalIndex)return false;
+      if(d.groupId&&d.groupId===currentGroupId)return false;
+      return d.plate===plate&&(d.date||'')===(dateVal||'')&&normalizeFormula(d.formula)===newNorm;
+    });
+    if(dup!==-1){alert('Duplicate: '+data[dup].title+' '+data[dup].bales+' bales already loaded for '+plate+' on this date');return;}
+  }
+  for(let i=0;i<lines.length;i++)for(let j=i+1;j<lines.length;j++){
+    if(normalizeFormula(lines[i].formula)===normalizeFormula(lines[j].formula)){alert('Lines '+(i+1)+' and '+(j+1)+' have the same formula');return;}
+  }
+  const otherOnSamePlate=data.findIndex((d,i)=>{
+    if(i===editingOriginalIndex)return false;
+    if(d.groupId&&d.groupId===currentGroupId)return false;
+    return d.plate===plate&&(d.date||'')===(dateVal||'');
+  });
+  if(otherOnSamePlate!==-1){
+    if(!confirm(plate+' already has a load on '+formatDate(dateVal)+':\n\n'+data[otherOnSamePlate].title+' '+data[otherOnSamePlate].bales+' bales\n\nAdd anyway?'))return;
+  }
+  let groupId=currentGroupId;
+  if(!groupId)groupId='g'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+  const entries=lines.map((ln,idx)=>({
+    bales:ln.bales,type:ln.type,title:ln.title,formula:ln.formula,
+    plate,date:dateVal||'',dateDisplay:dateVal?formatDate(dateVal):'',
+    time:timeVal||'',bay:bay||'',invoice,
+    groupId,masterFormula:idx===0?masterPlan:''
+  }));
+  if(editingGroupId){data=data.filter(d=>d.groupId!==editingGroupId);}
+  else if(editingOriginalIndex>=0){data.splice(editingOriginalIndex,1);}
+  entries.slice().reverse().forEach(e=>data.unshift(e));
+  editingOriginalIndex=-1;editingGroupId=null;
+  localStorage.setItem('flourData',JSON.stringify({formulas:data}));
+  markDirty(true);
+  resetAddForm();
+  closeModal('addModal');
+  show();updateSyncStatus();scheduleSync();
+}
+function delFormula(i){
+  const d=data[i];
+  const msg=d.groupId?'Delete entire load for '+d.plate+'?':'Delete this line?';
+  if(!confirm(msg))return;
+  if(d.groupId){data=data.filter(g=>g.groupId!==d.groupId);}
+  else{data.splice(i,1);}
+  localStorage.setItem('flourData',JSON.stringify({formulas:data}));
+  markDirty(true);show();updateSyncStatus();scheduleSync();
+}
+
+// ---------- RENDERING ----------
+function groupData(items){
+  const groups=new Map();const result=[];
+  items.forEach(item=>{
+    const d=item.d;
+    if(d.groupId){
+      if(!groups.has(d.groupId)){const g={type:'multi',id:d.groupId,lines:[]};groups.set(d.groupId,g);result.push(g);}
+      groups.get(d.groupId).lines.push(item);
+    }else{result.push({type:'single',line:item});}
+  });
+  return result;
+}
+function renderLoad(load){
+  if(load.type==='single')return renderSingleCard(load.line.d,load.line.i,true);
+  const lines=load.lines;
+  const totalBalesV=lines.reduce((s,x)=>s+(parseInt(x.d.bales,10)||0),0);
+  const totalKgV=lines.reduce((s,x)=>s+totalKg(x.d),0);
+  const first=lines[0].d;
+  const masterLine=lines.find(x=>x.d.masterFormula);
+  let masterLineHtml='';
+  if(masterLine){
+    const master=masterLine.d.masterFormula;
+    const mt=calcFormulaTotal(master);
+    const ok=mt!==null&&Math.abs(mt-totalBalesV)<0.01;
+    masterLineHtml='<div class="small" style="margin-top:4px"><b>Master:</b> <code style="background:#f0f7f4;padding:2px 4px;border-radius:3px">'+esc(master)+'</code> = '+(mt!==null?mt:'?')+' '+(ok?'<span style="color:#0b6e4f">✓</span>':'<span style="color:#c0392b">⚠️</span>')+'</div>';
+  }
+  const lineHtml=lines.map(x=>{
+    const d=x.d;const kg=totalKg(d);
+    return '<div class="groupLine">'+
+      '<div><b>'+(parseInt(d.bales,10)||0).toLocaleString()+' × '+esc(d.type||'?')+'</b> — '+(kg/1000).toFixed(2)+' t</div>'+
+      '<div class="small">'+esc(d.title||'')+'</div>'+
+      '<div class="small">'+esc(d.formula||'')+'</div>'+
+      '<div class="row" style="margin-top:4px">'+
+        '<button class="editBtn" style="margin:0;padding:6px;font-size:12px" onclick="editFormula('+x.i+')">✏️ Edit</button>'+
+        '<button class="del" style="margin:0;padding:6px;font-size:12px" onclick="delFormula('+x.i+')">🗑️ Delete</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  let dateLine='';
+  if(first.dateDisplay&&first.time)dateLine='📅 '+first.dateDisplay+' · '+first.time;
+  else if(first.dateDisplay)dateLine='📅 '+first.dateDisplay;
+  else if(first.time)dateLine='🕐 '+first.time;
+  return '<div class="card" style="border:2px solid #0b6e4f">'+
+    '<div class="bales">'+totalBalesV.toLocaleString()+' BALES · '+(totalKgV/1000).toFixed(2)+' t · '+lines.length+' lines</div>'+
+    '<div style="margin:4px 0"><span class="plate">'+esc(first.plate||'-')+'</span>'+(dateLine?' <span class="dateBadge">'+esc(dateLine)+'</span>':'')+'</div>'+
+    '<div class="small"><b>Bay:</b> '+esc(first.bay||'-')+' · <b>Invoice:</b> '+esc(first.invoice||'-')+'</div>'+
+    masterLineHtml+
+    '<div style="margin-top:8px">'+lineHtml+'</div>'+
+    '<button class="dupBtn" onclick="duplicateGroup(\''+load.id+'\')">📋 Duplicate Load</button>'+
+  '</div>';
+}
+function renderSingleCard(d,idx,withDup){
+  const kg=totalKg(d),t=(kg/1000).toFixed(2),balesNum=(parseInt(d.bales,10)||0).toLocaleString();
+  let dateLine='';
+  if(d.dateDisplay&&d.time)dateLine='📅 '+d.dateDisplay+' · '+d.time;
+  else if(d.dateDisplay)dateLine='📅 '+d.dateDisplay;
+  else if(d.time)dateLine='🕐 '+d.time;
+  const masterHtml=d.masterFormula?'<div class="small"><b>Master:</b> '+esc(d.masterFormula)+'</div>':'';
+  const dupBtn=withDup?'<button class="dupBtn" onclick="duplicateFormula('+idx+')">📋 Duplicate</button>':'';
+  return '<div class="card" style="border:1px solid #eee">'+
+    '<div class="bales">'+balesNum+' BALES · '+esc(d.type||'?')+' · '+t+' t</div>'+
+    '<b>'+esc(d.title||'')+'</b>'+
+    '<p style="white-space:pre-wrap">'+esc(d.formula||'')+'</p>'+
+    masterHtml+
+    '<div class="detail"><span class="plate">'+esc(d.plate||'-')+'</span>'+(dateLine?' <span class="dateBadge">'+esc(dateLine)+'</span>':'')+'<br><b>Bay:</b> '+esc(d.bay||'-')+'<br><b>Invoice:</b> '+esc(d.invoice||'-')+'</div>'+
+    '<div class="row"><button class="editBtn" onclick="editFormula('+idx+')">✏️ Edit</button><button class="del" onclick="delFormula('+idx+')">Delete</button></div>'+
+    dupBtn+
+  '</div>';
 }
 
 function showDates(filterDate){
-  if(filterDate !== undefined && filterDate !== '') selectedDate = filterDate;
-  else if(filterDate === '') selectedDate = '';
-
-  const dates = [...new Set(data.map(d => d.date).filter(Boolean))].sort().reverse();
-  const hasNoDate = data.some(d => !d.date);
-  document.getElementById('dateBadgeTop').innerText = '(' + dates.length + (hasNoDate ? '+' : '') + ')';
-
-  let html = '';
-  if(dates.length == 0 && !hasNoDate){
-    html = '<p>No dates yet. Add a formula with a date, or leave date blank.</p>';
-  } else {
-    dates.forEach(dt => {
-      const items = data.filter(d => d.date == dt);
-      const count = items.length;
-      const active = (selectedDate == dt) ? 'active' : '';
-      html += `<button class="dateBtn ${active}" onclick="showDates('${dt}')">📅 ${formatDate(dt)} — ${count} formula(s) — ${esc(dateSummaryLine(items))}</button>`;
+  if(filterDate!==undefined&&filterDate!=='')selectedDate=filterDate;
+  else if(filterDate==='')selectedDate='';
+  const dates=[...new Set(data.map(d=>d.date).filter(Boolean))].sort().reverse();
+  const hasNoDate=data.some(d=>!d.date);
+  document.getElementById('dateBadgeTop').innerText='('+dates.length+(hasNoDate?'+':'')+')';
+  let html='';
+  if(dates.length===0&&!hasNoDate){html='<p>No dates yet.</p>';}
+  else{
+    dates.forEach(dt=>{
+      const items=data.filter(d=>d.date===dt);
+      const active=(selectedDate===dt)?'active':'';
+      html+='<button class="dateBtn '+active+'" onclick="showDates(\''+dt+'\')">📅 '+formatDate(dt)+' — '+items.length+' line(s) — '+esc(dateSummaryLine(items))+'</button>';
     });
     if(hasNoDate){
-      const items = data.filter(d => !d.date);
-      const count = items.length;
-      const active = (selectedDate == '__NODATE__') ? 'active' : '';
-      html += `<button class="dateBtn ${active}" onclick="showDates('__NODATE__')">📅 No Date — ${count} formula(s) — ${esc(dateSummaryLine(items))}</button>`;
+      const items=data.filter(d=>!d.date);
+      const active=(selectedDate==='__NODATE__')?'active':'';
+      html+='<button class="dateBtn '+active+'" onclick="showDates(\'__NODATE__\')">📅 No Date — '+items.length+' line(s) — '+esc(dateSummaryLine(items))+'</button>';
     }
   }
-  document.getElementById('dateList').innerHTML = html;
-
-  let resHtml = '';
+  document.getElementById('dateList').innerHTML=html;
+  let resHtml='';
   if(selectedDate){
-    const items = data.map((d, i) => ({d, i})).filter(x => selectedDate == '__NODATE__' ? !x.d.date : x.d.date == selectedDate);
-    if(items.length == 0){
-      resHtml = '<p>No formula for this date</p>';
-    } else {
-      const title = selectedDate == '__NODATE__' ? 'No Date' : formatDate(selectedDate);
-      const totalKgAll = items.reduce((s, x) => s + totalKg(x.d), 0);
-      resHtml = '<h4>📅 ' + title + ' — ' + items.length + ' formula(s) / car(s) — ' + (totalKgAll / 1000).toFixed(2) + ' t</h4>';
-      const plates = [...new Set(items.map(x => x.d.plate).filter(Boolean))];
-      if(plates.length) resHtml += '<p><b>Cars used:</b> ' + plates.map(esc).join(', ') + '</p>';
-      items.forEach(x => { resHtml += formulaCard(x.d, x.i); });
+    const items=data.map((d,i)=>({d,i})).filter(x=>selectedDate==='__NODATE__'?!x.d.date:x.d.date===selectedDate);
+    if(items.length===0){resHtml='<p>No load for this date</p>';}
+    else{
+      const title=selectedDate==='__NODATE__'?'No Date':formatDate(selectedDate);
+      const totalKgAll=items.reduce((s,x)=>s+totalKg(x.d),0);
+      resHtml='<h4>📅 '+title+' — '+items.length+' line(s) — '+(totalKgAll/1000).toFixed(2)+' t</h4>';
+      const plates=[...new Set(items.map(x=>x.d.plate).filter(Boolean))];
+      if(plates.length)resHtml+='<p><b>Cars:</b> '+plates.map(esc).join(', ')+'</p>';
+      groupData(items).forEach(l=>{resHtml+=renderLoad(l);});
     }
-  } else {
-    resHtml = '<p class="small">Tap a date above to see formulas + cars for that day</p>';
-  }
-  document.getElementById('dateResults').innerHTML = resHtml;
-
-  const inp = document.getElementById('dateFilter');
-  if(selectedDate && selectedDate != '__NODATE__') inp.value = selectedDate;
-  else inp.value = '';
+  }else{resHtml='<p class="small">Tap a date above to see loads</p>';}
+  document.getElementById('dateResults').innerHTML=resHtml;
+  document.getElementById('dateFilter').value=(selectedDate&&selectedDate!=='__NODATE__')?selectedDate:'';
 }
 
 function show(){
-  const q = (document.getElementById('search').value || '').toLowerCase().trim();
-  const qt = document.getElementById('searchType').value;
-  document.getElementById('countBadge').innerText = data.length + ' saved';
-
-  let fHtml = '';
-  if(data.length == 0) fHtml = '<p>No formula.</p>';
-  data.forEach((d, idx) => { fHtml += formulaCard(d, idx); });
-  document.getElementById('list').innerHTML = fHtml;
-
+  const q=(document.getElementById('search').value||'').toLowerCase().trim();
+  const qt=document.getElementById('searchType').value;
+  document.getElementById('countBadge').innerText=data.length+' line(s)';
+  const allItems=data.map((d,i)=>({d,i}));
+  let fHtml='';
+  if(data.length===0)fHtml='<p>No loads.</p>';
+  groupData(allItems).forEach(l=>{fHtml+=renderLoad(l);});
+  document.getElementById('list').innerHTML=fHtml;
   showDates(selectedDate);
-
-  if(q || qt){
-    document.getElementById('searchResultsCard').style.display = 'block';
-    const matched = data.map((d, i) => ({d, i})).filter(x => {
-      const d = x.d;
-      const okQ = !q ||
-        String(d.bales) == q ||
-        (d.title || '').toLowerCase().includes(q) ||
-        (d.formula || '').toLowerCase().includes(q) ||
-        (d.plate || '').toLowerCase().includes(q) ||
-        (d.bay || '').toLowerCase().includes(q) ||
-        (d.invoice || '').toLowerCase().includes(q) ||
-        (d.dateDisplay || '').toLowerCase().includes(q) ||
-        (d.date || '').includes(q);
-      const okT = !qt || d.type == qt;
-      return okQ && okT;
+  if(q||qt){
+    document.getElementById('searchResultsCard').style.display='block';
+    const matched=allItems.filter(x=>{
+      const d=x.d;
+      const okQ=!q||String(d.bales)===q||(d.title||'').toLowerCase().includes(q)||(d.formula||'').toLowerCase().includes(q)||(d.plate||'').toLowerCase().includes(q)||(d.bay||'').toLowerCase().includes(q)||(d.invoice||'').toLowerCase().includes(q)||(d.dateDisplay||'').toLowerCase().includes(q)||(d.date||'').includes(q);
+      const okT=!qt||d.type===qt;
+      return okQ&&okT;
     });
-    let html = '';
-    if(matched.length > 0){
-      html += '<b>📋 Formulas found: ' + matched.length + '</b>';
-      matched.forEach(x => { html += formulaCard(x.d, x.i, true); });
-    } else {
-      html = '<p>No result for "' + esc(q) + '". Try different bales, plate, bay or date.</p>';
-    }
-    document.getElementById('searchResults').innerHTML = html;
-  } else {
-    document.getElementById('searchResultsCard').style.display = 'none';
-  }
+    const groupIds=new Set(matched.filter(x=>x.d.groupId).map(x=>x.d.groupId));
+    const expanded=allItems.filter(x=>matched.some(m=>m.i===x.i)||(x.d.groupId&&groupIds.has(x.d.groupId)));
+    let html='';
+    if(expanded.length>0){
+      const loads=groupData(expanded);
+      html+='<b>📋 Found: '+loads.length+' load(s)</b>';
+      loads.forEach(l=>{html+=renderLoad(l);});
+    }else{html='<p>No result for "'+esc(q)+'".</p>';}
+    document.getElementById('searchResults').innerHTML=html;
+  }else{document.getElementById('searchResultsCard').style.display='none';}
 }
 
-// ---------- export ----------
-function csvEscape(v){
-  let s = String(v == null ? '' : v);
-  if(/[",\n\r]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
-  return s;
-}
+// ---------- EXPORT ----------
+function csvEscape(v){let s=String(v==null?'':v);if(/[",\n\r]/.test(s))s='"'+s.replace(/"/g,'""')+'"';return s;}
 function toCSV(items){
-  const header = ['Date','Time','Plate','Type','Bales','KgPerBale','TotalKg','Tonnes','Title','Formula','Bay','Invoice'];
-  const rows = items.map(d => {
-    const kg = totalKg(d);
-    return [
-      d.date || '',
-      d.time || '',
-      d.plate || '',
-      d.type || '',
-      parseInt(d.bales, 10) || 0,
-      KG_PER_BALE[d.type] || 0,
-      kg,
-      (kg / 1000).toFixed(2),
-      d.title || '',
-      d.formula || '',
-      d.bay || '',
-      d.invoice || ''
-    ].map(csvEscape).join(',');
-  });
-  return '\uFEFF' + header.join(',') + '\n' + rows.join('\n');
+  const header=['Date','Time','Plate','Type','Bales','KgPerBale','TotalKg','Tonnes','Title','Formula','Bay','Invoice','GroupId','MasterPlan'];
+  const rows=items.map(d=>{const kg=totalKg(d);return [d.date||'',d.time||'',d.plate||'',d.type||'',parseInt(d.bales,10)||0,KG_PER_BALE[d.type]||0,kg,(kg/1000).toFixed(2),d.title||'',d.formula||'',d.bay||'',d.invoice||'',d.groupId||'',d.masterFormula||''].map(csvEscape).join(',');});
+  return '\uFEFF'+header.join(',')+'\n'+rows.join('\n');
 }
-function download(filename, content, mime){
-  const blob = new Blob([content], {type: mime || 'application/octet-stream'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1500);
+function download(filename,content,mime){
+  const blob=new Blob([content],{type:mime||'application/octet-stream'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');
+  a.href=url;a.download=filename;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},1500);
 }
-function setExportStatus(msg){ document.getElementById('exportStatus').innerHTML = msg; }
+function setExportStatus(msg){document.getElementById('exportStatus').innerHTML=msg;}
 function updateExportInfo(){
-  const t = todayStr();
-  const todayItems = data.filter(d => d.date === t);
-  const todayTonnes = (todayItems.reduce((s, d) => s + totalKg(d), 0) / 1000).toFixed(2);
-  document.getElementById('exportInfo').innerHTML =
-    'Total saved: <b>' + data.length + '</b> formula(s)<br>' +
-    'Today (' + formatDate(t) + '): <b>' + todayItems.length + '</b> formula(s) — ' + todayTonnes + ' t';
+  const t=todayStr();const ti=data.filter(d=>d.date===t);
+  const tt=(ti.reduce((s,d)=>s+totalKg(d),0)/1000).toFixed(2);
+  document.getElementById('exportInfo').innerHTML='Total: <b>'+data.length+'</b> line(s)<br>Today ('+formatDate(t)+'): <b>'+ti.length+'</b> line(s) — '+tt+' t';
   setExportStatus('');
 }
-function exportJSON(){
-  const payload = {formulas: data, exportedAt: new Date().toISOString()};
-  download('loading-plan-backup-' + todayStr() + '.json', JSON.stringify(payload, null, 2), 'application/json');
-  setExportStatus('✅ Downloaded JSON backup');
-}
-function exportCSVAll(){
-  download('loading-plan-all-' + todayStr() + '.csv', toCSV(sortedForExport(data)), 'text/csv;charset=utf-8');
-  setExportStatus('✅ Downloaded all formulas as CSV');
-}
-function exportCSVToday(){
-  const t = todayStr();
-  const items = data.filter(d => d.date === t);
-  if(!items.length){ setExportStatus('⚠️ No formulas dated today (' + formatDate(t) + ')'); return; }
-  download('loading-plan-' + t + '.csv', toCSV(sortedForExport(items)), 'text/csv;charset=utf-8');
-  setExportStatus('✅ Downloaded today\'s CSV (' + items.length + ' formula(s))');
-}
+function exportJSON(){download('loading-plan-backup-'+todayStr()+'.json',JSON.stringify({formulas:data,exportedAt:new Date().toISOString()},null,2),'application/json');setExportStatus('✅ Downloaded JSON backup');}
+function exportCSVAll(){download('loading-plan-all-'+todayStr()+'.csv',toCSV(sortedForExport(data)),'text/csv;charset=utf-8');setExportStatus('✅ Downloaded all as CSV');}
+function exportCSVToday(){const t=todayStr();const items=data.filter(d=>d.date===t);if(!items.length){setExportStatus('⚠️ No loads dated today');return;}download('loading-plan-'+t+'.csv',toCSV(sortedForExport(items)),'text/csv;charset=utf-8');setExportStatus('✅ Downloaded today CSV ('+items.length+' line(s))');}
 async function copyTodaySummary(){
-  const t = todayStr();
-  const items = sortedForExport(data.filter(d => d.date === t));
-  if(!items.length){ setExportStatus('⚠️ No formulas dated today'); return; }
-  const lines = ['LOADING SUMMARY — ' + formatDate(t), ''];
-  const plates = [...new Set(items.map(d => d.plate).filter(Boolean))];
-  if(plates.length) lines.push('Cars: ' + plates.join(', '));
+  const t=todayStr();const items=sortedForExport(data.filter(d=>d.date===t));
+  if(!items.length){setExportStatus('⚠️ No loads dated today');return;}
+  const lines=['LOADING SUMMARY — '+formatDate(t),''];
+  const plates=[...new Set(items.map(d=>d.plate).filter(Boolean))];
+  if(plates.length)lines.push('Cars: '+plates.join(', '));
   lines.push('');
-  items.forEach(d => {
-    const kg = totalKg(d);
-    lines.push(
-      (d.time || '--:--') + ' | ' + (d.plate || '-') + ' | ' + (d.type || '?') + ' | ' +
-      (parseInt(d.bales, 10) || 0) + ' bales | ' + (kg / 1000).toFixed(2) + ' t | ' + (d.title || '') +
-      (d.bay ? ' | ' + d.bay : '') +
-      (d.invoice ? ' | ' + d.invoice : '')
-    );
+  groupData(items.map((d,i)=>({d,i}))).forEach(load=>{
+    if(load.type==='single'){
+      const d=load.line.d;const kg=totalKg(d);
+      lines.push((d.time||'--:--')+' | '+(d.plate||'-')+' | '+(d.type||'?')+' | '+(parseInt(d.bales,10)||0)+' bales | '+(kg/1000).toFixed(2)+' t | '+(d.title||'')+(d.bay?' | '+d.bay:'')+(d.invoice?' | '+d.invoice:''));
+    }else{
+      const ls=load.lines.map(x=>x.d);const first=ls[0];
+      const tb=ls.reduce((s,x)=>s+(parseInt(x.bales,10)||0),0);
+      const tk=ls.reduce((s,x)=>s+totalKg(x),0);
+      lines.push((first.time||'--:--')+' | '+(first.plate||'-')+' | LOAD ('+ls.length+' lines) — '+tb.toLocaleString()+' bales | '+(tk/1000).toFixed(2)+' t'+(first.bay?' | '+first.bay:'')+(first.invoice?' | '+first.invoice:''));
+      ls.forEach(x=>{const kg=totalKg(x);lines.push('     · '+(parseInt(x.bales,10)||0).toLocaleString()+' × '+(x.type||'?')+' | '+(x.title||'')+' | '+(kg/1000).toFixed(2)+' t');});
+      const ml=ls.find(x=>x.masterFormula);
+      if(ml){const mt=calcFormulaTotal(ml.masterFormula);lines.push('     Master: '+ml.masterFormula+' = '+mt+(Math.abs(mt-tb)<0.01?' ✓':' ⚠️'));}
+    }
   });
-  const totalBales = items.reduce((s, d) => s + (parseInt(d.bales, 10) || 0), 0);
-  const totalTonnes = (items.reduce((s, d) => s + totalKg(d), 0) / 1000).toFixed(2);
+  const tbAll=items.reduce((s,d)=>s+(parseInt(d.bales,10)||0),0);
+  const tkAll=(items.reduce((s,d)=>s+totalKg(d),0)/1000).toFixed(2);
   lines.push('');
-  lines.push('TOTAL: ' + totalBales.toLocaleString() + ' bales — ' + totalTonnes + ' tonnes');
-  const text = lines.join('\n');
-  try {
-    await navigator.clipboard.writeText(text);
-    setExportStatus('✅ Summary copied — paste in WhatsApp / email');
-  } catch(e) {
-    prompt('Copy this summary:', text);
-    setExportStatus('📋 Summary ready — copy manually if needed');
-  }
+  lines.push('TOTAL: '+tbAll.toLocaleString()+' bales — '+tkAll+' tonnes');
+  const text=lines.join('\n');
+  try{await navigator.clipboard.writeText(text);setExportStatus('✅ Summary copied');}
+  catch(e){prompt('Copy this summary:',text);setExportStatus('📋 Summary ready — copy manually');}
 }
 
-// ---------- init ----------
+// ---------- INIT ----------
 loadSettings();
-
-const local = JSON.parse(localStorage.getItem('flourData') || 'null');
-if(local && local.formulas){
-  data = local.formulas;
-} else if(local && local.cars){
-  data = [];
-  local.cars.forEach(c => {
-    (c.items || []).forEach(it => {
-      data.push({
-        bales: it.bales, type: it.size, title: it.product,
-        formula: it.formula || '', plate: c.plate,
-        date: c.date, dateDisplay: c.dateDisplay || formatDate(c.date),
-        time: '',
-        bay: '', invoice: c.invoice || ''
-      });
-    });
-  });
-  if(local.formulas) data = data.concat(local.formulas);
-} else if(local && Array.isArray(local)){
-  data = local;
-} else {
-  data = [{bales: "1220", type: "2kg", title: "Ajab HBF", formula: "40+45*4+50*20", plate: "KDQ 076M", date: "", dateDisplay: "", time: "", bay: "", invoice: "INV 123"}];
-}
-
+const local=JSON.parse(localStorage.getItem('flourData')||'null');
+if(local&&local.formulas){data=local.formulas;}
+else if(local&&local.cars){
+  data=[];
+  local.cars.forEach(c=>{(c.items||[]).forEach(it=>{data.push({bales:it.bales,type:it.size,title:it.product,formula:it.formula||'',plate:c.plate,date:c.date,dateDisplay:c.dateDisplay||formatDate(c.date),time:'',bay:'',invoice:c.invoice||''});});});
+  if(local.formulas)data=data.concat(local.formulas);
+}else if(local&&Array.isArray(local)){data=local;}
+else{data=[{bales:'1220',type:'2kg',title:'Ajab HBF',formula:'40+45*4+50*20',plate:'KDQ 076M',date:'',dateDisplay:'',time:'',bay:'',invoice:'INV 123'}];}
 show();
 updateSyncStatus();
-if(localStorage.getItem('ghUser')) loadFromGitHub();
+if(localStorage.getItem('ghUser'))loadFromGitHub();
 </script>
 </body>
 </html>
