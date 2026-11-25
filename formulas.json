@@ -1,6 +1,17 @@
 {
   "formulas": [
     {
+      "bales": "710",
+      "type": "2kg",
+      "title": ".",
+      "formula": "51*13+47",
+      "plate": "KDK 091W",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
+    },
+    {
       "bales": "500",
       "type": "1kg",
       "title": ".",
