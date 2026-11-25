@@ -1,6 +1,17 @@
 {
   "formulas": [
     {
+      "bales": "1200",
+      "type": "2kg",
+      "title": ".",
+      "formula": "46*5+56*12+50*5+48",
+      "plate": "KCM 109Y",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
+    },
+    {
       "bales": "1230",
       "type": "2kg",
       "title": ".",
