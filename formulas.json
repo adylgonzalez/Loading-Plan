@@ -278,7 +278,12 @@
       "bales": "1230",
       "type": "2kg",
       "title": "Kdp647q",
-      "formula": "56*5+50*19"
+      "formula": "56*5+50*19",
+      "plate": "KDP 647Q",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
     },
     {
       "bales": "1150",
