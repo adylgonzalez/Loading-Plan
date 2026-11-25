@@ -14,9 +14,13 @@
     {
       "bales": "1150",
       "type": "2kg",
-      "typeLabel": "Wheat / Maize - 2kg Bale (12 bags)",
       "title": "terrius",
-      "formula": "35*3+40*2+50*19+15"
+      "formula": "35*3+40*2+50*19+15",
+      "plate": "KCG 288C",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
     },
     {
       "bales": "1230",
