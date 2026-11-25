@@ -260,7 +260,12 @@
       "bales": "1230",
       "type": "2kg",
       "title": "Kdu993r",
-      "formula": "50*5+49*20"
+      "formula": "50*5+49*20",
+      "plate": "KDU 993R",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
     },
     {
       "bales": "1200",
