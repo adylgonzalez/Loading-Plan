@@ -311,7 +311,12 @@
       "bales": "1200",
       "type": "2kg",
       "title": "Kdm178k",
-      "formula": "40*3+50*20+40*2"
+      "formula": "40*3+50*20+40*2",
+      "plate": "KDM 178K",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
     },
     {
       "bales": "1230",
