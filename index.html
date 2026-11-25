@@ -10,13 +10,13 @@ body{font-family:Arial;padding:0;background:#f2f2f2;margin:0}
 .top p{margin:4px 0 10px;font-size:13px;opacity:0.9}
 .topBtns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
 .topBtns button{width:auto;padding:10px 12px;font-size:12px;border-radius:20px}
-.btnCars{background:#ff9800;color:white}.btnSaved{background:white;color:#0b6e4f}.btnSync{background:#1a5276}.btnAdd{background:#333;color:white}.btnViewCars{background:#2196F3;color:white}
+.btnSaved{background:white;color:#0b6e4f}.btnSync{background:#1a5276}.btnAdd{background:#333;color:white}.btnDate{background:#ff9800;color:white}
 .wrap{padding:12px}
 input,textarea,button,select{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #ccc;font-size:16px;box-sizing:border-box}
 button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointer}
 .card{background:white;padding:14px;border-radius:12px;margin:12px 0;box-shadow:0 1px 5px #ccc}
 .bales{font-size:19px;font-weight:bold;color:#0b6e4f}
-.plate{font-size:22px;font-weight:bold;background:#0b6e4f;color:white;display:inline-block;padding:4px 12px;border-radius:6px;letter-spacing:1px}
+.plate{font-size:18px;font-weight:bold;background:#0b6e4f;color:white;display:inline-block;padding:4px 12px;border-radius:6px;letter-spacing:1px}
 .del{background:#c0392b;margin-top:8px}
 .editBtn{background:#ff9800;margin-top:8px}
 .small{color:#666;font-size:13px}
@@ -27,17 +27,16 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 .closeBtn{background:#eee;color:#333;width:40px;position:absolute;right:10px;top:10px;padding:8px}
 .row{display:flex;gap:8px}.row button{flex:1}
 .settingsRow{display:flex;gap:6px;align-items:center}.settingsRow input{flex:1}.settingsRow button{width:48px}.eye{background:#666}
-.itemBox{border:1px solid #ddd;border-radius:8px;padding:10px;margin:8px 0;background:#fafafa}
 .tag{display:inline-block;background:#fff3cd;padding:3px 8px;border-radius:12px;font-size:12px;font-weight:bold;margin:2px}
-.master{background:#e8f5e9;padding:10px;border-radius:8px;font-weight:bold;margin:8px 0}
 .detail{font-size:14px;line-height:1.6}
-.dateBadge{display:inline-block;background:#ff9800;color:white;padding:4px 10px;border-radius:20px;font-size:13px;font-weight:bold;margin-left:6px}
+.dateBadge{display:inline-block;background:#ff9800;color:white;padding:4px 10px;border-radius:20px;font-size:13px;font-weight:bold}
+.dateBtn{background:#fff3cd;color:#333;border:1px solid #ff9800;text-align:left}
+.dateBtn.active{background:#ff9800;color:white}
 .calcPreview{background:#e8f5e9;padding:10px;border-radius:8px;font-weight:bold;margin:6px 0}
 .calcPreview.bad{background:#fde8e8;color:#c0392b}
-.formulaSelect{background:#fff3cd;border:1px solid #ff9800;font-weight:bold}
-.hint{font-size:12px;color:#666;margin:-2px 0 6px}
-.homeHint{text-align:center;color:#666;font-size:13px;padding:10px}
 .editingBanner{background:#fff3cd;border:1px solid #ff9800;padding:10px;border-radius:8px;font-weight:bold;margin:6px 0;display:none}
+.homeHint{text-align:center;color:#666;font-size:13px;padding:10px}
+.sectionLabel{font-size:12px;font-weight:bold;color:#0b6e4f;margin-top:10px;text-transform:uppercase}
 </style>
 </head>
 <body>
@@ -46,19 +45,18 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 <h2>📦 LOADING PLANS</h2>
 <p>2kg = 12 bags | 1kg = 24 bags | 0.5kg = 24 bags</p>
 <div class="topBtns">
-<button class="btnCars" onclick="openModal('addCarModal')">🚛 + Add Car Loaded</button>
-<button class="btnViewCars" onclick="openModal('carsModal')">🚛 Cars Loaded <span id="carBadgeTop">0</span></button>
-<button class="btnSaved" onclick="openModal('savedModal')">📋 Saved Formulas</button>
-<button class="btnSync" onclick="openModal('syncModal')">☁️ GitHub Sync</button>
 <button class="btnAdd" onclick="openAddFormula()">➕ Add Formula</button>
+<button class="btnSaved" onclick="openModal('savedModal')">📋 Saved Formulas</button>
+<button class="btnDate" onclick="openModal('dateModal')">📅 By Date <span id="dateBadgeTop">0</span></button>
+<button class="btnSync" onclick="openModal('syncModal')">☁️ GitHub Sync</button>
 </div>
 <div id="syncStatus" style="font-size:12px;margin-top:8px;opacity:0.9">Not synced yet</div>
 </div>
 
 <div class="wrap">
 <div class="card">
-<b>🔍 Search Formula / Car</b>
-<input id="search" type="text" placeholder="Search by Plate e.g. KDQ 076M or Bales e.g. 1150" oninput="show()">
+<b>🔍 Search Formula / Plate / Bay / Date</b>
+<input id="search" type="text" placeholder="Search by Plate e.g. KDQ 076M or Bales e.g. 1150 or Bay e.g. Bay 1" oninput="show()">
 <select id="searchType" onchange="show()">
 <option value="">All Types</option>
 <option value="2kg">2kg Only</option>
@@ -73,14 +71,16 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 <button style="background:#eee;color:#333" onclick="clearSearch()">Clear Search X</button>
 </div>
 
-<div class="homeHint">👆 Use Search above, or tap <b>🚛 Cars Loaded</b> / <b>📋 Saved Formulas</b> to view all</div>
+<div class="homeHint">👆 Use Search above, or tap <b>📋 Saved Formulas</b> / <b>📅 By Date</b> to view all</div>
 </div>
 
-<div id="carsModal" class="modal"><div class="modalBox">
-<button class="closeBtn" onclick="closeModal('carsModal')">X</button>
-<h3>🚛 Cars Loaded <span class="badge" id="carBadge">0 cars</span></h3>
-<div id="carList" style="margin-top:10px"></div>
-<button style="background:#ff9800" onclick="closeModal('carsModal'); openModal('addCarModal')">🚛 + Add Car Loaded</button>
+<div id="dateModal" class="modal"><div class="modalBox">
+<button class="closeBtn" onclick="closeModal('dateModal')">X</button>
+<h3>📅 By Date</h3>
+<p class="small">Tap a date to see formulas + cars used on that date</p>
+<input id="dateFilter" type="date" onchange="showDates(this.value)">
+<div id="dateList"></div>
+<div id="dateResults"></div>
 </div></div>
 
 <div id="savedModal" class="modal"><div class="modalBox">
@@ -102,39 +102,26 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 <div id="addModal" class="modal"><div class="modalBox">
 <button class="closeBtn" onclick="closeModal('addModal'); cancelEdit();">X</button>
 <h3 id="addModalTitle">➕ Add New Formula</h3>
-<div id="editingBanner" class="editingBanner">✏️ Editing - changes will update this formula</div>
+<div id="editingBanner" class="editingBanner" style="display:none">✏️ Editing</div>
+<div class="sectionLabel">Formula Details</div>
 <input id="bales" type="number" placeholder="Total Bales e.g. 1150" oninput="previewCalc()">
 <select id="type"><option value="2kg">2kg Bale</option><option value="1kg">1kg Bale</option><option value="0.5kg">0.5kg Bale</option></select>
-<input id="title" placeholder="Formula Name">
+<input id="title" placeholder="Formula Name e.g. Ajab HBF">
 <textarea id="formula" rows="4" placeholder="Write formula e.g. 40+45*4+50*20" oninput="previewCalc()"></textarea>
 <div id="calcPreview" class="calcPreview">Enter bales + formula to check if it adds up</div>
+<div class="sectionLabel">Car / Loading Details</div>
+<input id="plate" placeholder="Number Plate e.g. KDQ 076M">
+<label class="small"><b>Date:</b></label>
+<input id="date" type="date">
+<input id="bay" placeholder="Bay e.g. Bay 1 / Bay 2 / Bay A">
+<input id="invoice" placeholder="Invoice (optional) e.g. INV 123">
 <button id="saveFormulaBtn" onclick="add()">+ SAVE FORMULA</button>
 <button id="cancelEditBtn" style="background:#eee;color:#333;display:none" onclick="cancelEdit()">Cancel Edit - Add as New Instead</button>
 </div></div>
 
-<div id="addCarModal" class="modal"><div class="modalBox">
-<button class="closeBtn" onclick="closeModal('addCarModal')">X</button>
-<h3>🚛 Add Car Loaded</h3>
-<label class="small"><b>Date:</b></label>
-<input id="carDate" type="date">
-<input id="plate" placeholder="1. Number Plate e.g. KDQ 076M">
-<input id="invoice" placeholder="4. Invoice to be given e.g. INV 123">
-<input id="emptyBales" placeholder="5. Empty Bales to be given e.g. 20">
-<input id="seals" placeholder="6. Seals to be given e.g. 4 - Seal No.">
-<hr>
-<p><b>What it's carrying - Add one or more items</b></p>
-<div id="itemsContainer"></div>
-<button style="background:#ff9800" onclick="addItem()">+ Add Another Product (for mixed load)</button>
-<hr>
-<label class="small"><b>Master Loading Plan - pick from saved or type manually:</b></label>
-<select id="masterSelect" class="formulaSelect" onchange="pickMaster()"><option value="">-- Pick Master Formula (or type below) --</option></select>
-<input id="masterFormula" placeholder="Master Loading Plan e.g. 40+45*4+50*20" oninput="updateMasterSelect()">
-<button onclick="saveCar()">🚛 SAVE CAR LOADED</button>
-</div></div>
-
 <script>
-let data=[]; let cars=[]; let fileSha=null; let editingIndex=-1;
-function openModal(id){document.getElementById(id).style.display='block'; if(id=='addCarModal'){ if(document.getElementById('itemsContainer').innerHTML=='') addItem(); let d=document.getElementById('carDate'); if(!d.value) d.value=new Date().toISOString().slice(0,10); updateMasterSelect(); } if(id=='addModal') previewCalc();}
+let data=[]; let fileSha=null; let editingIndex=-1; let selectedDate='';
+function openModal(id){document.getElementById(id).style.display='block'; if(id=='addModal') previewCalc(); if(id=='dateModal') showDates(selectedDate||'');}
 function closeModal(id){document.getElementById(id).style.display='none';}
 function clearSearch(){document.getElementById('search').value=''; document.getElementById('searchType').value=''; show();}
 window.onclick=function(e){if(e.target.classList.contains('modal')) e.target.style.display='none';}
@@ -142,54 +129,10 @@ function toggleToken(){let t=document.getElementById('ghToken'); t.type=t.type==
 function getSettings(){return{user:document.getElementById('ghUser').value.trim()||localStorage.getItem('ghUser')||'',repo:document.getElementById('ghRepo').value.trim()||'Loading-Plan',token:document.getElementById('ghToken').value.trim()||localStorage.getItem('ghToken')||''};}
 function saveSettings(){let s=getSettings(); localStorage.setItem('ghUser',s.user); localStorage.setItem('ghRepo',s.repo); localStorage.setItem('ghToken',s.token); loadFromGitHub(); closeModal('syncModal');}
 function loadSettings(){document.getElementById('ghUser').value=localStorage.getItem('ghUser')||'adylgonzalez'; document.getElementById('ghRepo').value=localStorage.getItem('ghRepo')||'Loading-Plan'; document.getElementById('ghToken').value=localStorage.getItem('ghToken')||'';}
-async function loadFromGitHub(){let s=getSettings(); if(!s.user||!s.token){document.getElementById('syncStatus').innerText='Fill GitHub Sync'; show(); return;} document.getElementById('syncStatus').innerText='Loading...'; try{let res=await fetch(`https://api.github.com/repos/${s.user}/${s.repo}/contents/formulas.json`,{headers:{Authorization:'token '+s.token}}); if(!res.ok) throw new Error('Create formulas.json with []'); let json=await res.json(); fileSha=json.sha; let all=JSON.parse(atob(json.content.replace(/\n/g,''))); if(all.cars){cars=all.cars; data=all.formulas||[];}else{data=all; cars=[];} localStorage.setItem('flourData',JSON.stringify({formulas:data,cars:cars})); document.getElementById('syncStatus').innerText='✅ Synced: '+cars.length+' cars, '+data.length+' formulas'; show(); refreshAllFormulaDropdowns();}catch(e){document.getElementById('syncStatus').innerText='❌ '+e.message; show();}}
-async function syncToGitHub(){let s=getSettings(); if(!s.user||!s.token){alert('Fill GitHub settings');return;} document.getElementById('syncStatus').innerText='Uploading...'; try{let getRes=await fetch(`https://api.github.com/repos/${s.user}/${s.repo}/contents/formulas.json`,{headers:{Authorization:'token '+s.token}}); fileSha=(await getRes.json()).sha; let content=btoa(unescape(encodeURIComponent(JSON.stringify({formulas:data,cars:cars},null,2)))); let res=await fetch(`https://api.github.com/repos/${s.user}/${s.repo}/contents/formulas.json`,{method:'PUT',headers:{Authorization:'token '+s.token},body:JSON.stringify({message:'Update '+new Date().toISOString(),content:content,sha:fileSha})}); if(!res.ok) throw new Error('GitHub rejected'); fileSha=(await res.json()).content.sha; document.getElementById('syncStatus').innerText='✅ Saved to GitHub!';}catch(e){alert(e.message);}}
-function formulasForBales(bales, size){
-  if(!bales) return [];
-  let exact = data.filter(d => d.bales == bales);
-  if(size) { let sameSize = exact.filter(d => d.type == size); if(sameSize.length>0) return sameSize; }
-  return exact;
-}
-function updateFormulaDropdown(box){
-  let bales = box.querySelector('.pBales').value.trim();
-  let size = box.querySelector('.pSize').value;
-  let sel = box.querySelector('.pFormulaSelect');
-  let hint = box.querySelector('.formulaHint');
-  let matches = formulasForBales(bales, size);
-  if(!bales){ sel.innerHTML = '<option value="">-- First enter Number of Bales above --</option>'; hint.innerText = 'Enter bales to see saved formulas'; return; }
-  if(matches.length==0){ sel.innerHTML = '<option value="">-- No saved formula for '+bales+' bales - type manually below --</option>'; hint.innerText = 'No saved formula for '+bales+' bales. Type manually.'; return; }
-  sel.innerHTML = '<option value="">-- Pick saved formula for '+bales+' bales ('+matches.length+' found) --</option>' + matches.map((d,i)=>`<option value="${d.formula.replace(/"/g,'&quot;')}">${d.title} | ${d.type} | ${d.formula}</option>`).join('') + '<option value="__manual__">✏️ Type manually instead...</option>';
-  hint.innerText = 'Found '+matches.length+' formula(s) for '+bales+' bales - pick one or type manually';
-}
-function pickFormula(box){
-  let sel = box.querySelector('.pFormulaSelect');
-  let input = box.querySelector('.pFormula');
-  if(sel.value=='__manual__'){ input.value=''; input.focus(); sel.value=''; return; }
-  if(sel.value){ input.value = sel.value; }
-}
-function refreshAllFormulaDropdowns(){ document.querySelectorAll('.itemBox').forEach(box=>updateFormulaDropdown(box)); updateMasterSelect(); }
-function updateMasterSelect(){
-  let sel = document.getElementById('masterSelect');
-  if(!sel) return;
-  let totalBales = 0; document.querySelectorAll('.pBales').forEach(i=>{ totalBales += parseInt(i.value||0); });
-  let matches = totalBales ? data.filter(d=>d.bales==totalBales) : data;
-  let label = totalBales ? 'Pick Master for total '+totalBales+' bales' : 'Pick Master Formula (all saved)';
-  sel.innerHTML = '<option value="">-- '+label+' ('+matches.length+' found) --</option>' + matches.map(d=>`<option value="${d.formula.replace(/"/g,'&quot;')}">${d.title} | ${d.bales} bales | ${d.formula}</option>`).join('') + '<option value="__manual__">✏️ Type manually instead...</option>';
-}
-function pickMaster(){
-  let sel = document.getElementById('masterSelect');
-  let input = document.getElementById('masterFormula');
-  if(sel.value=='__manual__'){ input.value=''; input.focus(); sel.value=''; return; }
-  if(sel.value){ input.value = sel.value; }
-}
-function addItem(product='',size='2kg',bales='',formula=''){
- let div=document.createElement('div'); div.className='itemBox';
- div.innerHTML=`<input class="pProduct" placeholder="2. What its carrying e.g. Ajab HBF" value="${product}"><select class="pSize" onchange="updateFormulaDropdown(this.closest('.itemBox'))"><option value="2kg" ${size=='2kg'?'selected':''}>2kg</option><option value="1kg" ${size=='1kg'?'selected':''}>1kg</option><option value="0.5kg" ${size=='0.5kg'?'selected':''}>0.5kg</option></select><input class="pBales" type="number" placeholder="3. Number of Bales e.g. 1145" value="${bales}" oninput="updateFormulaDropdown(this.closest('.itemBox')); updateMasterSelect();"><label class="small"><b>7. Formula - Pick from saved OR type manually:</b></label><select class="pFormulaSelect formulaSelect" onchange="pickFormula(this.closest('.itemBox'))"><option value="">-- First enter Number of Bales above --</option></select><div class="hint formulaHint">Enter bales to see saved formulas</div><input class="pFormula" placeholder="7. Formula Used - type manually or pick above" value="${formula}"><button style="background:#c0392b;padding:8px" onclick="this.parentElement.remove(); updateMasterSelect();">Remove this product</button>`;
- document.getElementById('itemsContainer').appendChild(div);
- if(bales) updateFormulaDropdown(div);
-}
+async function loadFromGitHub(){let s=getSettings(); if(!s.user||!s.token){document.getElementById('syncStatus').innerText='Fill GitHub Sync'; show(); return;} document.getElementById('syncStatus').innerText='Loading...'; try{let res=await fetch(`https://api.github.com/repos/${s.user}/${s.repo}/contents/formulas.json`,{headers:{Authorization:'token '+s.token}}); if(!res.ok) throw new Error('Create formulas.json with []'); let json=await res.json(); fileSha=json.sha; let all=JSON.parse(atob(json.content.replace(/\n/g,''))); if(all.formulas){data=all.formulas;} else if(Array.isArray(all)){data=all;} else {data=[];} localStorage.setItem('flourData',JSON.stringify({formulas:data})); document.getElementById('syncStatus').innerText='✅ Synced: '+data.length+' formulas'; show();}catch(e){document.getElementById('syncStatus').innerText='❌ '+e.message; show();}}
+async function syncToGitHub(){let s=getSettings(); if(!s.user||!s.token){alert('Fill GitHub settings');return;} document.getElementById('syncStatus').innerText='Uploading...'; try{let getRes=await fetch(`https://api.github.com/repos/${s.user}/${s.repo}/contents/formulas.json`,{headers:{Authorization:'token '+s.token}}); fileSha=(await getRes.json()).sha; let content=btoa(unescape(encodeURIComponent(JSON.stringify({formulas:data},null,2)))); let res=await fetch(`https://api.github.com/repos/${s.user}/${s.repo}/contents/formulas.json`,{method:'PUT',headers:{Authorization:'token '+s.token},body:JSON.stringify({message:'Update '+new Date().toISOString(),content:content,sha:fileSha})}); if(!res.ok) throw new Error('GitHub rejected'); fileSha=(await res.json()).content.sha; document.getElementById('syncStatus').innerText='✅ Saved to GitHub!';}catch(e){alert(e.message);}}
 function formatDate(d){ if(!d) return ''; try{ let dt=new Date(d+'T00:00:00'); return dt.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}); }catch(e){return d;} }
-function normalizeFormula(str){ return str.toLowerCase().replace(/\s+/g,'').replace(/x/g,'*'); }
+function normalizeFormula(str){ return (str||'').toLowerCase().replace(/\s+/g,'').replace(/x/g,'*'); }
 function calcFormulaTotal(formulaText){
   if(!formulaText) return null;
   let lines = formulaText.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
@@ -221,7 +164,7 @@ function previewCalc(){
   if(Math.abs(total - parseFloat(b)) < 0.01){ box.innerHTML='✅ Formula = '+total+' | Total Bales = '+b+' - MATCHES, will save'; box.className='calcPreview'; }
   else{ box.innerHTML='❌ Formula = '+total+' | Total Bales = '+b+' - DOES NOT MATCH (difference '+(total - parseFloat(b))+') - will NOT save'; box.className='calcPreview bad'; }
 }
-// --- EDIT FORMULA ---
+// --- EDIT / ADD ---
 function openAddFormula(){
   editingIndex = -1;
   document.getElementById('addModalTitle').innerText='➕ Add New Formula';
@@ -229,6 +172,8 @@ function openAddFormula(){
   document.getElementById('saveFormulaBtn').innerText='+ SAVE FORMULA';
   document.getElementById('cancelEditBtn').style.display='none';
   document.getElementById('bales').value=''; document.getElementById('title').value=''; document.getElementById('formula').value='';
+  document.getElementById('plate').value=''; document.getElementById('bay').value=''; document.getElementById('invoice').value='';
+  document.getElementById('date').value=new Date().toISOString().slice(0,10);
   document.getElementById('calcPreview').innerHTML='Enter bales + formula to check if it adds up';
   document.getElementById('calcPreview').className='calcPreview';
   openModal('addModal');
@@ -236,16 +181,20 @@ function openAddFormula(){
 function editFormula(i){
   let d = data[i];
   editingIndex = i;
-  closeModal('savedModal');
+  closeModal('savedModal'); closeModal('dateModal');
   document.getElementById('addModalTitle').innerText='✏️ Edit Formula';
   document.getElementById('editingBanner').style.display='block';
   document.getElementById('editingBanner').innerText='✏️ Editing: ' + d.title + ' - ' + d.bales + ' Bales';
   document.getElementById('saveFormulaBtn').innerText='💾 UPDATE FORMULA';
   document.getElementById('cancelEditBtn').style.display='block';
   document.getElementById('bales').value=d.bales;
-  document.getElementById('type').value=d.type;
+  document.getElementById('type').value=d.type||'2kg';
   document.getElementById('title').value=d.title;
   document.getElementById('formula').value=d.formula;
+  document.getElementById('plate').value=d.plate||'';
+  document.getElementById('date').value=d.date||'';
+  document.getElementById('bay').value=d.bay||'';
+  document.getElementById('invoice').value=d.invoice||'';
   openModal('addModal');
   previewCalc();
 }
@@ -255,89 +204,114 @@ function cancelEdit(){
   document.getElementById('editingBanner').style.display='none';
   document.getElementById('saveFormulaBtn').innerText='+ SAVE FORMULA';
   document.getElementById('cancelEditBtn').style.display='none';
-  document.getElementById('bales').value=''; document.getElementById('title').value=''; document.getElementById('formula').value='';
+  document.getElementById('bales').value=''; document.getElementById('title').value=''; document.getElementById('formula').value=''; document.getElementById('plate').value=''; document.getElementById('bay').value=''; document.getElementById('invoice').value='';
   closeModal('addModal');
-}
-async function saveCar(){
- let plate=document.getElementById('plate').value.trim(); if(!plate){alert('Enter Number Plate');return;}
- let items=[]; document.querySelectorAll('.itemBox').forEach(box=>{ let prod=box.querySelector('.pProduct').value; let sz=box.querySelector('.pSize').value; let bl=box.querySelector('.pBales').value; let fm=box.querySelector('.pFormula').value; if(prod&&bl) items.push({product:prod,size:sz,bales:bl,formula:fm}); });
- if(items.length==0){alert('Add at least one product');return;}
- let carDate=document.getElementById('carDate').value || new Date().toISOString().slice(0,10);
- let car={plate:plate,date:carDate,dateDisplay:formatDate(carDate),invoice:document.getElementById('invoice').value,emptyBales:document.getElementById('emptyBales').value,seals:document.getElementById('seals').value,master:document.getElementById('masterFormula').value,items:items};
- cars.unshift(car); localStorage.setItem('flourData',JSON.stringify({formulas:data,cars:cars})); show(); await syncToGitHub();
- document.getElementById('plate').value=''; document.getElementById('invoice').value=''; document.getElementById('emptyBales').value=''; document.getElementById('seals').value=''; document.getElementById('masterFormula').value=''; document.getElementById('itemsContainer').innerHTML=''; closeModal('addCarModal'); openModal('carsModal');
 }
 async function add(){
   let b=document.getElementById('bales').value.trim();
   let ty=document.getElementById('type').value;
   let t=document.getElementById('title').value.trim();
   let f=document.getElementById('formula').value.trim();
-  if(!b||!t||!f){alert('Fill all');return;}
+  let plate=document.getElementById('plate').value.trim();
+  let date=document.getElementById('date').value;
+  let bay=document.getElementById('bay').value.trim();
+  let invoice=document.getElementById('invoice').value.trim();
+  if(!b||!t||!f){alert('Fill Bales, Title and Formula');return;}
+  if(!plate){alert('Enter Number Plate');return;}
+  if(!date){alert('Pick Date');return;}
+  if(!bay){alert('Enter Bay e.g. Bay 1');return;}
   let total = calcFormulaTotal(f);
   if(total===null){ alert('Could not calculate your formula.\n\nUse numbers like: 40+45*4+50*20'); return; }
   if(Math.abs(total - parseFloat(b)) > 0.01){ alert('❌ WILL NOT SAVE!\n\nFormula adds up to: ' + total + '\nTotal Bales you entered: ' + b + '\nDifference: ' + (total - parseFloat(b))); return; }
   let newNorm = normalizeFormula(f);
-  // Duplicate check - ignore the one we are editing
-  let duplicateIndex = data.findIndex((d,idx) => idx !== editingIndex && normalizeFormula(d.formula) == newNorm);
-  if(duplicateIndex !== -1){ alert('⚠️ Duplicate Formula! This formula already exists:\n\n' + data[duplicateIndex].title + ' - ' + data[duplicateIndex].bales + ' Bales\n' + data[duplicateIndex].formula); return; }
-  if(editingIndex >= 0){
-    data[editingIndex] = {bales:b,type:ty,title:t,formula:f};
-    editingIndex = -1;
-  } else {
-    data.push({bales:b,type:ty,title:t,formula:f});
-  }
-  localStorage.setItem('flourData',JSON.stringify({formulas:data,cars:cars}));
+  let duplicateIndex = data.findIndex((d,idx) => idx !== editingIndex && normalizeFormula(d.formula) == newNorm && d.plate==plate && d.date==date);
+  if(duplicateIndex !== -1){ alert('⚠️ Duplicate! Same formula already exists for this plate + date:\n\n' + data[duplicateIndex].title + ' - ' + data[duplicateIndex].bales + ' Bales\n' + data[duplicateIndex].formula); return; }
+  let entry = {bales:b,type:ty,title:t,formula:f,plate:plate,date:date,dateDisplay:formatDate(date),bay:bay,invoice:invoice};
+  if(editingIndex >= 0){ data[editingIndex] = entry; editingIndex = -1; } else { data.unshift(entry); }
+  localStorage.setItem('flourData',JSON.stringify({formulas:data}));
   show(); await syncToGitHub();
-  document.getElementById('bales').value=''; document.getElementById('title').value=''; document.getElementById('formula').value=''; document.getElementById('calcPreview').innerHTML='Enter bales + formula to check if it adds up';
+  document.getElementById('bales').value=''; document.getElementById('title').value=''; document.getElementById('formula').value=''; document.getElementById('plate').value=''; document.getElementById('bay').value=''; document.getElementById('invoice').value='';
   document.getElementById('addModalTitle').innerText='➕ Add New Formula';
   document.getElementById('editingBanner').style.display='none';
   document.getElementById('saveFormulaBtn').innerText='+ SAVE FORMULA';
   document.getElementById('cancelEditBtn').style.display='none';
   closeModal('addModal');
 }
-function carHtml(c,idx){
- let itemsHtml=c.items.map(i=>`<div class="itemBox"><span class="tag">${i.size}</span> <b>${i.product} - ${i.bales} bales</b><br><span class="small">Individual Plan:</span> <b>${i.formula||' - '}</b></div>`).join('');
- return `<div class="card" style="border:1px solid #eee"><span class="plate">${c.plate}</span> <span class="dateBadge">📅 ${c.dateDisplay||c.date||''}</span><div class="detail"><b>Invoice:</b> ${c.invoice||'-'}<br><b>Empty Bales:</b> ${c.emptyBales||'-'}<br><b>Seals:</b> ${c.seals||'-'}</div>${c.master?`<div class="master">MASTER: ${c.master}</div>`:''}${itemsHtml}<button class="del" onclick="delCar(${idx})">Delete Car</button></div>`;
+// --- BY DATE ---
+function showDates(filterDate){
+  selectedDate = filterDate || selectedDate;
+  // Get unique dates, newest first
+  let dates = [...new Set(data.map(d=>d.date).filter(Boolean))].sort().reverse();
+  document.getElementById('dateBadgeTop').innerText='('+dates.length+')';
+  let html='';
+  if(dates.length==0){ html='<p>No dates yet. Add a formula with a date.</p>'; }
+  else{
+    dates.forEach(dt=>{
+      let count = data.filter(d=>d.date==dt).length;
+      let totalBales = data.filter(d=>d.date==dt).reduce((s,d)=>s+parseInt(d.bales||0),0);
+      let active = (selectedDate==dt) ? 'active' : '';
+      html+=`<button class="dateBtn ${active}" onclick="showDates('${dt}')">📅 ${formatDate(dt)} - ${count} formula(s) - ${totalBales} bales</button>`;
+    });
+  }
+  document.getElementById('dateList').innerHTML=html;
+  let resHtml='';
+  let showDate = filterDate || selectedDate;
+  if(showDate){
+    let items = data.filter(d=>d.date==showDate);
+    if(items.length==0){ resHtml='<p>No formula for '+formatDate(showDate)+'</p>'; }
+    else{
+      resHtml='<h4>📅 '+formatDate(showDate)+' - '+items.length+' formula(s) / car(s)</h4>';
+      // Group by plate - cars used that day
+      let plates = [...new Set(items.map(d=>d.plate))];
+      resHtml+='<p><b>Cars used:</b> '+plates.join(', ')+'</p>';
+      items.forEach(d=>{
+        let idx=data.indexOf(d);
+        resHtml+=formulaCard(d,idx);
+      });
+    }
+  } else {
+    resHtml='<p class="small">Tap a date above to see formulas + cars for that day</p>';
+  }
+  document.getElementById('dateResults').innerHTML=resHtml;
+  // Keep date input in sync
+  let inp=document.getElementById('dateFilter'); if(filterDate && inp.value!=filterDate) inp.value=filterDate;
+}
+function formulaCard(d,idx){
+  return `<div class="card" style="border:1px solid #eee"><div class="bales">${d.bales} BALES - ${d.type}</div><b>${d.title}</b><p style="white-space:pre-wrap">${d.formula}</p><div class="detail"><span class="plate">${d.plate||'-'}</span> <span class="dateBadge">📅 ${d.dateDisplay||d.date||''}</span><br><b>Bay:</b> ${d.bay||'-'}<br><b>Invoice:</b> ${d.invoice||'-'}</div><div class="row"><button class="editBtn" onclick="editFormula(${idx})">✏️ Edit</button><button class="del" onclick="delFormula(${idx})">Delete</button></div></div>`;
 }
 function show(){
  let q=(document.getElementById('search').value||'').toLowerCase().trim(); let qt=document.getElementById('searchType').value;
  document.getElementById('countBadge').innerText=data.length+' saved';
- document.getElementById('carBadge').innerText=cars.length+' cars';
- document.getElementById('carBadgeTop').innerText='('+cars.length+')';
  let fHtml=''; if(data.length==0) fHtml='<p>No formula.</p>';
- data.forEach(d=>{let idx=data.indexOf(d); fHtml+=`<div class="card" style="border:1px solid #eee"><div class="bales">${d.bales} BALES - ${d.type}</div><b>${d.title}</b><p style="white-space:pre-wrap">${d.formula}</p><div class="row"><button class="editBtn" onclick="editFormula(${idx})">✏️ Edit</button><button class="del" onclick="delFormula(${idx})">Delete</button></div></div>`;});
+ data.forEach(d=>{let idx=data.indexOf(d); fHtml+=formulaCard(d,idx);});
  document.getElementById('list').innerHTML=fHtml;
- let filteredC=cars.filter(c=>!q||c.plate.toLowerCase().includes(q)||(c.date&&c.date.includes(q))||(c.dateDisplay&&c.dateDisplay.toLowerCase().includes(q))||c.items.some(i=>i.bales==q||i.product.toLowerCase().includes(q)));
- let cHtml=''; if(filteredC.length==0) cHtml='<p>No car loaded yet. Click 🚛 + Add Car Loaded above.</p>';
- filteredC.forEach(c=>{ cHtml+=carHtml(c,cars.indexOf(c)); });
- document.getElementById('carList').innerHTML=cHtml;
+ showDates(selectedDate);
  if(q||qt){
    document.getElementById('searchResultsCard').style.display='block';
-   let matchedF=data.filter(d=>(!q||d.bales==q||d.title.toLowerCase().includes(q)||d.formula.toLowerCase().includes(q))&&(!qt||d.type==qt));
-   let matchedC=cars.filter(c=>!q||c.plate.toLowerCase().includes(q)||c.items.some(i=>i.bales==q||i.product.toLowerCase().includes(q)));
+   let matchedF=data.filter(d=>(!q||d.bales==q||d.title.toLowerCase().includes(q)||d.formula.toLowerCase().includes(q)||(d.plate||'').toLowerCase().includes(q)||(d.bay||'').toLowerCase().includes(q)||(d.dateDisplay||'').toLowerCase().includes(q)||(d.date||'').includes(q))&&(!qt||d.type==qt));
    let html='';
-   if(matchedF.length>0){ html+='<b>📋 Formulas found: '+matchedF.length+'</b>'; matchedF.forEach(d=>{ let di=data.indexOf(d); html+=`<div style="border:1px solid #ddd;padding:10px;border-radius:8px;margin:6px 0"><div class="bales">${d.bales} BALES - ${d.type}</div><b>${d.title}</b><p style="white-space:pre-wrap">${d.formula}</p><button class="editBtn" onclick="editFormula(${di})">✏️ Edit</button></div>`; }); }
-   if(matchedC.length>0){ html+='<b>🚛 Cars found: '+matchedC.length+'</b>'; matchedC.forEach(c=>{ html+=carHtml(c,cars.indexOf(c)); }); }
-   if(matchedF.length==0 && matchedC.length==0) html='<p>No result for "'+q+'". Try different bales or plate. Check filter - if you selected 2kg Only, a 1kg formula will not show.</p>';
+   if(matchedF.length>0){ html+='<b>📋 Formulas found: '+matchedF.length+'</b>'; matchedF.forEach(d=>{ let di=data.indexOf(d); html+=formulaCard(d,di); }); }
+   if(matchedF.length==0) html='<p>No result for "'+q+'". Try different bales, plate, bay or date.</p>';
    document.getElementById('searchResults').innerHTML=html;
  } else {
    document.getElementById('searchResultsCard').style.display='none';
  }
 }
-async function delFormula(i){if(confirm('Delete formula?')){data.splice(i,1); localStorage.setItem('flourData',JSON.stringify({formulas:data,cars:cars})); show(); await syncToGitHub();}}
-async function delCar(i){if(confirm('Delete this car?')){cars.splice(i,1); localStorage.setItem('flourData',JSON.stringify({formulas:data,cars:cars})); show(); await syncToGitHub();}}
+async function delFormula(i){if(confirm('Delete formula?')){data.splice(i,1); localStorage.setItem('flourData',JSON.stringify({formulas:data})); show(); await syncToGitHub();}}
 loadSettings();
 let local=JSON.parse(localStorage.getItem('flourData')||'null');
-if(local&&local.cars){data=local.formulas||[]; cars=local.cars;}
-else if(local&&Array.isArray(local)){data=local; cars=[];}
-else{data=[{bales:"1150",type:"2kg",title:"1150 Bales",formula:"40+45*4+50*20"}]; cars=[{plate:"KDQ 076M",date:"2026-11-23",dateDisplay:"23 Nov 2026",invoice:"INV 123",emptyBales:"20",seals:"4 seals",master:"40+45*4+50*20",items:[{product:"Ajab HBF",size:"2kg",bales:"1145",formula:"40+45*4+50*18+25"},{product:"Ajab HBF",size:"0.5kg",bales:"150",formula:"25+50"}]}];}
-let seen = new Set();
-data = data.filter(d => {
-  let key = normalizeFormula(d.formula);
-  if(seen.has(key)) return false;
-  seen.add(key);
-  return true;
-});
+if(local&&local.formulas){data=local.formulas;}
+else if(local&&local.cars){ // Migrate old cars -> formulas
+  data=[];
+  local.cars.forEach(c=>{
+    (c.items||[]).forEach(it=>{
+      data.push({bales:it.bales,type:it.size,title:it.product,formula:it.formula||'',plate:c.plate,date:c.date,dateDisplay:c.dateDisplay||formatDate(c.date),bay:'',invoice:c.invoice||''});
+    });
+  });
+  if(local.formulas) data=data.concat(local.formulas);
+}
+else if(local&&Array.isArray(local)){data=local;}
+else{data=[{bales:"1220",type:"2kg",title:"Ajab HBF",formula:"40+45*4+50*20",plate:"KDQ 076M",date:"2026-11-25",dateDisplay:"25 Nov 2026",bay:"Bay 1",invoice:"INV 123"}];}
 show();
 if(localStorage.getItem('ghUser')) loadFromGitHub();
 </script>
