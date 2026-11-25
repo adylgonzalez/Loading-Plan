@@ -37,7 +37,12 @@
       "bales": "2300",
       "type": "0.5kg",
       "title": "GIL",
-      "formula": "90*5+99*18+68"
+      "formula": "90*5+99*18+68",
+      "plate": "KCL 995Y",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
     },
     {
       "bales": "590",
