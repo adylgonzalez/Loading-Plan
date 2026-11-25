@@ -303,7 +303,12 @@
       "bales": "1200",
       "type": "2kg",
       "title": "gil",
-      "formula": "46*5+56*12+50*5+48"
+      "formula": "46*5+56*12+50*5+48",
+      "plate": "KDZ 131W",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
     },
     {
       "bales": "1150",
