@@ -364,7 +364,12 @@
       "bales": "1200",
       "type": "1kg",
       "title": "cus",
-      "formula": "55*20+50*2"
+      "formula": "55*20+50*2",
+      "plate": "KDW 278U",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
     },
     {
       "bales": "1230",
