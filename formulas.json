@@ -508,7 +508,12 @@
       "bales": "1150",
       "type": "1kg",
       "title": "tipper",
-      "formula": "82+83*2+82*11"
+      "formula": "82+83*2+82*11",
+      "plate": "KCC 607S",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
     },
     {
       "bales": "2280",
