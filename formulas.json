@@ -392,7 +392,12 @@
       "bales": "1200",
       "type": "2kg",
       "title": "-",
-      "formula": "50*5+55*10+50*8"
+      "formula": "50*5+55*10+50*8",
+      "plate": "KDJ 932U",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
     },
     {
       "bales": "1200",
