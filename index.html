@@ -19,6 +19,7 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 .plate{font-size:18px;font-weight:bold;background:#0b6e4f;color:white;display:inline-block;padding:4px 12px;border-radius:6px;letter-spacing:1px}
 .del{background:#c0392b;margin-top:8px}
 .editBtn{background:#ff9800;margin-top:8px}
+.dupBtn{background:#6a1b9a;margin-top:8px}
 .small{color:#666;font-size:13px}
 .sync{background:#1a5276}
 .badge{display:inline-block;background:#e8f5e9;color:#0b6e4f;padding:4px 8px;border-radius:20px;font-size:12px;font-weight:bold}
@@ -36,10 +37,13 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 .calcPreview.bad{background:#fde8e8;color:#c0392b}
 .editingBanner{background:#fff3cd;border:1px solid #ff9800;padding:10px;border-radius:8px;font-weight:bold;margin:6px 0;display:none}
 .homeHint{text-align:center;color:#666;font-size:13px;padding:10px}
-.sectionLabel{font-size:12px;font-weight:bold;color:#0b6e4f;margin-top:10px;text-transform:uppercase}
+.sectionLabel{font-size:12px;font-weight:bold;color:#0b6e4f;margin-top:12px;text-transform:uppercase}
 .templatePanel{background:#f0f7f4;border:1px solid #0b6e4f;border-radius:10px;padding:8px;margin:2px 0 8px;max-height:340px;overflow-y:auto}
 .templateBtn{background:white;color:#333;border:1px solid #cce5d9;text-align:left;padding:10px;margin:6px 0;font-weight:normal;line-height:1.35}
 .templateBtn:active{background:#e8f5e9}
+.dateTimeRow{display:flex;gap:8px;align-items:flex-end}
+.dateTimeRow > div{flex:1}
+.dateTimeRow input{margin:4px 0}
 </style>
 </head>
 <body>
@@ -121,19 +125,34 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 <button class="closeBtn" onclick="closeModal('addModal'); cancelEdit();">X</button>
 <h3 id="addModalTitle">➕ Add New Formula</h3>
 <div id="editingBanner" class="editingBanner" style="display:none">✏️ Editing</div>
-<div class="sectionLabel">Formula Details</div>
+
+<div class="sectionLabel">🚚 Number Plate</div>
+<input id="plate" placeholder="Number Plate e.g. KDQ 076M" oninput="renderTemplates()" autocomplete="off">
+<div id="templatePanel" class="templatePanel" style="display:none"></div>
+
+<div class="sectionLabel">📅 Date &amp; Time (optional)</div>
+<div class="dateTimeRow">
+  <div>
+    <label class="small" for="date">Date</label>
+    <input id="date" type="date">
+  </div>
+  <div>
+    <label class="small" for="time">Time</label>
+    <input id="time" type="time">
+  </div>
+</div>
+
+<div class="sectionLabel">📦 Formula Details</div>
 <input id="bales" type="number" placeholder="Total Bales e.g. 1150" oninput="previewCalc()">
 <select id="type" onchange="previewCalc()"><option value="2kg">2kg Bale</option><option value="1kg">1kg Bale</option><option value="0.5kg">0.5kg Bale</option></select>
 <input id="title" placeholder="Formula Name e.g. Ajab HBF">
 <textarea id="formula" rows="4" placeholder="Write formula e.g. 40+45*4+50*20" oninput="previewCalc()"></textarea>
 <div id="calcPreview" class="calcPreview">Enter bales + formula to check if it adds up</div>
-<div class="sectionLabel">Car / Loading Details</div>
-<input id="plate" placeholder="Number Plate e.g. KDQ 076M" oninput="renderTemplates()" autocomplete="off">
-<div id="templatePanel" class="templatePanel" style="display:none"></div>
-<label class="small" for="date"><b>Date (optional):</b></label>
-<input id="date" type="date">
+
+<div class="sectionLabel">📍 Other Details (optional)</div>
 <input id="bay" placeholder="Bay (optional) e.g. Bay 1 / Bay 2">
 <input id="invoice" placeholder="Invoice (optional) e.g. INV 123">
+
 <button id="saveFormulaBtn" onclick="add()">+ SAVE FORMULA</button>
 <button id="cancelEditBtn" style="background:#eee;color:#333;display:none" onclick="cancelEdit()">Cancel Edit - Add as New Instead</button>
 </div></div>
@@ -175,12 +194,23 @@ function todayStr(){
   const d = new Date();
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
+function nowTimeStr(){
+  const d = new Date();
+  return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+}
 function formatDate(d){
   if(!d) return '';
   try{
     const dt = new Date(d + 'T00:00:00');
     return dt.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
   }catch(e){ return d; }
+}
+function sortedForExport(items){
+  return [...items].sort((a, b) => {
+    const da = (a.date || '') + ' ' + (a.time || '');
+    const db = (b.date || '') + ' ' + (b.time || '');
+    return da.localeCompare(db);
+  });
 }
 
 // ---------- state ----------
@@ -482,25 +512,25 @@ function applyTemplate(k){
   document.getElementById('title').value = t.title || '';
   document.getElementById('formula').value = t.formula || '';
   document.getElementById('bay').value = t.bay || '';
-  // intentionally NOT filling invoice (unique per load) or date (should be day of loading)
   previewCalc();
 }
 
-// ---------- add / edit / delete ----------
+// ---------- add / edit / duplicate / delete ----------
 function openAddFormula(){
   editingIndex = -1;
   document.getElementById('addModalTitle').innerText = '➕ Add New Formula';
   document.getElementById('editingBanner').style.display = 'none';
   document.getElementById('saveFormulaBtn').innerText = '+ SAVE FORMULA';
   document.getElementById('cancelEditBtn').style.display = 'none';
+  document.getElementById('plate').value = '';
   document.getElementById('bales').value = '';
   document.getElementById('type').value = '2kg';
   document.getElementById('title').value = '';
   document.getElementById('formula').value = '';
-  document.getElementById('plate').value = '';
   document.getElementById('bay').value = '';
   document.getElementById('invoice').value = '';
-  document.getElementById('date').value = '';
+  document.getElementById('date').value = todayStr();
+  document.getElementById('time').value = nowTimeStr();
   document.getElementById('calcPreview').innerHTML = 'Enter bales + formula to check if it adds up';
   document.getElementById('calcPreview').className = 'calcPreview';
   document.getElementById('templatePanel').style.display = 'none';
@@ -516,14 +546,37 @@ function editFormula(i){
   document.getElementById('editingBanner').innerText = '✏️ Editing: ' + d.title + ' - ' + d.bales + ' Bales';
   document.getElementById('saveFormulaBtn').innerText = '💾 UPDATE FORMULA';
   document.getElementById('cancelEditBtn').style.display = 'block';
+  document.getElementById('plate').value = d.plate || '';
   document.getElementById('bales').value = d.bales;
   document.getElementById('type').value = d.type || '2kg';
   document.getElementById('title').value = d.title;
   document.getElementById('formula').value = d.formula;
-  document.getElementById('plate').value = d.plate || '';
   document.getElementById('date').value = d.date || '';
+  document.getElementById('time').value = d.time || '';
   document.getElementById('bay').value = d.bay || '';
   document.getElementById('invoice').value = d.invoice || '';
+  document.getElementById('templatePanel').style.display = 'none';
+  currentTemplates = [];
+  openModal('addModal');
+  previewCalc();
+}
+function duplicateFormula(i){
+  const d = data[i];
+  editingIndex = -1;
+  closeModal('savedModal'); closeModal('dateModal');
+  document.getElementById('addModalTitle').innerText = '📋 Duplicate Load';
+  document.getElementById('editingBanner').style.display = 'none';
+  document.getElementById('saveFormulaBtn').innerText = '+ SAVE FORMULA';
+  document.getElementById('cancelEditBtn').style.display = 'none';
+  document.getElementById('plate').value = d.plate || '';
+  document.getElementById('bales').value = d.bales || '';
+  document.getElementById('type').value = d.type || '2kg';
+  document.getElementById('title').value = d.title || '';
+  document.getElementById('formula').value = d.formula || '';
+  document.getElementById('bay').value = d.bay || '';
+  document.getElementById('invoice').value = '';
+  document.getElementById('date').value = todayStr();
+  document.getElementById('time').value = nowTimeStr();
   document.getElementById('templatePanel').style.display = 'none';
   currentTemplates = [];
   openModal('addModal');
@@ -535,14 +588,15 @@ function cancelEdit(){
   document.getElementById('editingBanner').style.display = 'none';
   document.getElementById('saveFormulaBtn').innerText = '+ SAVE FORMULA';
   document.getElementById('cancelEditBtn').style.display = 'none';
+  document.getElementById('plate').value = '';
   document.getElementById('bales').value = '';
   document.getElementById('type').value = '2kg';
   document.getElementById('title').value = '';
   document.getElementById('formula').value = '';
-  document.getElementById('plate').value = '';
   document.getElementById('bay').value = '';
   document.getElementById('invoice').value = '';
   document.getElementById('date').value = '';
+  document.getElementById('time').value = '';
   document.getElementById('templatePanel').style.display = 'none';
   currentTemplates = [];
   closeModal('addModal');
@@ -554,6 +608,7 @@ function add(){
   const f = document.getElementById('formula').value.trim();
   const plate = document.getElementById('plate').value.trim();
   const dateVal = document.getElementById('date').value;
+  const timeVal = document.getElementById('time').value;
   const bay = document.getElementById('bay').value.trim();
   const invoice = document.getElementById('invoice').value.trim();
 
@@ -583,6 +638,7 @@ function add(){
   const entry = {
     bales: b, type: ty, title: t, formula: f, plate: plate,
     date: dateVal || '', dateDisplay: dateVal ? formatDate(dateVal) : '',
+    time: timeVal || '',
     bay: bay || '', invoice: invoice
   };
   if(editingIndex >= 0){ data[editingIndex] = entry; editingIndex = -1; }
@@ -591,14 +647,15 @@ function add(){
   localStorage.setItem('flourData', JSON.stringify({formulas: data}));
   markDirty(true);
 
+  document.getElementById('plate').value = '';
   document.getElementById('bales').value = '';
   document.getElementById('type').value = '2kg';
   document.getElementById('title').value = '';
   document.getElementById('formula').value = '';
-  document.getElementById('plate').value = '';
   document.getElementById('bay').value = '';
   document.getElementById('invoice').value = '';
   document.getElementById('date').value = '';
+  document.getElementById('time').value = '';
   document.getElementById('addModalTitle').innerText = '➕ Add New Formula';
   document.getElementById('editingBanner').style.display = 'none';
   document.getElementById('saveFormulaBtn').innerText = '+ SAVE FORMULA';
@@ -622,17 +679,22 @@ function delFormula(i){
 }
 
 // ---------- rendering ----------
-function formulaCard(d, idx){
+function formulaCard(d, idx, withDup){
   const kg = totalKg(d);
   const t = (kg / 1000).toFixed(2);
   const balesNum = (parseInt(d.bales, 10) || 0).toLocaleString();
+  let dateLine = '';
+  if(d.dateDisplay && d.time) dateLine = '📅 ' + d.dateDisplay + ' · ' + d.time;
+  else if(d.dateDisplay) dateLine = '📅 ' + d.dateDisplay;
+  else if(d.time) dateLine = '🕐 ' + d.time;
+  const dupBtn = withDup ? `<button class="dupBtn" onclick="duplicateFormula(${idx})">📋 Duplicate</button>` : '';
   return `<div class="card" style="border:1px solid #eee">
     <div class="bales">${balesNum} BALES · ${esc(d.type || '?')} · ${t} t</div>
     <b>${esc(d.title || '')}</b>
     <p style="white-space:pre-wrap">${esc(d.formula || '')}</p>
     <div class="detail">
       <span class="plate">${esc(d.plate || '-')}</span>
-      ${d.dateDisplay ? `<span class="dateBadge">📅 ${esc(d.dateDisplay)}</span>` : ''}
+      ${dateLine ? `<span class="dateBadge">${esc(dateLine)}</span>` : ''}
       <br><b>Bay:</b> ${esc(d.bay || '-')}
       <br><b>Invoice:</b> ${esc(d.invoice || '-')}
     </div>
@@ -640,6 +702,7 @@ function formulaCard(d, idx){
       <button class="editBtn" onclick="editFormula(${idx})">✏️ Edit</button>
       <button class="del" onclick="delFormula(${idx})">Delete</button>
     </div>
+    ${dupBtn}
   </div>`;
 }
 
@@ -724,7 +787,7 @@ function show(){
     let html = '';
     if(matched.length > 0){
       html += '<b>📋 Formulas found: ' + matched.length + '</b>';
-      matched.forEach(x => { html += formulaCard(x.d, x.i); });
+      matched.forEach(x => { html += formulaCard(x.d, x.i, true); });
     } else {
       html = '<p>No result for "' + esc(q) + '". Try different bales, plate, bay or date.</p>';
     }
@@ -741,11 +804,12 @@ function csvEscape(v){
   return s;
 }
 function toCSV(items){
-  const header = ['Date','Plate','Type','Bales','KgPerBale','TotalKg','Tonnes','Title','Formula','Bay','Invoice'];
+  const header = ['Date','Time','Plate','Type','Bales','KgPerBale','TotalKg','Tonnes','Title','Formula','Bay','Invoice'];
   const rows = items.map(d => {
     const kg = totalKg(d);
     return [
       d.date || '',
+      d.time || '',
       d.plate || '',
       d.type || '',
       parseInt(d.bales, 10) || 0,
@@ -786,19 +850,19 @@ function exportJSON(){
   setExportStatus('✅ Downloaded JSON backup');
 }
 function exportCSVAll(){
-  download('loading-plan-all-' + todayStr() + '.csv', toCSV(data), 'text/csv;charset=utf-8');
+  download('loading-plan-all-' + todayStr() + '.csv', toCSV(sortedForExport(data)), 'text/csv;charset=utf-8');
   setExportStatus('✅ Downloaded all formulas as CSV');
 }
 function exportCSVToday(){
   const t = todayStr();
   const items = data.filter(d => d.date === t);
   if(!items.length){ setExportStatus('⚠️ No formulas dated today (' + formatDate(t) + ')'); return; }
-  download('loading-plan-' + t + '.csv', toCSV(items), 'text/csv;charset=utf-8');
+  download('loading-plan-' + t + '.csv', toCSV(sortedForExport(items)), 'text/csv;charset=utf-8');
   setExportStatus('✅ Downloaded today\'s CSV (' + items.length + ' formula(s))');
 }
 async function copyTodaySummary(){
   const t = todayStr();
-  const items = data.filter(d => d.date === t);
+  const items = sortedForExport(data.filter(d => d.date === t));
   if(!items.length){ setExportStatus('⚠️ No formulas dated today'); return; }
   const lines = ['LOADING SUMMARY — ' + formatDate(t), ''];
   const plates = [...new Set(items.map(d => d.plate).filter(Boolean))];
@@ -807,8 +871,8 @@ async function copyTodaySummary(){
   items.forEach(d => {
     const kg = totalKg(d);
     lines.push(
-      (d.plate || '-') + ' | ' + (d.type || '?') + ' | ' + (parseInt(d.bales, 10) || 0) + ' bales | ' +
-      (kg / 1000).toFixed(2) + ' t | ' + (d.title || '') +
+      (d.time || '--:--') + ' | ' + (d.plate || '-') + ' | ' + (d.type || '?') + ' | ' +
+      (parseInt(d.bales, 10) || 0) + ' bales | ' + (kg / 1000).toFixed(2) + ' t | ' + (d.title || '') +
       (d.bay ? ' | ' + d.bay : '') +
       (d.invoice ? ' | ' + d.invoice : '')
     );
@@ -841,6 +905,7 @@ if(local && local.formulas){
         bales: it.bales, type: it.size, title: it.product,
         formula: it.formula || '', plate: c.plate,
         date: c.date, dateDisplay: c.dateDisplay || formatDate(c.date),
+        time: '',
         bay: '', invoice: c.invoice || ''
       });
     });
@@ -849,7 +914,7 @@ if(local && local.formulas){
 } else if(local && Array.isArray(local)){
   data = local;
 } else {
-  data = [{bales: "1220", type: "2kg", title: "Ajab HBF", formula: "40+45*4+50*20", plate: "KDQ 076M", date: "", dateDisplay: "", bay: "", invoice: "INV 123"}];
+  data = [{bales: "1220", type: "2kg", title: "Ajab HBF", formula: "40+45*4+50*20", plate: "KDQ 076M", date: "", dateDisplay: "", time: "", bay: "", invoice: "INV 123"}];
 }
 
 show();
