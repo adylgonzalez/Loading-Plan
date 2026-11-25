@@ -331,7 +331,12 @@
       "bales": "1250",
       "type": "2kg",
       "title": "-",
-      "formula": "63*10+62*10"
+      "formula": "63*10+62*10",
+      "plate": "KDX 336L",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
     },
     {
       "bales": "1200",
