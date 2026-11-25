@@ -1,6 +1,17 @@
 {
   "formulas": [
     {
+      "bales": "1160",
+      "type": "2kg",
+      "title": ".",
+      "formula": "40*5+60*15+40+20",
+      "plate": "KCL 995Y",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
+    },
+    {
       "bales": "1250",
       "type": "2kg",
       "title": ".",
