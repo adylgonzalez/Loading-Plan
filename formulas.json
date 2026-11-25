@@ -442,7 +442,12 @@
       "bales": "1200",
       "type": "1kg",
       "title": "-",
-      "formula": "53*4+52*19"
+      "formula": "53*4+52*19",
+      "plate": "KCW 002Y",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
     },
     {
       "bales": "1150",
