@@ -77,7 +77,7 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 <div id="dateModal" class="modal"><div class="modalBox">
 <button class="closeBtn" onclick="closeModal('dateModal')">X</button>
 <h3>📅 By Date</h3>
-<p class="small">Tap a date to see formulas + cars used on that date</p>
+<p class="small">Tap a date to see formulas + cars used on that date. Formulas without a date show under "No Date".</p>
 <input id="dateFilter" type="date" onchange="showDates(this.value)">
 <div id="dateList"></div>
 <div id="dateResults"></div>
@@ -111,9 +111,9 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 <div id="calcPreview" class="calcPreview">Enter bales + formula to check if it adds up</div>
 <div class="sectionLabel">Car / Loading Details</div>
 <input id="plate" placeholder="Number Plate e.g. KDQ 076M">
-<label class="small"><b>Date:</b></label>
+<label class="small"><b>Date (optional):</b></label>
 <input id="date" type="date">
-<input id="bay" placeholder="Bay e.g. Bay 1 / Bay 2 / Bay A">
+<input id="bay" placeholder="Bay (optional) e.g. Bay 1 / Bay 2">
 <input id="invoice" placeholder="Invoice (optional) e.g. INV 123">
 <button id="saveFormulaBtn" onclick="add()">+ SAVE FORMULA</button>
 <button id="cancelEditBtn" style="background:#eee;color:#333;display:none" onclick="cancelEdit()">Cancel Edit - Add as New Instead</button>
@@ -164,7 +164,6 @@ function previewCalc(){
   if(Math.abs(total - parseFloat(b)) < 0.01){ box.innerHTML='✅ Formula = '+total+' | Total Bales = '+b+' - MATCHES, will save'; box.className='calcPreview'; }
   else{ box.innerHTML='❌ Formula = '+total+' | Total Bales = '+b+' - DOES NOT MATCH (difference '+(total - parseFloat(b))+') - will NOT save'; box.className='calcPreview bad'; }
 }
-// --- EDIT / ADD ---
 function openAddFormula(){
   editingIndex = -1;
   document.getElementById('addModalTitle').innerText='➕ Add New Formula';
@@ -173,7 +172,7 @@ function openAddFormula(){
   document.getElementById('cancelEditBtn').style.display='none';
   document.getElementById('bales').value=''; document.getElementById('title').value=''; document.getElementById('formula').value='';
   document.getElementById('plate').value=''; document.getElementById('bay').value=''; document.getElementById('invoice').value='';
-  document.getElementById('date').value=new Date().toISOString().slice(0,10);
+  document.getElementById('date').value='';
   document.getElementById('calcPreview').innerHTML='Enter bales + formula to check if it adds up';
   document.getElementById('calcPreview').className='calcPreview';
   openModal('addModal');
@@ -204,7 +203,7 @@ function cancelEdit(){
   document.getElementById('editingBanner').style.display='none';
   document.getElementById('saveFormulaBtn').innerText='+ SAVE FORMULA';
   document.getElementById('cancelEditBtn').style.display='none';
-  document.getElementById('bales').value=''; document.getElementById('title').value=''; document.getElementById('formula').value=''; document.getElementById('plate').value=''; document.getElementById('bay').value=''; document.getElementById('invoice').value='';
+  document.getElementById('bales').value=''; document.getElementById('title').value=''; document.getElementById('formula').value=''; document.getElementById('plate').value=''; document.getElementById('bay').value=''; document.getElementById('invoice').value=''; document.getElementById('date').value='';
   closeModal('addModal');
 }
 async function add(){
@@ -218,33 +217,32 @@ async function add(){
   let invoice=document.getElementById('invoice').value.trim();
   if(!b||!t||!f){alert('Fill Bales, Title and Formula');return;}
   if(!plate){alert('Enter Number Plate');return;}
-  if(!date){alert('Pick Date');return;}
-  if(!bay){alert('Enter Bay e.g. Bay 1');return;}
+  // DATE and BAY are OPTIONAL - no check here
   let total = calcFormulaTotal(f);
   if(total===null){ alert('Could not calculate your formula.\n\nUse numbers like: 40+45*4+50*20'); return; }
   if(Math.abs(total - parseFloat(b)) > 0.01){ alert('❌ WILL NOT SAVE!\n\nFormula adds up to: ' + total + '\nTotal Bales you entered: ' + b + '\nDifference: ' + (total - parseFloat(b))); return; }
   let newNorm = normalizeFormula(f);
-  let duplicateIndex = data.findIndex((d,idx) => idx !== editingIndex && normalizeFormula(d.formula) == newNorm && d.plate==plate && d.date==date);
+  let duplicateIndex = data.findIndex((d,idx) => idx !== editingIndex && normalizeFormula(d.formula) == newNorm && d.plate==plate && (d.date||'')==(date||''));
   if(duplicateIndex !== -1){ alert('⚠️ Duplicate! Same formula already exists for this plate + date:\n\n' + data[duplicateIndex].title + ' - ' + data[duplicateIndex].bales + ' Bales\n' + data[duplicateIndex].formula); return; }
-  let entry = {bales:b,type:ty,title:t,formula:f,plate:plate,date:date,dateDisplay:formatDate(date),bay:bay,invoice:invoice};
+  let entry = {bales:b,type:ty,title:t,formula:f,plate:plate,date:date||'',dateDisplay:date?formatDate(date):'',bay:bay||'',invoice:invoice};
   if(editingIndex >= 0){ data[editingIndex] = entry; editingIndex = -1; } else { data.unshift(entry); }
   localStorage.setItem('flourData',JSON.stringify({formulas:data}));
   show(); await syncToGitHub();
-  document.getElementById('bales').value=''; document.getElementById('title').value=''; document.getElementById('formula').value=''; document.getElementById('plate').value=''; document.getElementById('bay').value=''; document.getElementById('invoice').value='';
+  document.getElementById('bales').value=''; document.getElementById('title').value=''; document.getElementById('formula').value=''; document.getElementById('plate').value=''; document.getElementById('bay').value=''; document.getElementById('invoice').value=''; document.getElementById('date').value='';
   document.getElementById('addModalTitle').innerText='➕ Add New Formula';
   document.getElementById('editingBanner').style.display='none';
   document.getElementById('saveFormulaBtn').innerText='+ SAVE FORMULA';
   document.getElementById('cancelEditBtn').style.display='none';
   closeModal('addModal');
 }
-// --- BY DATE ---
 function showDates(filterDate){
-  selectedDate = filterDate || selectedDate;
-  // Get unique dates, newest first
+  if(filterDate !== undefined && filterDate !== '') selectedDate = filterDate;
+  else if(filterDate === '') selectedDate = '';
   let dates = [...new Set(data.map(d=>d.date).filter(Boolean))].sort().reverse();
-  document.getElementById('dateBadgeTop').innerText='('+dates.length+')';
+  let hasNoDate = data.some(d=>!d.date);
+  document.getElementById('dateBadgeTop').innerText='('+dates.length+(hasNoDate?'+':'')+')';
   let html='';
-  if(dates.length==0){ html='<p>No dates yet. Add a formula with a date.</p>'; }
+  if(dates.length==0 && !hasNoDate){ html='<p>No dates yet. Add a formula with a date, or leave date blank.</p>'; }
   else{
     dates.forEach(dt=>{
       let count = data.filter(d=>d.date==dt).length;
@@ -252,32 +250,34 @@ function showDates(filterDate){
       let active = (selectedDate==dt) ? 'active' : '';
       html+=`<button class="dateBtn ${active}" onclick="showDates('${dt}')">📅 ${formatDate(dt)} - ${count} formula(s) - ${totalBales} bales</button>`;
     });
+    if(hasNoDate){
+      let count = data.filter(d=>!d.date).length;
+      let totalBales = data.filter(d=>!d.date).reduce((s,d)=>s+parseInt(d.bales||0),0);
+      let active = (selectedDate=='__NODATE__') ? 'active' : '';
+      html+=`<button class="dateBtn ${active}" onclick="showDates('__NODATE__')">📅 No Date - ${count} formula(s) - ${totalBales} bales</button>`;
+    }
   }
   document.getElementById('dateList').innerHTML=html;
   let resHtml='';
-  let showDate = filterDate || selectedDate;
+  let showDate = selectedDate;
   if(showDate){
-    let items = data.filter(d=>d.date==showDate);
-    if(items.length==0){ resHtml='<p>No formula for '+formatDate(showDate)+'</p>'; }
+    let items = showDate=='__NODATE__' ? data.filter(d=>!d.date) : data.filter(d=>d.date==showDate);
+    if(items.length==0){ resHtml='<p>No formula for this date</p>'; }
     else{
-      resHtml='<h4>📅 '+formatDate(showDate)+' - '+items.length+' formula(s) / car(s)</h4>';
-      // Group by plate - cars used that day
-      let plates = [...new Set(items.map(d=>d.plate))];
-      resHtml+='<p><b>Cars used:</b> '+plates.join(', ')+'</p>';
-      items.forEach(d=>{
-        let idx=data.indexOf(d);
-        resHtml+=formulaCard(d,idx);
-      });
+      let title = showDate=='__NODATE__' ? 'No Date' : formatDate(showDate);
+      resHtml='<h4>📅 '+title+' - '+items.length+' formula(s) / car(s)</h4>';
+      let plates = [...new Set(items.map(d=>d.plate).filter(Boolean))];
+      if(plates.length) resHtml+='<p><b>Cars used:</b> '+plates.join(', ')+'</p>';
+      items.forEach(d=>{ let idx=data.indexOf(d); resHtml+=formulaCard(d,idx); });
     }
   } else {
     resHtml='<p class="small">Tap a date above to see formulas + cars for that day</p>';
   }
   document.getElementById('dateResults').innerHTML=resHtml;
-  // Keep date input in sync
-  let inp=document.getElementById('dateFilter'); if(filterDate && inp.value!=filterDate) inp.value=filterDate;
+  let inp=document.getElementById('dateFilter'); if(selectedDate && selectedDate!='__NODATE__' && inp.value!=selectedDate) inp.value=selectedDate; if(selectedDate=='') inp.value='';
 }
 function formulaCard(d,idx){
-  return `<div class="card" style="border:1px solid #eee"><div class="bales">${d.bales} BALES - ${d.type}</div><b>${d.title}</b><p style="white-space:pre-wrap">${d.formula}</p><div class="detail"><span class="plate">${d.plate||'-'}</span> <span class="dateBadge">📅 ${d.dateDisplay||d.date||''}</span><br><b>Bay:</b> ${d.bay||'-'}<br><b>Invoice:</b> ${d.invoice||'-'}</div><div class="row"><button class="editBtn" onclick="editFormula(${idx})">✏️ Edit</button><button class="del" onclick="delFormula(${idx})">Delete</button></div></div>`;
+  return `<div class="card" style="border:1px solid #eee"><div class="bales">${d.bales} BALES - ${d.type}</div><b>${d.title}</b><p style="white-space:pre-wrap">${d.formula}</p><div class="detail"><span class="plate">${d.plate||'-'}</span> ${d.dateDisplay?`<span class="dateBadge">📅 ${d.dateDisplay}</span>`:''}<br><b>Bay:</b> ${d.bay||'-'}<br><b>Invoice:</b> ${d.invoice||'-'}</div><div class="row"><button class="editBtn" onclick="editFormula(${idx})">✏️ Edit</button><button class="del" onclick="delFormula(${idx})">Delete</button></div></div>`;
 }
 function show(){
  let q=(document.getElementById('search').value||'').toLowerCase().trim(); let qt=document.getElementById('searchType').value;
@@ -301,7 +301,7 @@ async function delFormula(i){if(confirm('Delete formula?')){data.splice(i,1); lo
 loadSettings();
 let local=JSON.parse(localStorage.getItem('flourData')||'null');
 if(local&&local.formulas){data=local.formulas;}
-else if(local&&local.cars){ // Migrate old cars -> formulas
+else if(local&&local.cars){
   data=[];
   local.cars.forEach(c=>{
     (c.items||[]).forEach(it=>{
@@ -311,7 +311,7 @@ else if(local&&local.cars){ // Migrate old cars -> formulas
   if(local.formulas) data=data.concat(local.formulas);
 }
 else if(local&&Array.isArray(local)){data=local;}
-else{data=[{bales:"1220",type:"2kg",title:"Ajab HBF",formula:"40+45*4+50*20",plate:"KDQ 076M",date:"2026-11-25",dateDisplay:"25 Nov 2026",bay:"Bay 1",invoice:"INV 123"}];}
+else{data=[{bales:"1220",type:"2kg",title:"Ajab HBF",formula:"40+45*4+50*20",plate:"KDQ 076M",date:"",dateDisplay:"",bay:"",invoice:"INV 123"}];}
 show();
 if(localStorage.getItem('ghUser')) loadFromGitHub();
 </script>
