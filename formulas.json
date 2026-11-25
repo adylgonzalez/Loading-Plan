@@ -361,7 +361,12 @@
       "bales": "1150",
       "type": "2kg",
       "title": "Kcj793a",
-      "formula": "48*22+47*2"
+      "formula": "48*22+47*2",
+      "plate": "KCJ 793A",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
     },
     {
       "bales": "1150",
