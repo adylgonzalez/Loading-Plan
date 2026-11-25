@@ -1,6 +1,17 @@
 {
   "formulas": [
     {
+      "bales": "500",
+      "type": "1kg",
+      "title": ".",
+      "formula": "50+45*10",
+      "plate": "KDW 390S",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
+    },
+    {
       "bales": "1230",
       "type": "2kg",
       "title": ".",
