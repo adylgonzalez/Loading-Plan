@@ -558,7 +558,12 @@
       "bales": "1250",
       "type": "2kg",
       "title": "Kdw131p",
-      "formula": "55*8+54*15"
+      "formula": "55*8+54*15",
+      "plate": "KDW 131P",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
     },
     {
       "bales": "1150",
