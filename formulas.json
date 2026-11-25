@@ -1,6 +1,17 @@
 {
   "formulas": [
     {
+      "bales": "1150",
+      "type": "2kg",
+      "title": ".",
+      "formula": "44*4+48*16+54*3+44",
+      "plate": "KBX 393D",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
+    },
+    {
       "bales": "1230",
       "type": "2kg",
       "title": "T",
