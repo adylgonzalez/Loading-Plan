@@ -26,7 +26,12 @@
       "bales": "1230",
       "type": "2kg",
       "title": "flat",
-      "formula": "68*15+70*3"
+      "formula": "68*15+70*3",
+      "plate": "KDU 331B",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
     },
     {
       "bales": "2300",
