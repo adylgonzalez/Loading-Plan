@@ -1,6 +1,17 @@
 {
   "formulas": [
     {
+      "bales": "1120",
+      "type": "2kg",
+      "title": "GIL",
+      "formula": "46*5+56*12+50*4+18",
+      "plate": "KCL 998Y",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
+    },
+    {
       "bales": "500",
       "type": "1kg",
       "title": "10 wheeler",
