@@ -1,6 +1,17 @@
 {
   "formulas": [
     {
+      "bales": "710",
+      "type": "2kg",
+      "title": ".",
+      "formula": "50*12+55*2",
+      "plate": "KCJ 579X",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
+    },
+    {
       "bales": "1150",
       "type": "1kg",
       "title": ".",
