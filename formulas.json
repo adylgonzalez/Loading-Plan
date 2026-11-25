@@ -87,7 +87,12 @@
       "bales": "1230",
       "type": "2kg",
       "title": "full KCV398A",
-      "formula": "40*5+52*10+51*10"
+      "formula": "40*5+52*10+51*10",
+      "plate": "KCV 398A",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
     },
     {
       "bales": "1230",
