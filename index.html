@@ -7,15 +7,15 @@
 body{font-family:Arial;padding:0;background:#f2f2f2;margin:0}
 .top{background:#0b6e4f;color:white;padding:14px 12px;text-align:center;position:sticky;top:0;z-index:10}
 .top h2{margin:0;font-size:24px;letter-spacing:1px}
-.top p{margin:4px 0 10px;font-size:13px;opacity:0.9}
+.top p{margin:4px 0 10px;font-size:12px;opacity:0.9;line-height:1.5}
 .topBtns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
 .topBtns button{width:auto;padding:10px 12px;font-size:12px;border-radius:20px}
-.btnSaved{background:white;color:#0b6e4f}.btnSync{background:#1a5276}.btnAdd{background:#333;color:white}.btnDate{background:#ff9800;color:white}
+.btnSaved{background:white;color:#0b6e4f}.btnSync{background:#1a5276}.btnAdd{background:#333;color:white}.btnDate{background:#ff9800;color:white}.btnExport{background:#6a1b9a;color:white}
 .wrap{padding:12px}
 input,textarea,button,select{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #ccc;font-size:16px;box-sizing:border-box}
 button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointer}
 .card{background:white;padding:14px;border-radius:12px;margin:12px 0;box-shadow:0 1px 5px #ccc}
-.bales{font-size:19px;font-weight:bold;color:#0b6e4f}
+.bales{font-size:17px;font-weight:bold;color:#0b6e4f}
 .plate{font-size:18px;font-weight:bold;background:#0b6e4f;color:white;display:inline-block;padding:4px 12px;border-radius:6px;letter-spacing:1px}
 .del{background:#c0392b;margin-top:8px}
 .editBtn{background:#ff9800;margin-top:8px}
@@ -43,11 +43,12 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 
 <div class="top">
 <h2>📦 LOADING PLANS</h2>
-<p>2kg = 12 bags | 1kg = 24 bags | 0.5kg = 24 bags</p>
+<p>2kg = 12 bags (24kg) · 1kg = 24 bags (24kg) · 0.5kg = 24 bags (12kg)</p>
 <div class="topBtns">
 <button class="btnAdd" onclick="openAddFormula()">➕ Add Formula</button>
 <button class="btnSaved" onclick="openModal('savedModal')">📋 Saved Formulas</button>
 <button class="btnDate" onclick="openModal('dateModal')">📅 By Date <span id="dateBadgeTop">0</span></button>
+<button class="btnExport" onclick="openModal('exportModal')">📤 Export</button>
 <button class="btnSync" onclick="openModal('syncModal')">☁️ GitHub Sync</button>
 </div>
 <div id="syncStatus" style="font-size:12px;margin-top:8px;opacity:0.9">Not synced yet</div>
@@ -89,14 +90,28 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 <div id="list"></div>
 </div></div>
 
+<div id="exportModal" class="modal"><div class="modalBox">
+<button class="closeBtn" onclick="closeModal('exportModal')">X</button>
+<h3>📤 Export Data</h3>
+<p class="small">Backups are your safety net — save one at the end of each shift.</p>
+<div id="exportInfo" class="small" style="margin-bottom:8px"></div>
+<button onclick="exportJSON()">💾 Download Backup (JSON)</button>
+<button onclick="exportCSVAll()" style="background:#1a5276">📊 Download All as CSV (Excel)</button>
+<button onclick="exportCSVToday()" style="background:#0b6e4f">📅 Download Today's CSV</button>
+<button onclick="copyTodaySummary()" style="background:#ff9800">📋 Copy Today's Summary</button>
+<div id="exportStatus" class="small" style="margin-top:8px;color:#0b6e4f"></div>
+</div></div>
+
 <div id="syncModal" class="modal"><div class="modalBox">
 <button class="closeBtn" onclick="closeModal('syncModal')">X</button>
 <h3>☁️ GitHub Sync</h3>
 <p class="small">Token hidden •••••• Saved only in this browser</p>
 <input id="ghUser" value="adylgonzalez">
 <input id="ghRepo" value="Loading-Plan">
-<div class="settingsRow"><input id="ghToken" type="password" placeholder="GitHub Token ghp_..."><button class="eye" onclick="toggleToken()">👁️</button></div>
-<div class="row"><button class="sync" onclick="saveSettings()">SAVE & SYNC</button><button class="sync" onclick="syncToGitHub()">SYNC NOW</button></div>
+<div class="settingsRow"><input id="ghToken" type="password" placeholder="GitHub Token ghp_..."><button class="eye" onclick="toggleToken()" aria-label="Show or hide token">👁️</button></div>
+<button class="sync" onclick="saveOnly()">💾 SAVE SETTINGS</button>
+<div class="row"><button class="sync" onclick="pullFromGH()">⬇️ PULL</button><button class="sync" onclick="pushToGH()">⬆️ PUSH</button></div>
+<p class="small">PULL downloads formulas from GitHub. PUSH uploads local formulas to GitHub.</p>
 </div></div>
 
 <div id="addModal" class="modal"><div class="modalBox">
@@ -105,13 +120,13 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 <div id="editingBanner" class="editingBanner" style="display:none">✏️ Editing</div>
 <div class="sectionLabel">Formula Details</div>
 <input id="bales" type="number" placeholder="Total Bales e.g. 1150" oninput="previewCalc()">
-<select id="type"><option value="2kg">2kg Bale</option><option value="1kg">1kg Bale</option><option value="0.5kg">0.5kg Bale</option></select>
+<select id="type" onchange="previewCalc()"><option value="2kg">2kg Bale</option><option value="1kg">1kg Bale</option><option value="0.5kg">0.5kg Bale</option></select>
 <input id="title" placeholder="Formula Name e.g. Ajab HBF">
 <textarea id="formula" rows="4" placeholder="Write formula e.g. 40+45*4+50*20" oninput="previewCalc()"></textarea>
 <div id="calcPreview" class="calcPreview">Enter bales + formula to check if it adds up</div>
 <div class="sectionLabel">Car / Loading Details</div>
 <input id="plate" placeholder="Number Plate e.g. KDQ 076M">
-<label class="small"><b>Date (optional):</b></label>
+<label class="small" for="date"><b>Date (optional):</b></label>
 <input id="date" type="date">
 <input id="bay" placeholder="Bay (optional) e.g. Bay 1 / Bay 2">
 <input id="invoice" placeholder="Invoice (optional) e.g. INV 123">
@@ -120,199 +135,645 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 </div></div>
 
 <script>
-let data=[]; let fileSha=null; let editingIndex=-1; let selectedDate='';
-function openModal(id){document.getElementById(id).style.display='block'; if(id=='addModal') previewCalc(); if(id=='dateModal') showDates(selectedDate||'');}
-function closeModal(id){document.getElementById(id).style.display='none';}
-function clearSearch(){document.getElementById('search').value=''; document.getElementById('searchType').value=''; show();}
-window.onclick=function(e){if(e.target.classList.contains('modal')) e.target.style.display='none';}
-function toggleToken(){let t=document.getElementById('ghToken'); t.type=t.type==='password'?'text':'password';}
-function getSettings(){return{user:document.getElementById('ghUser').value.trim()||localStorage.getItem('ghUser')||'',repo:document.getElementById('ghRepo').value.trim()||'Loading-Plan',token:document.getElementById('ghToken').value.trim()||localStorage.getItem('ghToken')||''};}
-function saveSettings(){let s=getSettings(); localStorage.setItem('ghUser',s.user); localStorage.setItem('ghRepo',s.repo); localStorage.setItem('ghToken',s.token); loadFromGitHub(); closeModal('syncModal');}
-function loadSettings(){document.getElementById('ghUser').value=localStorage.getItem('ghUser')||'adylgonzalez'; document.getElementById('ghRepo').value=localStorage.getItem('ghRepo')||'Loading-Plan'; document.getElementById('ghToken').value=localStorage.getItem('ghToken')||'';}
-async function loadFromGitHub(){let s=getSettings(); if(!s.user||!s.token){document.getElementById('syncStatus').innerText='Fill GitHub Sync'; show(); return;} document.getElementById('syncStatus').innerText='Loading...'; try{let res=await fetch(`https://api.github.com/repos/${s.user}/${s.repo}/contents/formulas.json`,{headers:{Authorization:'token '+s.token}}); if(!res.ok) throw new Error('Create formulas.json with []'); let json=await res.json(); fileSha=json.sha; let all=JSON.parse(atob(json.content.replace(/\n/g,''))); if(all.formulas){data=all.formulas;} else if(Array.isArray(all)){data=all;} else {data=[];} localStorage.setItem('flourData',JSON.stringify({formulas:data})); document.getElementById('syncStatus').innerText='✅ Synced: '+data.length+' formulas'; show();}catch(e){document.getElementById('syncStatus').innerText='❌ '+e.message; show();}}
-async function syncToGitHub(){let s=getSettings(); if(!s.user||!s.token){alert('Fill GitHub settings');return;} document.getElementById('syncStatus').innerText='Uploading...'; try{let getRes=await fetch(`https://api.github.com/repos/${s.user}/${s.repo}/contents/formulas.json`,{headers:{Authorization:'token '+s.token}}); fileSha=(await getRes.json()).sha; let content=btoa(unescape(encodeURIComponent(JSON.stringify({formulas:data},null,2)))); let res=await fetch(`https://api.github.com/repos/${s.user}/${s.repo}/contents/formulas.json`,{method:'PUT',headers:{Authorization:'token '+s.token},body:JSON.stringify({message:'Update '+new Date().toISOString(),content:content,sha:fileSha})}); if(!res.ok) throw new Error('GitHub rejected'); fileSha=(await res.json()).content.sha; document.getElementById('syncStatus').innerText='✅ Saved to GitHub!';}catch(e){alert(e.message);}}
-function formatDate(d){ if(!d) return ''; try{ let dt=new Date(d+'T00:00:00'); return dt.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}); }catch(e){return d;} }
-function normalizeFormula(str){ return (str||'').toLowerCase().replace(/\s+/g,'').replace(/x/g,'*'); }
+// ---------- helpers ----------
+const KG_PER_BALE = {'2kg':24, '1kg':24, '0.5kg':12};
+
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function totalKg(d){
+  const bags = parseInt(d.bales, 10) || 0;
+  return bags * (KG_PER_BALE[d.type] || 0);
+}
+function dateSummaryLine(items){
+  const byType = {};
+  items.forEach(d => {
+    const t = d.type || '?';
+    byType[t] = (byType[t] || 0) + (parseInt(d.bales, 10) || 0);
+  });
+  const kg = items.reduce((s, d) => s + totalKg(d), 0);
+  const parts = Object.keys(byType).map(t => byType[t].toLocaleString() + ' × ' + t);
+  return parts.join(' + ') + ' = ' + (kg / 1000).toFixed(2) + ' t';
+}
+function b64ToUtf8(b64){
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for(let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder('utf-8').decode(bytes);
+}
+function utf8ToB64(str){
+  const bytes = new TextEncoder().encode(str);
+  let bin = '';
+  for(let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin);
+}
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function formatDate(d){
+  if(!d) return '';
+  try{
+    const dt = new Date(d + 'T00:00:00');
+    return dt.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
+  }catch(e){ return d; }
+}
+
+// ---------- state ----------
+let data = [];
+let fileSha = null;
+let editingIndex = -1;
+let selectedDate = '';
+let dirty = localStorage.getItem('flourDirty') === '1';
+let syncing = false;
+let syncTimer = null;
+
+// ---------- modals ----------
+function openModal(id){
+  document.getElementById(id).style.display = 'block';
+  if(id == 'addModal') previewCalc();
+  if(id == 'dateModal') showDates(selectedDate || '');
+  if(id == 'exportModal') updateExportInfo();
+}
+function closeModal(id){ document.getElementById(id).style.display = 'none'; }
+function clearSearch(){
+  document.getElementById('search').value = '';
+  document.getElementById('searchType').value = '';
+  show();
+}
+window.onclick = function(e){ if(e.target.classList.contains('modal')) e.target.style.display = 'none'; };
+function toggleToken(){
+  const t = document.getElementById('ghToken');
+  t.type = t.type === 'password' ? 'text' : 'password';
+}
+
+// ---------- settings / sync ----------
+function getSettings(){
+  return {
+    user: localStorage.getItem('ghUser') || '',
+    repo: localStorage.getItem('ghRepo') || 'Loading-Plan',
+    token: localStorage.getItem('ghToken') || ''
+  };
+}
+function saveSettingsToStorage(){
+  localStorage.setItem('ghUser', document.getElementById('ghUser').value.trim());
+  localStorage.setItem('ghRepo', document.getElementById('ghRepo').value.trim() || 'Loading-Plan');
+  localStorage.setItem('ghToken', document.getElementById('ghToken').value.trim());
+  updateSyncStatus();
+}
+function loadSettings(){
+  document.getElementById('ghUser').value = localStorage.getItem('ghUser') || 'adylgonzalez';
+  document.getElementById('ghRepo').value = localStorage.getItem('ghRepo') || 'Loading-Plan';
+  document.getElementById('ghToken').value = localStorage.getItem('ghToken') || '';
+}
+function markDirty(v){
+  dirty = !!v;
+  localStorage.setItem('flourDirty', dirty ? '1' : '0');
+}
+function updateSyncStatus(){
+  if(syncing) return;
+  const el = document.getElementById('syncStatus');
+  const btn = document.querySelector('.btnSync');
+  const s = getSettings();
+  if(!s.user || !s.token){
+    el.innerText = '⚠️ GitHub not set up — data saved on this device only';
+    if(btn) btn.style.background = '#666';
+    return;
+  }
+  if(dirty){
+    el.innerText = '⚠️ Unsynced changes — tap ☁️ GitHub Sync → PUSH';
+    if(btn) btn.style.background = '#c0392b';
+    return;
+  }
+  el.innerText = '✅ Synced — ' + data.length + ' formula(s)';
+  if(btn) btn.style.background = '#1a5276';
+}
+async function loadFromGitHub(){
+  const s = getSettings();
+  if(!s.user || !s.token){ updateSyncStatus(); show(); return; }
+  const status = document.getElementById('syncStatus');
+  syncing = true;
+  status.innerText = '🔄 Loading from GitHub...';
+  try{
+    const res = await fetch('https://api.github.com/repos/' + s.user + '/' + s.repo + '/contents/formulas.json', {
+      headers: { Authorization: 'Bearer ' + s.token }
+    });
+    if(res.status === 404){
+      fileSha = null;
+      syncing = false;
+      if(data.length){
+        markDirty(true);
+        status.innerText = '⚠️ GitHub file not found — tap SYNC NOW to upload your ' + data.length + ' formula(s)';
+      } else {
+        updateSyncStatus();
+      }
+      show();
+      return;
+    }
+    if(!res.ok) throw new Error('Load failed (' + res.status + ')');
+    const json = await res.json();
+    fileSha = json.sha;
+    const all = JSON.parse(b64ToUtf8(json.content.replace(/\n/g, '')));
+    const remote = all.formulas || (Array.isArray(all) ? all : []);
+    syncing = false;
+    if(dirty){
+      status.innerText = '⚠️ Unsynced local changes — remote has ' + remote.length + '. Tap SYNC NOW to push.';
+      show();
+      return;
+    }
+    if(remote.length === 0 && data.length > 0){
+      markDirty(true);
+      status.innerText = '⚠️ GitHub is empty — tap SYNC NOW to upload your ' + data.length + ' formula(s)';
+      show();
+      return;
+    }
+    data = remote;
+    localStorage.setItem('flourData', JSON.stringify({formulas: data}));
+    updateSyncStatus();
+    show();
+  }catch(e){
+    syncing = false;
+    status.innerText = '❌ ' + e.message;
+    show();
+  }
+}
+async function syncToGitHub(){
+  const s = getSettings();
+  const status = document.getElementById('syncStatus');
+  if(!s.user || !s.token){
+    updateSyncStatus();
+    return;
+  }
+  if(syncing){ status.innerText = '🔄 Sync already running...'; return; }
+  syncing = true;
+  status.innerText = '🔄 Uploading...';
+  try{
+    const getRes = await fetch('https://api.github.com/repos/' + s.user + '/' + s.repo + '/contents/formulas.json', {
+      headers: { Authorization: 'Bearer ' + s.token }
+    });
+    if(getRes.ok){
+      const g = await getRes.json();
+      fileSha = g.sha;
+    } else if(getRes.status === 404){
+      fileSha = null;
+    } else {
+      throw new Error('GitHub read failed (' + getRes.status + ')');
+    }
+    const content = utf8ToB64(JSON.stringify({formulas: data}, null, 2));
+    const body = { message: 'Update ' + new Date().toISOString(), content: content };
+    if(fileSha) body.sha = fileSha;
+    const res = await fetch('https://api.github.com/repos/' + s.user + '/' + s.repo + '/contents/formulas.json', {
+      method: 'PUT',
+      headers: { Authorization: 'Bearer ' + s.token, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if(!res.ok){
+      const errText = await res.text();
+      throw new Error('GitHub rejected (' + res.status + ') ' + errText.slice(0, 80));
+    }
+    const out = await res.json();
+    fileSha = out.content.sha;
+    markDirty(false);
+    syncing = false;
+    updateSyncStatus();
+  }catch(e){
+    syncing = false;
+    status.innerText = '❌ Sync failed: ' + e.message;
+  }
+}
+function scheduleSync(){
+  clearTimeout(syncTimer);
+  const s = getSettings();
+  if(!s.user || !s.token) return;
+  syncTimer = setTimeout(() => syncToGitHub(), 1000);
+}
+function saveOnly(){
+  saveSettingsToStorage();
+  closeModal('syncModal');
+}
+function pullFromGH(){
+  saveSettingsToStorage();
+  loadFromGitHub();
+}
+function pushToGH(){
+  saveSettingsToStorage();
+  syncToGitHub();
+}
+
+// ---------- formula engine ----------
+function normalizeFormula(str){
+  return (str || '').toLowerCase().replace(/\s+/g, '').replace(/x/g, '*');
+}
 function calcFormulaTotal(formulaText){
   if(!formulaText) return null;
-  let lines = formulaText.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
-  if(lines.length==0) return null;
-  let total = 0; let validLines = 0;
+  const lines = formulaText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  if(lines.length == 0) return null;
+  let total = 0;
+  let validLines = 0;
   for(let line of lines){
     let expr = line.split('=')[0];
-    expr = expr.toLowerCase().replace(/x/g,'*').replace(/[^0-9+\-*/().]/g,'');
+    expr = expr.toLowerCase().replace(/x/g, '*').replace(/[^0-9+\-*/().]/g, '');
     if(!expr || !/[0-9]/.test(expr)) continue;
     if(!/^[0-9+\-*/().\s]+$/.test(expr)) continue;
-    try{ let val = Function('"use strict"; return ('+expr+')')(); if(typeof val === 'number' && isFinite(val)){ total += val; validLines++; } }catch(e){ return null; }
+    try{
+      const val = Function('"use strict"; return (' + expr + ')')();
+      if(typeof val === 'number' && isFinite(val)){ total += val; validLines++; }
+    }catch(e){ return null; }
   }
-  if(validLines==0) return null;
-  let last = lines[lines.length-1].split('=')[0].trim().toLowerCase().replace(/x/g,'*').replace(/[^0-9+\-*/().]/g,'');
-  if(lines.length>1 && /^[0-9]+$/.test(last)){
-    let lastVal = parseFloat(last); let sumPrev = 0;
-    for(let i=0;i<lines.length-1;i++){ let e = lines[i].split('=')[0].toLowerCase().replace(/x/g,'*').replace(/[^0-9+\-*/().]/g,''); if(!e) continue; try{ sumPrev += Function('"use strict"; return ('+e+')')(); }catch(e){} }
+  if(validLines == 0) return null;
+  const last = lines[lines.length - 1].split('=')[0].trim().toLowerCase().replace(/x/g, '*').replace(/[^0-9+\-*/().]/g, '');
+  if(lines.length > 1 && /^[0-9]+$/.test(last)){
+    const lastVal = parseFloat(last);
+    let sumPrev = 0;
+    for(let i = 0; i < lines.length - 1; i++){
+      const e = lines[i].split('=')[0].toLowerCase().replace(/x/g, '*').replace(/[^0-9+\-*/().]/g, '');
+      if(!e) continue;
+      try{ sumPrev += Function('"use strict"; return (' + e + ')')(); }catch(err){}
+    }
     if(Math.abs(sumPrev - lastVal) < 0.01) return lastVal;
   }
   return total;
 }
 function previewCalc(){
-  let b = document.getElementById('bales').value;
-  let f = document.getElementById('formula').value;
-  let box = document.getElementById('calcPreview');
-  if(!b || !f){ box.innerHTML='Enter bales + formula to check if it adds up'; box.className='calcPreview'; return; }
-  let total = calcFormulaTotal(f);
-  if(total===null){ box.innerHTML='Could not calculate - use numbers like 40+45*4+50*20'; box.className='calcPreview bad'; return; }
-  if(Math.abs(total - parseFloat(b)) < 0.01){ box.innerHTML='✅ Formula = '+total+' | Total Bales = '+b+' - MATCHES, will save'; box.className='calcPreview'; }
-  else{ box.innerHTML='❌ Formula = '+total+' | Total Bales = '+b+' - DOES NOT MATCH (difference '+(total - parseFloat(b))+') - will NOT save'; box.className='calcPreview bad'; }
+  const b = document.getElementById('bales').value;
+  const f = document.getElementById('formula').value;
+  const ty = document.getElementById('type').value;
+  const box = document.getElementById('calcPreview');
+  if(!b || !f){ box.innerHTML = 'Enter bales + formula to check if it adds up'; box.className = 'calcPreview'; return; }
+  const total = calcFormulaTotal(f);
+  if(total === null){ box.innerHTML = 'Could not calculate — use numbers like 40+45*4+50*20'; box.className = 'calcPreview bad'; return; }
+  const kgB = KG_PER_BALE[ty] || 0;
+  if(Math.abs(total - parseFloat(b)) < 0.01){
+    const kg = (parseFloat(b) || 0) * kgB;
+    box.innerHTML = '✅ Formula = ' + total + ' bales · ' + ty + ' × ' + kgB + ' kg = ' + (kg / 1000).toFixed(2) + ' t — matches';
+    box.className = 'calcPreview';
+  } else {
+    box.innerHTML = '❌ Formula = ' + total + ' · Bales = ' + b + ' — difference ' + (total - parseFloat(b));
+    box.className = 'calcPreview bad';
+  }
 }
+
+// ---------- add / edit / delete ----------
 function openAddFormula(){
   editingIndex = -1;
-  document.getElementById('addModalTitle').innerText='➕ Add New Formula';
-  document.getElementById('editingBanner').style.display='none';
-  document.getElementById('saveFormulaBtn').innerText='+ SAVE FORMULA';
-  document.getElementById('cancelEditBtn').style.display='none';
-  document.getElementById('bales').value=''; document.getElementById('title').value=''; document.getElementById('formula').value='';
-  document.getElementById('plate').value=''; document.getElementById('bay').value=''; document.getElementById('invoice').value='';
-  document.getElementById('date').value='';
-  document.getElementById('calcPreview').innerHTML='Enter bales + formula to check if it adds up';
-  document.getElementById('calcPreview').className='calcPreview';
+  document.getElementById('addModalTitle').innerText = '➕ Add New Formula';
+  document.getElementById('editingBanner').style.display = 'none';
+  document.getElementById('saveFormulaBtn').innerText = '+ SAVE FORMULA';
+  document.getElementById('cancelEditBtn').style.display = 'none';
+  document.getElementById('bales').value = '';
+  document.getElementById('type').value = '2kg';
+  document.getElementById('title').value = '';
+  document.getElementById('formula').value = '';
+  document.getElementById('plate').value = '';
+  document.getElementById('bay').value = '';
+  document.getElementById('invoice').value = '';
+  document.getElementById('date').value = '';
+  document.getElementById('calcPreview').innerHTML = 'Enter bales + formula to check if it adds up';
+  document.getElementById('calcPreview').className = 'calcPreview';
   openModal('addModal');
 }
 function editFormula(i){
-  let d = data[i];
+  const d = data[i];
   editingIndex = i;
   closeModal('savedModal'); closeModal('dateModal');
-  document.getElementById('addModalTitle').innerText='✏️ Edit Formula';
-  document.getElementById('editingBanner').style.display='block';
-  document.getElementById('editingBanner').innerText='✏️ Editing: ' + d.title + ' - ' + d.bales + ' Bales';
-  document.getElementById('saveFormulaBtn').innerText='💾 UPDATE FORMULA';
-  document.getElementById('cancelEditBtn').style.display='block';
-  document.getElementById('bales').value=d.bales;
-  document.getElementById('type').value=d.type||'2kg';
-  document.getElementById('title').value=d.title;
-  document.getElementById('formula').value=d.formula;
-  document.getElementById('plate').value=d.plate||'';
-  document.getElementById('date').value=d.date||'';
-  document.getElementById('bay').value=d.bay||'';
-  document.getElementById('invoice').value=d.invoice||'';
+  document.getElementById('addModalTitle').innerText = '✏️ Edit Formula';
+  document.getElementById('editingBanner').style.display = 'block';
+  document.getElementById('editingBanner').innerText = '✏️ Editing: ' + d.title + ' - ' + d.bales + ' Bales';
+  document.getElementById('saveFormulaBtn').innerText = '💾 UPDATE FORMULA';
+  document.getElementById('cancelEditBtn').style.display = 'block';
+  document.getElementById('bales').value = d.bales;
+  document.getElementById('type').value = d.type || '2kg';
+  document.getElementById('title').value = d.title;
+  document.getElementById('formula').value = d.formula;
+  document.getElementById('plate').value = d.plate || '';
+  document.getElementById('date').value = d.date || '';
+  document.getElementById('bay').value = d.bay || '';
+  document.getElementById('invoice').value = d.invoice || '';
   openModal('addModal');
   previewCalc();
 }
 function cancelEdit(){
   editingIndex = -1;
-  document.getElementById('addModalTitle').innerText='➕ Add New Formula';
-  document.getElementById('editingBanner').style.display='none';
-  document.getElementById('saveFormulaBtn').innerText='+ SAVE FORMULA';
-  document.getElementById('cancelEditBtn').style.display='none';
-  document.getElementById('bales').value=''; document.getElementById('title').value=''; document.getElementById('formula').value=''; document.getElementById('plate').value=''; document.getElementById('bay').value=''; document.getElementById('invoice').value=''; document.getElementById('date').value='';
+  document.getElementById('addModalTitle').innerText = '➕ Add New Formula';
+  document.getElementById('editingBanner').style.display = 'none';
+  document.getElementById('saveFormulaBtn').innerText = '+ SAVE FORMULA';
+  document.getElementById('cancelEditBtn').style.display = 'none';
+  document.getElementById('bales').value = '';
+  document.getElementById('type').value = '2kg';
+  document.getElementById('title').value = '';
+  document.getElementById('formula').value = '';
+  document.getElementById('plate').value = '';
+  document.getElementById('bay').value = '';
+  document.getElementById('invoice').value = '';
+  document.getElementById('date').value = '';
   closeModal('addModal');
 }
-async function add(){
-  let b=document.getElementById('bales').value.trim();
-  let ty=document.getElementById('type').value;
-  let t=document.getElementById('title').value.trim();
-  let f=document.getElementById('formula').value.trim();
-  let plate=document.getElementById('plate').value.trim();
-  let date=document.getElementById('date').value;
-  let bay=document.getElementById('bay').value.trim();
-  let invoice=document.getElementById('invoice').value.trim();
-  if(!b||!t||!f){alert('Fill Bales, Title and Formula');return;}
-  if(!plate){alert('Enter Number Plate');return;}
-  // DATE and BAY are OPTIONAL - no check here
-  let total = calcFormulaTotal(f);
-  if(total===null){ alert('Could not calculate your formula.\n\nUse numbers like: 40+45*4+50*20'); return; }
-  if(Math.abs(total - parseFloat(b)) > 0.01){ alert('❌ WILL NOT SAVE!\n\nFormula adds up to: ' + total + '\nTotal Bales you entered: ' + b + '\nDifference: ' + (total - parseFloat(b))); return; }
-  let newNorm = normalizeFormula(f);
-  let duplicateIndex = data.findIndex((d,idx) => idx !== editingIndex && normalizeFormula(d.formula) == newNorm && d.plate==plate && (d.date||'')==(date||''));
-  if(duplicateIndex !== -1){ alert('⚠️ Duplicate! Same formula already exists for this plate + date:\n\n' + data[duplicateIndex].title + ' - ' + data[duplicateIndex].bales + ' Bales\n' + data[duplicateIndex].formula); return; }
-  let entry = {bales:b,type:ty,title:t,formula:f,plate:plate,date:date||'',dateDisplay:date?formatDate(date):'',bay:bay||'',invoice:invoice};
-  if(editingIndex >= 0){ data[editingIndex] = entry; editingIndex = -1; } else { data.unshift(entry); }
-  localStorage.setItem('flourData',JSON.stringify({formulas:data}));
-  show(); await syncToGitHub();
-  document.getElementById('bales').value=''; document.getElementById('title').value=''; document.getElementById('formula').value=''; document.getElementById('plate').value=''; document.getElementById('bay').value=''; document.getElementById('invoice').value=''; document.getElementById('date').value='';
-  document.getElementById('addModalTitle').innerText='➕ Add New Formula';
-  document.getElementById('editingBanner').style.display='none';
-  document.getElementById('saveFormulaBtn').innerText='+ SAVE FORMULA';
-  document.getElementById('cancelEditBtn').style.display='none';
+function add(){
+  const b = document.getElementById('bales').value.trim();
+  const ty = document.getElementById('type').value;
+  const t = document.getElementById('title').value.trim();
+  const f = document.getElementById('formula').value.trim();
+  const plate = document.getElementById('plate').value.trim();
+  const dateVal = document.getElementById('date').value;
+  const bay = document.getElementById('bay').value.trim();
+  const invoice = document.getElementById('invoice').value.trim();
+
+  if(!b || !t || !f){ alert('Fill Bales, Title and Formula'); return; }
+  if(!plate){ alert('Enter Number Plate'); return; }
+
+  const total = calcFormulaTotal(f);
+  if(total === null){ alert('Could not calculate your formula.\n\nUse numbers like: 40+45*4+50*20'); return; }
+  if(Math.abs(total - parseFloat(b)) > 0.01){
+    alert('❌ WILL NOT SAVE!\n\nFormula adds up to: ' + total + '\nTotal Bales you entered: ' + b + '\nDifference: ' + (total - parseFloat(b)));
+    return;
+  }
+
+  const newNorm = normalizeFormula(f);
+  const dup = data.findIndex((d, idx) =>
+    idx !== editingIndex &&
+    normalizeFormula(d.formula) == newNorm &&
+    d.plate == plate &&
+    (d.date || '') == (dateVal || '')
+  );
+  if(dup !== -1){
+    alert('⚠️ Duplicate! Same formula already exists for this plate + date:\n\n' +
+      data[dup].title + ' - ' + data[dup].bales + ' Bales\n' + data[dup].formula);
+    return;
+  }
+
+  const entry = {
+    bales: b, type: ty, title: t, formula: f, plate: plate,
+    date: dateVal || '', dateDisplay: dateVal ? formatDate(dateVal) : '',
+    bay: bay || '', invoice: invoice
+  };
+  if(editingIndex >= 0){ data[editingIndex] = entry; editingIndex = -1; }
+  else { data.unshift(entry); }
+
+  localStorage.setItem('flourData', JSON.stringify({formulas: data}));
+  markDirty(true);
+
+  // reset form
+  document.getElementById('bales').value = '';
+  document.getElementById('type').value = '2kg';
+  document.getElementById('title').value = '';
+  document.getElementById('formula').value = '';
+  document.getElementById('plate').value = '';
+  document.getElementById('bay').value = '';
+  document.getElementById('invoice').value = '';
+  document.getElementById('date').value = '';
+  document.getElementById('addModalTitle').innerText = '➕ Add New Formula';
+  document.getElementById('editingBanner').style.display = 'none';
+  document.getElementById('saveFormulaBtn').innerText = '+ SAVE FORMULA';
+  document.getElementById('cancelEditBtn').style.display = 'none';
   closeModal('addModal');
+
+  show();
+  updateSyncStatus();
+  scheduleSync();
 }
+function delFormula(i){
+  if(!confirm('Delete formula?')) return;
+  data.splice(i, 1);
+  localStorage.setItem('flourData', JSON.stringify({formulas: data}));
+  markDirty(true);
+  show();
+  updateSyncStatus();
+  scheduleSync();
+}
+
+// ---------- rendering ----------
+function formulaCard(d, idx){
+  const kg = totalKg(d);
+  const t = (kg / 1000).toFixed(2);
+  const balesNum = (parseInt(d.bales, 10) || 0).toLocaleString();
+  return `<div class="card" style="border:1px solid #eee">
+    <div class="bales">${balesNum} BALES · ${esc(d.type || '?')} · ${t} t</div>
+    <b>${esc(d.title || '')}</b>
+    <p style="white-space:pre-wrap">${esc(d.formula || '')}</p>
+    <div class="detail">
+      <span class="plate">${esc(d.plate || '-')}</span>
+      ${d.dateDisplay ? `<span class="dateBadge">📅 ${esc(d.dateDisplay)}</span>` : ''}
+      <br><b>Bay:</b> ${esc(d.bay || '-')}
+      <br><b>Invoice:</b> ${esc(d.invoice || '-')}
+    </div>
+    <div class="row">
+      <button class="editBtn" onclick="editFormula(${idx})">✏️ Edit</button>
+      <button class="del" onclick="delFormula(${idx})">Delete</button>
+    </div>
+  </div>`;
+}
+
 function showDates(filterDate){
   if(filterDate !== undefined && filterDate !== '') selectedDate = filterDate;
   else if(filterDate === '') selectedDate = '';
-  let dates = [...new Set(data.map(d=>d.date).filter(Boolean))].sort().reverse();
-  let hasNoDate = data.some(d=>!d.date);
-  document.getElementById('dateBadgeTop').innerText='('+dates.length+(hasNoDate?'+':'')+')';
-  let html='';
-  if(dates.length==0 && !hasNoDate){ html='<p>No dates yet. Add a formula with a date, or leave date blank.</p>'; }
-  else{
-    dates.forEach(dt=>{
-      let count = data.filter(d=>d.date==dt).length;
-      let totalBales = data.filter(d=>d.date==dt).reduce((s,d)=>s+parseInt(d.bales||0),0);
-      let active = (selectedDate==dt) ? 'active' : '';
-      html+=`<button class="dateBtn ${active}" onclick="showDates('${dt}')">📅 ${formatDate(dt)} - ${count} formula(s) - ${totalBales} bales</button>`;
+
+  const dates = [...new Set(data.map(d => d.date).filter(Boolean))].sort().reverse();
+  const hasNoDate = data.some(d => !d.date);
+  document.getElementById('dateBadgeTop').innerText = '(' + dates.length + (hasNoDate ? '+' : '') + ')';
+
+  let html = '';
+  if(dates.length == 0 && !hasNoDate){
+    html = '<p>No dates yet. Add a formula with a date, or leave date blank.</p>';
+  } else {
+    dates.forEach(dt => {
+      const items = data.filter(d => d.date == dt);
+      const count = items.length;
+      const active = (selectedDate == dt) ? 'active' : '';
+      html += `<button class="dateBtn ${active}" onclick="showDates('${dt}')">📅 ${formatDate(dt)} — ${count} formula(s) — ${esc(dateSummaryLine(items))}</button>`;
     });
     if(hasNoDate){
-      let count = data.filter(d=>!d.date).length;
-      let totalBales = data.filter(d=>!d.date).reduce((s,d)=>s+parseInt(d.bales||0),0);
-      let active = (selectedDate=='__NODATE__') ? 'active' : '';
-      html+=`<button class="dateBtn ${active}" onclick="showDates('__NODATE__')">📅 No Date - ${count} formula(s) - ${totalBales} bales</button>`;
+      const items = data.filter(d => !d.date);
+      const count = items.length;
+      const active = (selectedDate == '__NODATE__') ? 'active' : '';
+      html += `<button class="dateBtn ${active}" onclick="showDates('__NODATE__')">📅 No Date — ${count} formula(s) — ${esc(dateSummaryLine(items))}</button>`;
     }
   }
-  document.getElementById('dateList').innerHTML=html;
-  let resHtml='';
-  let showDate = selectedDate;
-  if(showDate){
-    let items = showDate=='__NODATE__' ? data.filter(d=>!d.date) : data.filter(d=>d.date==showDate);
-    if(items.length==0){ resHtml='<p>No formula for this date</p>'; }
-    else{
-      let title = showDate=='__NODATE__' ? 'No Date' : formatDate(showDate);
-      resHtml='<h4>📅 '+title+' - '+items.length+' formula(s) / car(s)</h4>';
-      let plates = [...new Set(items.map(d=>d.plate).filter(Boolean))];
-      if(plates.length) resHtml+='<p><b>Cars used:</b> '+plates.join(', ')+'</p>';
-      items.forEach(d=>{ let idx=data.indexOf(d); resHtml+=formulaCard(d,idx); });
+  document.getElementById('dateList').innerHTML = html;
+
+  let resHtml = '';
+  if(selectedDate){
+    const items = data.map((d, i) => ({d, i})).filter(x => selectedDate == '__NODATE__' ? !x.d.date : x.d.date == selectedDate);
+    if(items.length == 0){
+      resHtml = '<p>No formula for this date</p>';
+    } else {
+      const title = selectedDate == '__NODATE__' ? 'No Date' : formatDate(selectedDate);
+      const totalKgAll = items.reduce((s, x) => s + totalKg(x.d), 0);
+      resHtml = '<h4>📅 ' + title + ' — ' + items.length + ' formula(s) / car(s) — ' + (totalKgAll / 1000).toFixed(2) + ' t</h4>';
+      const plates = [...new Set(items.map(x => x.d.plate).filter(Boolean))];
+      if(plates.length) resHtml += '<p><b>Cars used:</b> ' + plates.map(esc).join(', ') + '</p>';
+      items.forEach(x => { resHtml += formulaCard(x.d, x.i); });
     }
   } else {
-    resHtml='<p class="small">Tap a date above to see formulas + cars for that day</p>';
+    resHtml = '<p class="small">Tap a date above to see formulas + cars for that day</p>';
   }
-  document.getElementById('dateResults').innerHTML=resHtml;
-  let inp=document.getElementById('dateFilter'); if(selectedDate && selectedDate!='__NODATE__' && inp.value!=selectedDate) inp.value=selectedDate; if(selectedDate=='') inp.value='';
+  document.getElementById('dateResults').innerHTML = resHtml;
+
+  const inp = document.getElementById('dateFilter');
+  if(selectedDate && selectedDate != '__NODATE__') inp.value = selectedDate;
+  else inp.value = '';
 }
-function formulaCard(d,idx){
-  return `<div class="card" style="border:1px solid #eee"><div class="bales">${d.bales} BALES - ${d.type}</div><b>${d.title}</b><p style="white-space:pre-wrap">${d.formula}</p><div class="detail"><span class="plate">${d.plate||'-'}</span> ${d.dateDisplay?`<span class="dateBadge">📅 ${d.dateDisplay}</span>`:''}<br><b>Bay:</b> ${d.bay||'-'}<br><b>Invoice:</b> ${d.invoice||'-'}</div><div class="row"><button class="editBtn" onclick="editFormula(${idx})">✏️ Edit</button><button class="del" onclick="delFormula(${idx})">Delete</button></div></div>`;
-}
+
 function show(){
- let q=(document.getElementById('search').value||'').toLowerCase().trim(); let qt=document.getElementById('searchType').value;
- document.getElementById('countBadge').innerText=data.length+' saved';
- let fHtml=''; if(data.length==0) fHtml='<p>No formula.</p>';
- data.forEach(d=>{let idx=data.indexOf(d); fHtml+=formulaCard(d,idx);});
- document.getElementById('list').innerHTML=fHtml;
- showDates(selectedDate);
- if(q||qt){
-   document.getElementById('searchResultsCard').style.display='block';
-   let matchedF=data.filter(d=>(!q||d.bales==q||d.title.toLowerCase().includes(q)||d.formula.toLowerCase().includes(q)||(d.plate||'').toLowerCase().includes(q)||(d.bay||'').toLowerCase().includes(q)||(d.dateDisplay||'').toLowerCase().includes(q)||(d.date||'').includes(q))&&(!qt||d.type==qt));
-   let html='';
-   if(matchedF.length>0){ html+='<b>📋 Formulas found: '+matchedF.length+'</b>'; matchedF.forEach(d=>{ let di=data.indexOf(d); html+=formulaCard(d,di); }); }
-   if(matchedF.length==0) html='<p>No result for "'+q+'". Try different bales, plate, bay or date.</p>';
-   document.getElementById('searchResults').innerHTML=html;
- } else {
-   document.getElementById('searchResultsCard').style.display='none';
- }
+  const q = (document.getElementById('search').value || '').toLowerCase().trim();
+  const qt = document.getElementById('searchType').value;
+  document.getElementById('countBadge').innerText = data.length + ' saved';
+
+  let fHtml = '';
+  if(data.length == 0) fHtml = '<p>No formula.</p>';
+  data.forEach((d, idx) => { fHtml += formulaCard(d, idx); });
+  document.getElementById('list').innerHTML = fHtml;
+
+  showDates(selectedDate);
+
+  if(q || qt){
+    document.getElementById('searchResultsCard').style.display = 'block';
+    const matched = data.map((d, i) => ({d, i})).filter(x => {
+      const d = x.d;
+      const okQ = !q ||
+        String(d.bales) == q ||
+        (d.title || '').toLowerCase().includes(q) ||
+        (d.formula || '').toLowerCase().includes(q) ||
+        (d.plate || '').toLowerCase().includes(q) ||
+        (d.bay || '').toLowerCase().includes(q) ||
+        (d.invoice || '').toLowerCase().includes(q) ||
+        (d.dateDisplay || '').toLowerCase().includes(q) ||
+        (d.date || '').includes(q);
+      const okT = !qt || d.type == qt;
+      return okQ && okT;
+    });
+    let html = '';
+    if(matched.length > 0){
+      html += '<b>📋 Formulas found: ' + matched.length + '</b>';
+      matched.forEach(x => { html += formulaCard(x.d, x.i); });
+    } else {
+      html = '<p>No result for "' + esc(q) + '". Try different bales, plate, bay or date.</p>';
+    }
+    document.getElementById('searchResults').innerHTML = html;
+  } else {
+    document.getElementById('searchResultsCard').style.display = 'none';
+  }
 }
-async function delFormula(i){if(confirm('Delete formula?')){data.splice(i,1); localStorage.setItem('flourData',JSON.stringify({formulas:data})); show(); await syncToGitHub();}}
+
+// ---------- export ----------
+function csvEscape(v){
+  let s = String(v == null ? '' : v);
+  if(/[",\n\r]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+function toCSV(items){
+  const header = ['Date','Plate','Type','Bales','KgPerBale','TotalKg','Tonnes','Title','Formula','Bay','Invoice'];
+  const rows = items.map(d => {
+    const kg = totalKg(d);
+    return [
+      d.date || '',
+      d.plate || '',
+      d.type || '',
+      parseInt(d.bales, 10) || 0,
+      KG_PER_BALE[d.type] || 0,
+      kg,
+      (kg / 1000).toFixed(2),
+      d.title || '',
+      d.formula || '',
+      d.bay || '',
+      d.invoice || ''
+    ].map(csvEscape).join(',');
+  });
+  return '\uFEFF' + header.join(',') + '\n' + rows.join('\n');
+}
+function download(filename, content, mime){
+  const blob = new Blob([content], {type: mime || 'application/octet-stream'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1500);
+}
+function setExportStatus(msg){ document.getElementById('exportStatus').innerHTML = msg; }
+function updateExportInfo(){
+  const t = todayStr();
+  const todayItems = data.filter(d => d.date === t);
+  const todayTonnes = (todayItems.reduce((s, d) => s + totalKg(d), 0) / 1000).toFixed(2);
+  document.getElementById('exportInfo').innerHTML =
+    'Total saved: <b>' + data.length + '</b> formula(s)<br>' +
+    'Today (' + formatDate(t) + '): <b>' + todayItems.length + '</b> formula(s) — ' + todayTonnes + ' t';
+  setExportStatus('');
+}
+function exportJSON(){
+  const payload = {formulas: data, exportedAt: new Date().toISOString()};
+  download('loading-plan-backup-' + todayStr() + '.json', JSON.stringify(payload, null, 2), 'application/json');
+  setExportStatus('✅ Downloaded JSON backup');
+}
+function exportCSVAll(){
+  download('loading-plan-all-' + todayStr() + '.csv', toCSV(data), 'text/csv;charset=utf-8');
+  setExportStatus('✅ Downloaded all formulas as CSV');
+}
+function exportCSVToday(){
+  const t = todayStr();
+  const items = data.filter(d => d.date === t);
+  if(!items.length){ setExportStatus('⚠️ No formulas dated today (' + formatDate(t) + ')'); return; }
+  download('loading-plan-' + t + '.csv', toCSV(items), 'text/csv;charset=utf-8');
+  setExportStatus('✅ Downloaded today\'s CSV (' + items.length + ' formula(s))');
+}
+async function copyTodaySummary(){
+  const t = todayStr();
+  const items = data.filter(d => d.date === t);
+  if(!items.length){ setExportStatus('⚠️ No formulas dated today'); return; }
+  const lines = ['LOADING SUMMARY — ' + formatDate(t), ''];
+  const plates = [...new Set(items.map(d => d.plate).filter(Boolean))];
+  if(plates.length) lines.push('Cars: ' + plates.join(', '));
+  lines.push('');
+  items.forEach(d => {
+    const kg = totalKg(d);
+    lines.push(
+      (d.plate || '-') + ' | ' + (d.type || '?') + ' | ' + (parseInt(d.bales, 10) || 0) + ' bales | ' +
+      (kg / 1000).toFixed(2) + ' t | ' + (d.title || '') +
+      (d.bay ? ' | ' + d.bay : '') +
+      (d.invoice ? ' | ' + d.invoice : '')
+    );
+  });
+  const totalBales = items.reduce((s, d) => s + (parseInt(d.bales, 10) || 0), 0);
+  const totalTonnes = (items.reduce((s, d) => s + totalKg(d), 0) / 1000).toFixed(2);
+  lines.push('');
+  lines.push('TOTAL: ' + totalBales.toLocaleString() + ' bales — ' + totalTonnes + ' tonnes');
+  const text = lines.join('\n');
+  try {
+    await navigator.clipboard.writeText(text);
+    setExportStatus('✅ Summary copied — paste in WhatsApp / email');
+  } catch(e) {
+    prompt('Copy this summary:', text);
+    setExportStatus('📋 Summary ready — copy manually if needed');
+  }
+}
+
+// ---------- init ----------
 loadSettings();
-let local=JSON.parse(localStorage.getItem('flourData')||'null');
-if(local&&local.formulas){data=local.formulas;}
-else if(local&&local.cars){
-  data=[];
-  local.cars.forEach(c=>{
-    (c.items||[]).forEach(it=>{
-      data.push({bales:it.bales,type:it.size,title:it.product,formula:it.formula||'',plate:c.plate,date:c.date,dateDisplay:c.dateDisplay||formatDate(c.date),bay:'',invoice:c.invoice||''});
+
+const local = JSON.parse(localStorage.getItem('flourData') || 'null');
+if(local && local.formulas){
+  data = local.formulas;
+} else if(local && local.cars){
+  data = [];
+  local.cars.forEach(c => {
+    (c.items || []).forEach(it => {
+      data.push({
+        bales: it.bales, type: it.size, title: it.product,
+        formula: it.formula || '', plate: c.plate,
+        date: c.date, dateDisplay: c.dateDisplay || formatDate(c.date),
+        bay: '', invoice: c.invoice || ''
+      });
     });
   });
-  if(local.formulas) data=data.concat(local.formulas);
+  if(local.formulas) data = data.concat(local.formulas);
+} else if(local && Array.isArray(local)){
+  data = local;
+} else {
+  data = [{bales: "1220", type: "2kg", title: "Ajab HBF", formula: "40+45*4+50*20", plate: "KDQ 076M", date: "", dateDisplay: "", bay: "", invoice: "INV 123"}];
 }
-else if(local&&Array.isArray(local)){data=local;}
-else{data=[{bales:"1220",type:"2kg",title:"Ajab HBF",formula:"40+45*4+50*20",plate:"KDQ 076M",date:"",dateDisplay:"",bay:"",invoice:"INV 123"}];}
+
 show();
+updateSyncStatus();
 if(localStorage.getItem('ghUser')) loadFromGitHub();
 </script>
 </body>
