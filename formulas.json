@@ -1,6 +1,17 @@
 {
   "formulas": [
     {
+      "bales": "1230",
+      "type": "1kg",
+      "title": ".",
+      "formula": "53*12+54*11",
+      "plate": "KCB 024T",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
+    },
+    {
       "bales": "1150",
       "type": "2kg",
       "title": ".",
