@@ -381,7 +381,12 @@
       "bales": "1150",
       "type": "2kg",
       "title": "tipper",
-      "formula": "77*10+76*5"
+      "formula": "77*10+76*5",
+      "plate": "KBD 368Z",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
     },
     {
       "bales": "1200",
