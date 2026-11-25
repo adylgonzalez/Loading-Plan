@@ -1,6 +1,17 @@
 {
   "formulas": [
     {
+      "bales": "1220",
+      "type": "2kg",
+      "title": ".",
+      "formula": "45*10+50*11+55*4",
+      "plate": "KDY 326B",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": ""
+    },
+    {
       "bales": "1230",
       "type": "2kg",
       "title": ".",
