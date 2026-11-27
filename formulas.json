@@ -353,7 +353,7 @@
       "dateDisplay": "",
       "bay": "",
       "invoice": "",
-      "status": "unfinished"
+      "status": "done"
     },
     {
       "bales": "1150",
@@ -800,7 +800,7 @@
       "type": "2kg",
       "title": "Kcy991t",
       "formula": "53*22+34",
-      "status": "unfinished"
+      "status": "done"
     },
     {
       "bales": "1150",
