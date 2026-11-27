@@ -1,6 +1,18 @@
 {
   "formulas": [
     {
+      "bales": "1230",
+      "type": "1kg",
+      "title": "2kg, 1kg,0.5kg",
+      "formula": "54*11+53*12",
+      "plate": "KCG 035D",
+      "date": "2026-11-27",
+      "dateDisplay": "27 Nov 2026",
+      "time": "10:33",
+      "bay": "Bay 4",
+      "invoice": ""
+    },
+    {
       "bales": "1150",
       "type": "2kg",
       "title": "Flat",
