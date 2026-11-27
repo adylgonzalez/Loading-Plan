@@ -1,6 +1,18 @@
 {
   "formulas": [
     {
+      "bales": "1150",
+      "type": "2kg",
+      "title": "-",
+      "formula": "50*23",
+      "plate": "KBM 562J",
+      "date": "2026-11-27",
+      "dateDisplay": "27 Nov 2026",
+      "time": "08:38",
+      "bay": "4",
+      "invoice": ""
+    },
+    {
       "bales": "710",
       "type": "2kg",
       "title": ".",
