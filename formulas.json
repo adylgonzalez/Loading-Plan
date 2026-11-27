@@ -604,7 +604,7 @@
       "type": "2kg",
       "title": "terrius",
       "formula": "31*3+40+54*19+40+31",
-      "status": "unfinished"
+      "status": "done"
     },
     {
       "bales": "1150",
@@ -616,7 +616,7 @@
       "dateDisplay": "",
       "bay": "",
       "invoice": "",
-      "status": "unfinished"
+      "status": "done"
     },
     {
       "bales": "1200",
