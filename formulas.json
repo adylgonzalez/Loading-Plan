@@ -628,7 +628,7 @@
       "dateDisplay": "",
       "bay": "",
       "invoice": "",
-      "status": "unfinished"
+      "status": "done"
     },
     {
       "bales": "1200",
@@ -647,7 +647,7 @@
       "type": "1kg",
       "title": "-",
       "formula": "56*20+55*2",
-      "status": "unfinished"
+      "status": "done"
     },
     {
       "bales": "1200",
