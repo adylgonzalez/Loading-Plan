@@ -461,14 +461,14 @@
       "dateDisplay": "",
       "bay": "",
       "invoice": "",
-      "status": "unfinished"
+      "status": "done"
     },
     {
       "bales": "1150",
       "type": "2kg",
       "title": "-",
       "formula": "44*5+48*16+54*3",
-      "status": "unfinished"
+      "status": "done"
     },
     {
       "bales": "1230",
