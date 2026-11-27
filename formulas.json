@@ -9,7 +9,8 @@
       "date": "2026-11-27",
       "dateDisplay": "27 Nov 2026",
       "bay": "6",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1150",
@@ -21,7 +22,8 @@
       "dateDisplay": "27 Nov 2026",
       "time": "12:42",
       "bay": "6",
-      "invoice": ""
+      "invoice": "",
+      "status": "done"
     },
     {
       "bales": "1200",
@@ -33,7 +35,8 @@
       "dateDisplay": "27 Nov 2026",
       "time": "12:22",
       "bay": "Bay 3",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1230",
@@ -45,7 +48,8 @@
       "dateDisplay": "27 Nov 2026",
       "time": "10:33",
       "bay": "Bay 4",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1150",
@@ -57,7 +61,8 @@
       "dateDisplay": "27 Nov 2026",
       "time": "10:15",
       "bay": "Bay 1",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1150",
@@ -69,7 +74,8 @@
       "dateDisplay": "27 Nov 2026",
       "time": "09:27",
       "bay": "Bay 6",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1150",
@@ -81,7 +87,8 @@
       "dateDisplay": "27 Nov 2026",
       "time": "08:48",
       "bay": "Bay 1",
-      "invoice": "EB"
+      "invoice": "EB",
+      "status": "unfinished"
     },
     {
       "bales": "1150",
@@ -93,7 +100,8 @@
       "dateDisplay": "27 Nov 2026",
       "time": "08:38",
       "bay": "4",
-      "invoice": ""
+      "invoice": "",
+      "status": "done"
     },
     {
       "bales": "710",
@@ -104,7 +112,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1150",
@@ -115,7 +124,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "960",
@@ -126,7 +136,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1230",
@@ -137,7 +148,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1150",
@@ -148,7 +160,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1150",
@@ -159,7 +172,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1230",
@@ -170,7 +184,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1150",
@@ -181,7 +196,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1200",
@@ -192,7 +208,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1230",
@@ -203,7 +220,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1220",
@@ -214,7 +232,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1230",
@@ -225,7 +244,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1150",
@@ -236,7 +256,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1160",
@@ -247,7 +268,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1250",
@@ -258,7 +280,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1150",
@@ -269,7 +292,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1230",
@@ -280,7 +304,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "710",
@@ -291,7 +316,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "500",
@@ -302,7 +328,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1230",
@@ -313,7 +340,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1200",
@@ -324,7 +352,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1150",
@@ -335,7 +364,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1230",
@@ -346,7 +376,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1120",
@@ -357,7 +388,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "500",
@@ -368,7 +400,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "-",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1150",
@@ -379,7 +412,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1230",
@@ -390,7 +424,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "2300",
@@ -401,7 +436,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "590",
@@ -412,7 +448,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1150",
@@ -423,13 +460,15 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1150",
       "type": "2kg",
       "title": "-",
-      "formula": "44*5+48*16+54*3"
+      "formula": "44*5+48*16+54*3",
+      "status": "unfinished"
     },
     {
       "bales": "1230",
@@ -440,7 +479,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1230",
@@ -451,7 +491,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1150",
@@ -462,7 +503,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1150",
@@ -473,7 +515,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1200",
@@ -484,19 +527,22 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1230",
       "type": "2kg",
       "title": "-",
-      "formula": "50*6+52*12+51*6"
+      "formula": "50*6+52*12+51*6",
+      "status": "unfinished"
     },
     {
       "bales": "1200",
       "type": "1kg",
       "title": "-",
-      "formula": "49*5+62*11+55*3+54*2"
+      "formula": "49*5+62*11+55*3+54*2",
+      "status": "unfinished"
     },
     {
       "bales": "1200",
@@ -507,7 +553,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1150",
@@ -518,13 +565,15 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1230",
       "type": "2kg",
       "title": "-",
-      "formula": "30+50*24"
+      "formula": "30+50*24",
+      "status": "unfinished"
     },
     {
       "bales": "1250",
@@ -535,7 +584,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1200",
@@ -546,13 +596,15 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1230",
       "type": "2kg",
       "title": "terrius",
-      "formula": "31*3+40+54*19+40+31"
+      "formula": "31*3+40+54*19+40+31",
+      "status": "unfinished"
     },
     {
       "bales": "1150",
@@ -563,7 +615,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1200",
@@ -574,7 +627,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1200",
@@ -585,13 +639,15 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1230",
       "type": "1kg",
       "title": "-",
-      "formula": "56*20+55*2"
+      "formula": "56*20+55*2",
+      "status": "unfinished"
     },
     {
       "bales": "1200",
@@ -602,7 +658,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1150",
@@ -613,19 +670,22 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "2280",
       "type": "0.5kg",
       "title": "-",
-      "formula": "100*4+120*15+80"
+      "formula": "100*4+120*15+80",
+      "status": "unfinished"
     },
     {
       "bales": "590",
       "type": "2kg",
       "title": "-",
-      "formula": "45*2+50*6+45*4+20"
+      "formula": "45*2+50*6+45*4+20",
+      "status": "unfinished"
     },
     {
       "bales": "1200",
@@ -636,7 +696,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1230",
@@ -647,7 +708,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1250",
@@ -658,7 +720,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1150",
@@ -669,7 +732,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1230",
@@ -680,7 +744,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1150",
@@ -691,7 +756,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1150",
@@ -702,7 +768,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1200",
@@ -713,7 +780,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1230",
@@ -724,13 +792,15 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1200",
       "type": "2kg",
       "title": "Kcy991t",
-      "formula": "53*22+34"
+      "formula": "53*22+34",
+      "status": "unfinished"
     },
     {
       "bales": "1150",
@@ -741,7 +811,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     },
     {
       "bales": "1150",
@@ -752,7 +823,8 @@
       "date": "",
       "dateDisplay": "",
       "bay": "",
-      "invoice": ""
+      "invoice": "",
+      "status": "unfinished"
     }
   ]
 }
