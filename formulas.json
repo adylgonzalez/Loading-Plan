@@ -1,6 +1,18 @@
 {
   "formulas": [
     {
+      "bales": "590",
+      "type": "1kg",
+      "title": "10 wheeler",
+      "formula": "40*2+50*6+45*4+30",
+      "plate": "KCL 795Y",
+      "date": "2026-11-27",
+      "dateDisplay": "27 Nov 2026",
+      "bay": "6",
+      "invoice": "In",
+      "status": "unfinished"
+    },
+    {
       "bales": "1200",
       "type": "1kg",
       "title": "Flat",
@@ -10,7 +22,7 @@
       "dateDisplay": "27 Nov 2026",
       "bay": "6",
       "invoice": "",
-      "status": "unfinished"
+      "status": "done"
     },
     {
       "bales": "1150",
