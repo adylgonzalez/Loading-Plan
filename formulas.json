@@ -1,6 +1,17 @@
 {
   "formulas": [
     {
+      "bales": "1200",
+      "type": "1kg",
+      "title": "Flat",
+      "formula": "55*12+54*10",
+      "plate": "KDK 498S",
+      "date": "2026-11-27",
+      "dateDisplay": "27 Nov 2026",
+      "bay": "6",
+      "invoice": ""
+    },
+    {
       "bales": "1150",
       "type": "2kg",
       "title": "2kg 1kg flat",
