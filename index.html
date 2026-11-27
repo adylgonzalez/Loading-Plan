@@ -10,18 +10,24 @@ body{font-family:Arial;padding:0;background:#f2f2f2;margin:0}
 .top p{margin:4px 0 10px;font-size:13px;opacity:0.9}
 .topBtns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
 .topBtns button{width:auto;padding:10px 12px;font-size:12px;border-radius:20px}
-.btnSaved{background:white;color:#0b6e4f}.btnSync{background:#1a5276}.btnAdd{background:#333;color:white}.btnDate{background:#ff9800;color:white}
+.btnSaved{background:white;color:#0b6e4f}.btnSync{background:#1a5276}.btnAdd{background:#333;color:white}.btnDate{background:#ff9800;color:white}.btnUnfinished{background:#c0392b;color:white}
 .wrap{padding:12px}
 input,textarea,button,select{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #ccc;font-size:16px;box-sizing:border-box}
 button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointer}
 .card{background:white;padding:14px;border-radius:12px;margin:12px 0;box-shadow:0 1px 5px #ccc}
+.card.unfinished{border:2px solid #ff9800;border-left:8px solid #ff9800}
+.card.doneCard{border:1px solid #ddd;opacity:0.85}
 .bales{font-size:19px;font-weight:bold;color:#0b6e4f}
 .plate{font-size:15px;font-weight:bold;background:#0b6e4f;color:white;display:inline-block;padding:3px 8px;border-radius:6px;margin:2px}
 .del{background:#c0392b;margin-top:8px}
 .editBtn{background:#ff9800;margin-top:8px}
+.doneBtn{background:#0b6e4f;margin-top:8px}
+.undoBtn{background:#666;margin-top:8px}
 .small{color:#666;font-size:13px}
 .sync{background:#1a5276}
 .badge{display:inline-block;background:#e8f5e9;color:#0b6e4f;padding:4px 8px;border-radius:20px;font-size:12px;font-weight:bold}
+.unfinishedBadge{background:#ff9800;color:white;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:bold}
+.doneBadge{background:#0b6e4f;color:white;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:bold}
 .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:100;overflow:auto}
 .modalBox{background:white;margin:5% auto 20px;padding:16px;border-radius:14px;width:92%;max-width:560px;position:relative}
 .closeBtn{background:#eee;color:#333;width:40px;position:absolute;right:10px;top:10px;padding:8px}
@@ -38,7 +44,6 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 .sectionLabel{font-size:12px;font-weight:bold;color:#0b6e4f;margin-top:10px;text-transform:uppercase}
 .formulaSelect{background:#fff3cd;border:1px solid #ff9800;font-weight:bold}
 .groupBadge{background:#0b6e4f;color:white;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:bold}
-.offlineBadge{background:#c0392b;color:white;padding:3px 8px;border-radius:12px;font-size:11px}
 </style>
 </head>
 <body>
@@ -50,6 +55,7 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 <button class="btnAdd" onclick="openAddFormula()">➕ Add Formula</button>
 <button class="btnSaved" onclick="openModal('savedModal')">📋 Saved Formulas</button>
 <button class="btnDate" onclick="openModal('dateModal')">📅 By Date <span id="dateBadgeTop">0</span></button>
+<button class="btnUnfinished" onclick="showOnlyUnfinished()">⏳ Unfinished <span id="unfinishedBadgeTop">0</span></button>
 <button class="btnSync" onclick="openModal('syncModal')">☁️ GitHub Sync</button>
 </div>
 <div id="syncStatus" style="font-size:12px;margin-top:8px;opacity:0.9">Not synced yet</div>
@@ -58,15 +64,20 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 <div class="wrap">
 <div class="card">
 <b>🔍 Search Formula / Plate / Bay / Date</b>
-<input id="search" type="text" placeholder="Search by Plate e.g. KDQ 076M or Bales e.g. 1150 or Bay e.g. Bay 1" oninput="show()">
+<input id="search" type="text" placeholder="Search by Plate e.g. KDQ 076M or Bales e.g. 1150" oninput="show()">
 <select id="searchType" onchange="show()">
 <option value="">All Types</option>
 <option value="2kg">2kg Only</option>
 <option value="1kg">1kg Only</option>
 <option value="0.5kg">0.5kg Only</option>
-<option value="All">All (2kg + 1kg + 0.5kg)</option>
+<option value="All">All - 2kg + 1kg + 0.5kg</option>
 </select>
-<p class="small">Grouped: identical formulas show as ONE card with all plates inside.</p>
+<select id="statusFilter" onchange="show()">
+<option value="">All Status - Unfinished on Top</option>
+<option value="unfinished">⏳ Unfinished Only</option>
+<option value="done">✅ Done Only</option>
+</select>
+<p class="small">⏳ Unfinished trucks always show on top until you mark them Done.</p>
 </div>
 
 <div class="card" id="searchResultsCard" style="display:none;border:2px solid #0b6e4f">
@@ -75,13 +86,13 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 <button style="background:#eee;color:#333" onclick="clearSearch()">Clear Search X</button>
 </div>
 
-<div class="homeHint">👆 Use Search above, or tap <b>📋 Saved Formulas</b> / <b>📅 By Date</b> to view all</div>
+<div class="homeHint">👆 Use Search above, or tap <b>📋 Saved Formulas</b> / <b>📅 By Date</b> / <b>⏳ Unfinished</b></div>
 </div>
 
 <div id="dateModal" class="modal"><div class="modalBox">
 <button class="closeBtn" onclick="closeModal('dateModal')">X</button>
 <h3>📅 By Date</h3>
-<p class="small">Tap a date to see formulas + cars used on that date.</p>
+<p class="small">Tap a date - unfinished on top.</p>
 <input id="dateFilter" type="date" onchange="showDates(this.value)">
 <div id="dateList"></div>
 <div id="dateResults"></div>
@@ -89,20 +100,19 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 
 <div id="savedModal" class="modal"><div class="modalBox">
 <button class="closeBtn" onclick="closeModal('savedModal')">X</button>
-<h3>📋 Saved Formulas <span class="badge" id="countBadge">0</span></h3>
-<p class="small">Grouped by identical formula - tap to expand plates.</p>
+<h3>📋 Saved Formulas <span class="badge" id="countBadge">0</span> <span class="unfinishedBadge" id="unfinishedBadge">0 unfinished</span></h3>
+<p class="small">Grouped - ⏳ Unfinished on top, ✅ Done below. Tap Show plates to Mark Done per car.</p>
 <div id="list"></div>
 </div></div>
 
 <div id="syncModal" class="modal"><div class="modalBox">
 <button class="closeBtn" onclick="closeModal('syncModal')">X</button>
 <h3>☁️ GitHub Sync</h3>
-<p class="small">Works offline - saves to this phone first, syncs when you are back online.</p>
+<p class="small">Works offline - saves to this phone first, syncs when back online.</p>
 <input id="ghUser" value="adylgonzalez">
 <input id="ghRepo" value="Loading-Plan">
 <div class="settingsRow"><input id="ghToken" type="password" placeholder="GitHub Token ghp_..."><button class="eye" onclick="toggleToken()">👁️</button></div>
 <div class="row"><button class="sync" onclick="saveSettings()">SAVE & SYNC</button><button class="sync" onclick="syncToGitHub()">SYNC NOW</button></div>
-<button style="background:#666" onclick="syncToGitHub()">Try Sync Again When Back Online</button>
 </div></div>
 
 <div id="addModal" class="modal"><div class="modalBox">
@@ -126,6 +136,8 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 <input id="date" type="date">
 <input id="bay" placeholder="Bay (optional) e.g. Bay 1">
 <input id="invoice" placeholder="Invoice (optional) e.g. INV 123">
+<label class="small"><b>Status:</b></label>
+<select id="status"><option value="unfinished">⏳ Unfinished - Still Loading</option><option value="done">✅ Done - Loaded</option></select>
 <button id="saveFormulaBtn" onclick="add()">+ SAVE FORMULA</button>
 <button id="cancelEditBtn" style="background:#eee;color:#333;display:none" onclick="cancelEdit()">Cancel Edit - Add as New Instead</button>
 </div></div>
@@ -134,7 +146,8 @@ button{background:#0b6e4f;color:white;border:none;font-weight:bold;cursor:pointe
 let data=[]; let fileSha=null; let editingIndex=-1; let selectedDate=''; let expandedGroups=new Set();
 function openModal(id){document.getElementById(id).style.display='block'; if(id=='addModal') previewCalc(); if(id=='dateModal') showDates(selectedDate||'');}
 function closeModal(id){document.getElementById(id).style.display='none';}
-function clearSearch(){document.getElementById('search').value=''; document.getElementById('searchType').value=''; show();}
+function clearSearch(){document.getElementById('search').value=''; document.getElementById('searchType').value=''; document.getElementById('statusFilter').value=''; show();}
+function showOnlyUnfinished(){ document.getElementById('statusFilter').value='unfinished'; document.getElementById('search').value=''; show(); openModal('savedModal'); }
 window.onclick=function(e){if(e.target.classList.contains('modal')) e.target.style.display='none';}
 function toggleToken(){let t=document.getElementById('ghToken'); t.type=t.type==='password'?'text':'password';}
 function getSettings(){return{user:document.getElementById('ghUser').value.trim()||localStorage.getItem('ghUser')||'',repo:document.getElementById('ghRepo').value.trim()||'Loading-Plan',token:document.getElementById('ghToken').value.trim()||localStorage.getItem('ghToken')||''};}
@@ -145,10 +158,9 @@ function updateSyncStatus(msg){ document.getElementById('syncStatus').innerText 
 async function loadFromGitHub(){
   let s=getSettings(); if(!s.user||!s.token){updateSyncStatus('Fill GitHub Sync'); show(); return;}
   if(!isOnline()){ updateSyncStatus('📴 Offline - using saved on phone'); show(); return; }
-  updateSyncStatus('Loading...'); try{let res=await fetch(`https://api.github.com/repos/${s.user}/${s.repo}/contents/formulas.json`,{headers:{Authorization:'token '+s.token}}); if(!res.ok) throw new Error('Create formulas.json with []'); let json=await res.json(); fileSha=json.sha; let all=JSON.parse(atob(json.content.replace(/\n/g,''))); if(all.formulas){data=all.formulas;} else if(Array.isArray(all)){data=all;} else {data=[];} localStorage.setItem('flourData',JSON.stringify({formulas:data})); updateSyncStatus('✅ Synced: '+data.length+' formulas'); show();}catch(e){updateSyncStatus('❌ '+e.message+' - using phone copy'); show();}
+  updateSyncStatus('Loading...'); try{let res=await fetch(`https://api.github.com/repos/${s.user}/${s.repo}/contents/formulas.json`,{headers:{Authorization:'token '+s.token}}); if(!res.ok) throw new Error('Create formulas.json with []'); let json=await res.json(); fileSha=json.sha; let all=JSON.parse(atob(json.content.replace(/\n/g,''))); if(all.formulas){data=all.formulas;} else if(Array.isArray(all)){data=all;} else {data=[];} data.forEach(d=>{ if(!d.status) d.status='unfinished'; }); localStorage.setItem('flourData',JSON.stringify({formulas:data})); updateSyncStatus('✅ Synced: '+data.length+' formulas'); show();}catch(e){updateSyncStatus('❌ '+e.message+' - using phone copy'); show();}
 }
 async function syncToGitHub(){
-  // OFFLINE SAFE - never blocks saving, just tries in background
   let s=getSettings(); if(!s.user||!s.token){return;}
   if(!isOnline()){ updateSyncStatus('📴 Offline - saved on phone, will sync when online'); return; }
   updateSyncStatus('Uploading...'); try{let getRes=await fetch(`https://api.github.com/repos/${s.user}/${s.repo}/contents/formulas.json`,{headers:{Authorization:'token '+s.token}}); fileSha=(await getRes.json()).sha; let content=btoa(unescape(encodeURIComponent(JSON.stringify({formulas:data},null,2)))); let res=await fetch(`https://api.github.com/repos/${s.user}/${s.repo}/contents/formulas.json`,{method:'PUT',headers:{Authorization:'token '+s.token},body:JSON.stringify({message:'Update '+new Date().toISOString(),content:content,sha:fileSha})}); if(!res.ok) throw new Error('GitHub rejected'); fileSha=(await res.json()).content.sha; updateSyncStatus('✅ Saved to GitHub!');}catch(e){updateSyncStatus('Saved on phone - GitHub sync failed, will retry later');}
@@ -187,13 +199,11 @@ function previewCalc(){
   if(Math.abs(total - parseFloat(b)) < 0.01){ box.innerHTML='✅ Formula = '+total+' | Total Bales = '+b+' - MATCHES, will save'; box.className='calcPreview'; }
   else{ box.innerHTML='❌ Formula = '+total+' | Total Bales = '+b+' - DOES NOT MATCH (difference '+(total - parseFloat(b))+') - will NOT save'; box.className='calcPreview bad'; }
 }
-// --- DROPDOWN AFTER BALES ---
 function updateAddFormulaDropdown(){
   let bales = document.getElementById('bales').value.trim();
   let sel = document.getElementById('savedFormulaSelect');
   let hint = document.getElementById('savedFormulaHint');
   if(!bales){ sel.innerHTML='<option value="">-- First enter Number of Bales --</option>'; hint.innerText='Enter bales to see saved formulas'; return; }
-  // Unique formulas for this bales (grouped) - show one per unique formula
   let seen = new Map();
   data.filter(d=>d.bales==bales).forEach(d=>{ let k=normalizeFormula(d.formula)+'|'+d.type; if(!seen.has(k)) seen.set(k,d); });
   let uniques = [...seen.values()];
@@ -209,27 +219,34 @@ function updateAddFormulaDropdown(){
 }
 function pickSavedFormula(){
   let sel = document.getElementById('savedFormulaSelect');
-  if(sel.value=='__new__'){
-    document.getElementById('title').value=''; document.getElementById('formula').value=''; document.getElementById('title').focus(); sel.value=''; previewCalc(); return;
-  }
+  if(sel.value=='__new__'){ document.getElementById('title').value=''; document.getElementById('formula').value=''; document.getElementById('title').focus(); sel.value=''; previewCalc(); return; }
   if(sel.value){
-    // Find first matching entry to copy title + type
     let found = data.find(d=>d.formula==sel.value);
     document.getElementById('formula').value = sel.value;
     if(found){ document.getElementById('title').value = found.title; document.getElementById('type').value = found.type||'2kg'; }
     previewCalc();
   }
 }
-// --- GROUPING ---
+function sortByStatus(list){
+  // Unfinished first, then Done. Keep newest first inside each group.
+  return [...list].sort((a,b)=>{
+    let sa = (a.status||'unfinished')=='unfinished' ? 0 : 1;
+    let sb = (b.status||'unfinished')=='unfinished' ? 0 : 1;
+    return sa - sb;
+  });
+}
 function groupFormulas(list){
-  // Group by normalized formula + bales + type
   let map = new Map();
   list.forEach(d=>{
     let key = d.bales+'|'+(d.type||'')+'|'+normalizeFormula(d.formula);
     if(!map.has(key)) map.set(key, {key:key, sample:d, items:[]});
     map.get(key).items.push(d);
   });
-  return [...map.values()];
+  // Sort groups: if group has any unfinished, it goes on top
+  let groups = [...map.values()];
+  groups.forEach(g=>{ g.items = sortByStatus(g.items); g.unfinishedCount = g.items.filter(x=>(x.status||'unfinished')=='unfinished').length; });
+  groups.sort((a,b)=> b.unfinishedCount - a.unfinishedCount);
+  return groups;
 }
 function groupedCard(g, allowEdit=true){
   let d = g.sample;
@@ -237,18 +254,38 @@ function groupedCard(g, allowEdit=true){
   let plates = [...new Set(g.items.map(x=>x.plate).filter(Boolean))];
   let isOpen = expandedGroups.has(g.key);
   let platesHtml = plates.map(p=>`<span class="plate">${p}</span>`).join(' ');
+  let unfinished = g.unfinishedCount;
+  let statusLine = unfinished>0 ? `<span class="unfinishedBadge">⏳ ${unfinished} Unfinished</span> ${count-unfinished>0?`<span class="doneBadge">✅ ${count-unfinished} Done</span>`:''}` : `<span class="doneBadge">✅ All Done (${count})</span>`;
+  let cardClass = unfinished>0 ? 'unfinished' : 'doneCard';
   let detailsHtml = '';
   if(isOpen){
     detailsHtml = g.items.map(item=>{
       let idx=data.indexOf(item);
-      return `<div style="border:1px solid #eee;padding:8px;border-radius:8px;margin:4px 0"><b>${item.plate||'-'}</b> ${item.dateDisplay?`📅 ${item.dateDisplay}`:''} ${item.bay?`• Bay: ${item.bay}`:''} ${item.invoice?`• ${item.invoice}`:''}<br><div class="row"><button class="editBtn" style="padding:6px" onclick="editFormula(${idx})">✏️ Edit This Car</button><button class="del" style="padding:6px" onclick="delFormula(${idx})">Delete This Car</button></div></div>`;
+      let st = item.status||'unfinished';
+      let badge = st=='unfinished' ? '<span class="unfinishedBadge">⏳ Unfinished</span>' : '<span class="doneBadge">✅ Done</span>';
+      let markBtn = st=='unfinished' ? `<button class="doneBtn" style="padding:8px" onclick="markDone(${idx})">✅ Mark Done</button>` : `<button class="undoBtn" style="padding:8px" onclick="markUnfinished(${idx})">↩️ Mark Unfinished</button>`;
+      return `<div style="border:1px solid #eee;padding:8px;border-radius:8px;margin:4px 0"><b>${item.plate||'-'}</b> ${item.dateDisplay?`📅 ${item.dateDisplay}`:''} ${item.bay?`• Bay: ${item.bay}`:''} ${item.invoice?`• ${item.invoice}`:''} ${badge}<br><div class="row">${markBtn}<button class="editBtn" style="padding:8px" onclick="editFormula(${idx})">✏️ Edit</button><button class="del" style="padding:8px" onclick="delFormula(${idx})">Delete</button></div></div>`;
     }).join('');
   }
-  return `<div class="card" style="border:1px solid #eee"><div class="bales">${d.bales} BALES - ${d.type}</div><b>${d.title}</b><p style="white-space:pre-wrap">${d.formula}</p><span class="groupBadge">Used on ${count} car(s) • ${plates.length} plate(s)</span><div style="margin:8px 0">${platesHtml}</div>${detailsHtml}<div class="row"><button style="background:#eee;color:#333;padding:8px" onclick="toggleGroup('${g.key}')">${isOpen?'Hide plates ▲':'Show all plates / cars ▼'}</button>${allowEdit?`<button class="editBtn" style="padding:8px" onclick="editFormula(${data.indexOf(d)})">✏️ Edit Formula</button>`:''}</div></div>`;
+  return `<div class="card ${cardClass}"><div class="bales">${d.bales} BALES - ${d.type}</div><b>${d.title}</b><p style="white-space:pre-wrap">${d.formula}</p>${statusLine} <span class="small">Used on ${count} car(s)</span><div style="margin:8px 0">${platesHtml}</div>${detailsHtml}<div class="row"><button style="background:#eee;color:#333;padding:8px" onclick="toggleGroup('${g.key}')">${isOpen?'Hide plates ▲':'Show all plates / Mark Done ▼'}</button>${unfinished>0?`<button class="doneBtn" style="padding:8px" onclick="markGroupDone('${g.key}')">✅ Mark All Done</button>`:''}</div></div>`;
 }
 function toggleGroup(key){
   if(expandedGroups.has(key)) expandedGroups.delete(key); else expandedGroups.add(key);
   show();
+}
+function markDone(i){
+  data[i].status='done'; data[i].doneAt=new Date().toISOString();
+  localStorage.setItem('flourData',JSON.stringify({formulas:data})); show(); syncToGitHub();
+}
+function markUnfinished(i){
+  data[i].status='unfinished';
+  localStorage.setItem('flourData',JSON.stringify({formulas:data})); show(); syncToGitHub();
+}
+function markGroupDone(key){
+  if(!confirm('Mark ALL unfinished cars in this formula as Done?')) return;
+  let g = groupFormulas(data).find(x=>x.key==key); if(!g) return;
+  g.items.forEach(item=>{ if((item.status||'unfinished')=='unfinished') item.status='done'; });
+  localStorage.setItem('flourData',JSON.stringify({formulas:data})); show(); syncToGitHub();
 }
 function openAddFormula(){
   editingIndex = -1;
@@ -258,7 +295,7 @@ function openAddFormula(){
   document.getElementById('cancelEditBtn').style.display='none';
   document.getElementById('bales').value=''; document.getElementById('title').value=''; document.getElementById('formula').value='';
   document.getElementById('plate').value=''; document.getElementById('bay').value=''; document.getElementById('invoice').value='';
-  document.getElementById('date').value=''; document.getElementById('type').value='2kg';
+  document.getElementById('date').value=''; document.getElementById('type').value='2kg'; document.getElementById('status').value='unfinished';
   document.getElementById('calcPreview').innerHTML='Enter bales + formula to check if it adds up';
   document.getElementById('calcPreview').className='calcPreview';
   updateAddFormulaDropdown();
@@ -281,6 +318,7 @@ function editFormula(i){
   document.getElementById('date').value=d.date||'';
   document.getElementById('bay').value=d.bay||'';
   document.getElementById('invoice').value=d.invoice||'';
+  document.getElementById('status').value=d.status||'unfinished';
   updateAddFormulaDropdown();
   openModal('addModal');
   previewCalc();
@@ -303,21 +341,18 @@ async function add(){
   let date=document.getElementById('date').value;
   let bay=document.getElementById('bay').value.trim();
   let invoice=document.getElementById('invoice').value.trim();
+  let status=document.getElementById('status').value;
   if(!b||!t||!f){alert('Fill Bales, Title and Formula');return;}
   if(!plate){alert('Enter Number Plate');return;}
   let total = calcFormulaTotal(f);
   if(total===null){ alert('Could not calculate your formula.\n\nUse numbers like: 40+45*4+50*20'); return; }
   if(Math.abs(total - parseFloat(b)) > 0.01){ alert('❌ WILL NOT SAVE!\n\nFormula adds up to: ' + total + '\nTotal Bales you entered: ' + b + '\nDifference: ' + (total - parseFloat(b))); return; }
-  // Allow same formula for different plate - block only exact same formula + plate + date
   let duplicateIndex = data.findIndex((d,idx) => idx !== editingIndex && normalizeFormula(d.formula) == normalizeFormula(f) && d.plate==plate && (d.date||'')==(date||''));
   if(duplicateIndex !== -1){ alert('⚠️ Already saved for this plate + date!'); return; }
-  let entry = {bales:b,type:ty,title:t,formula:f,plate:plate,date:date||'',dateDisplay:date?formatDate(date):'',bay:bay||'',invoice:invoice};
+  let entry = {bales:b,type:ty,title:t,formula:f,plate:plate,date:date||'',dateDisplay:date?formatDate(date):'',bay:bay||'',invoice:invoice,status:status};
   if(editingIndex >= 0){ data[editingIndex] = entry; editingIndex = -1; } else { data.unshift(entry); }
-  // OFFLINE FIRST - save to phone immediately
   localStorage.setItem('flourData',JSON.stringify({formulas:data}));
-  show();
-  // Try sync in background - will not block if offline
-  syncToGitHub();
+  show(); syncToGitHub();
   document.getElementById('bales').value=''; document.getElementById('title').value=''; document.getElementById('formula').value=''; document.getElementById('plate').value=''; document.getElementById('bay').value=''; document.getElementById('invoice').value=''; document.getElementById('date').value='';
   document.getElementById('addModalTitle').innerText='➕ Add New Formula';
   document.getElementById('editingBanner').style.display='none';
@@ -355,7 +390,8 @@ function showDates(filterDate){
     if(items.length==0){ resHtml='<p>No formula for this date</p>'; }
     else{
       let title = showDate=='__NODATE__' ? 'No Date' : formatDate(showDate);
-      resHtml='<h4>📅 '+title+' - '+items.length+' formula(s) / car(s)</h4>';
+      let unfinished = items.filter(d=>(d.status||'unfinished')=='unfinished').length;
+      resHtml='<h4>📅 '+title+' - '+items.length+' car(s) • ⏳ '+unfinished+' unfinished</h4>';
       let plates = [...new Set(items.map(d=>d.plate).filter(Boolean))];
       if(plates.length) resHtml+='<p><b>Cars used:</b> '+plates.join(', ')+'</p>';
       groupFormulas(items).forEach(g=>{ resHtml+=groupedCard(g); });
@@ -367,25 +403,29 @@ function showDates(filterDate){
   let inp=document.getElementById('dateFilter'); if(selectedDate && selectedDate!='__NODATE__' && inp.value!=selectedDate) inp.value=selectedDate; if(selectedDate=='') inp.value='';
 }
 function show(){
- let q=(document.getElementById('search').value||'').toLowerCase().trim(); let qt=document.getElementById('searchType').value;
+ let q=(document.getElementById('search').value||'').toLowerCase().trim(); let qt=document.getElementById('searchType').value; let st=document.getElementById('statusFilter').value;
+ let unfinishedTotal = data.filter(d=>(d.status||'unfinished')=='unfinished').length;
+ document.getElementById('unfinishedBadgeTop').innerText='('+unfinishedTotal+')';
+ document.getElementById('unfinishedBadge').innerText=unfinishedTotal+' unfinished';
  document.getElementById('countBadge').innerText=data.length+' entries • '+groupFormulas(data).length+' unique formulas';
- // Saved list - GROUPED
- let grouped = groupFormulas(data);
- let fHtml=''; if(grouped.length==0) fHtml='<p>No formula.</p>';
+ // Saved list - GROUPED + UNFINISHED ON TOP + status filter
+ let filteredForList = data.filter(d=>!st||(d.status||'unfinished')==st);
+ let grouped = groupFormulas(filteredForList);
+ let fHtml=''; if(grouped.length==0) fHtml='<p>No formula for this filter.</p>';
  grouped.forEach(g=>{ fHtml+=groupedCard(g); });
  document.getElementById('list').innerHTML=fHtml;
  showDates(selectedDate);
- if(q||qt){
+ if(q||qt||st){
    document.getElementById('searchResultsCard').style.display='block';
-   // Filter: All means ignore type filter, otherwise match type OR All
    let matchedF=data.filter(d=>{
      let matchesQ = !q||d.bales==q||d.title.toLowerCase().includes(q)||d.formula.toLowerCase().includes(q)||(d.plate||'').toLowerCase().includes(q)||(d.bay||'').toLowerCase().includes(q)||(d.dateDisplay||'').toLowerCase().includes(q)||(d.date||'').includes(q);
      let matchesT = !qt||qt=='All'||d.type==qt||d.type=='All';
-     return matchesQ && matchesT;
+     let matchesS = !st||(d.status||'unfinished')==st;
+     return matchesQ && matchesT && matchesS;
    });
    let html='';
-   if(matchedF.length>0){ html+='<b>📋 Found: '+groupFormulas(matchedF).length+' unique formula(s) from '+matchedF.length+' entries</b>'; groupFormulas(matchedF).forEach(g=>{ html+=groupedCard(g); }); }
-   if(matchedF.length==0) html='<p>No result for "'+q+'".</p>';
+   if(matchedF.length>0){ html+='<b>📋 Found: '+groupFormulas(matchedF).length+' unique formula(s) from '+matchedF.length+' entries • ⏳ '+matchedF.filter(d=>(d.status||'unfinished')=='unfinished').length+' unfinished on top</b>'; groupFormulas(matchedF).forEach(g=>{ html+=groupedCard(g); }); }
+   if(matchedF.length==0) html='<p>No result for this filter.</p>';
    document.getElementById('searchResults').innerHTML=html;
  } else {
    document.getElementById('searchResultsCard').style.display='none';
@@ -397,11 +437,12 @@ let local=JSON.parse(localStorage.getItem('flourData')||'null');
 if(local&&local.formulas){data=local.formulas;}
 else if(local&&local.cars){
   data=[];
-  local.cars.forEach(c=>{ (c.items||[]).forEach(it=>{ data.push({bales:it.bales,type:it.size,title:it.product,formula:it.formula||'',plate:c.plate,date:c.date,dateDisplay:c.dateDisplay||formatDate(c.date),bay:'',invoice:c.invoice||''}); }); });
+  local.cars.forEach(c=>{ (c.items||[]).forEach(it=>{ data.push({bales:it.bales,type:it.size,title:it.product,formula:it.formula||'',plate:c.plate,date:c.date,dateDisplay:c.dateDisplay||formatDate(c.date),bay:'',invoice:c.invoice||'',status:'unfinished'}); }); });
   if(local.formulas) data=data.concat(local.formulas);
 }
 else if(local&&Array.isArray(local)){data=local;}
-else{data=[{bales:"1220",type:"All",title:"Ajab HBF",formula:"40+45*4+50*20",plate:"KDQ 076M",date:"",dateDisplay:"",bay:"",invoice:"INV 123"}];}
+else{data=[{bales:"1220",type:"All",title:"Ajab HBF",formula:"40+45*4+50*20",plate:"KDQ 076M",date:"",dateDisplay:"",bay:"",invoice:"INV 123",status:"unfinished"}];}
+data.forEach(d=>{ if(!d.status) d.status='unfinished'; });
 show();
 if(localStorage.getItem('ghUser')) loadFromGitHub();
 if(!isOnline()) updateSyncStatus('📴 Offline - using saved on phone');
