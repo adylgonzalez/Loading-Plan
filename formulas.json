@@ -88,7 +88,7 @@
       "time": "08:48",
       "bay": "Bay 1",
       "invoice": "EB",
-      "status": "unfinished"
+      "status": "done"
     },
     {
       "bales": "1150",
@@ -209,7 +209,7 @@
       "dateDisplay": "",
       "bay": "",
       "invoice": "",
-      "status": "unfinished"
+      "status": "done"
     },
     {
       "bales": "1230",
@@ -554,7 +554,7 @@
       "dateDisplay": "",
       "bay": "",
       "invoice": "",
-      "status": "unfinished"
+      "status": "done"
     },
     {
       "bales": "1150",
