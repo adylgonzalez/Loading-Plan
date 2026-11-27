@@ -2,6 +2,18 @@
   "formulas": [
     {
       "bales": "1150",
+      "type": "1kg",
+      "title": ".",
+      "formula": "50*4+75*12+50",
+      "plate": "KCS 051Y",
+      "date": "2026-11-27",
+      "dateDisplay": "27 Nov 2026",
+      "time": "09:27",
+      "bay": "Bay 6",
+      "invoice": ""
+    },
+    {
+      "bales": "1150",
       "type": "2kg",
       "title": ".",
       "formula": "25*4+30+45*5+53*15",
