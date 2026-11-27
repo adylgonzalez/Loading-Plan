@@ -528,14 +528,14 @@
       "dateDisplay": "",
       "bay": "",
       "invoice": "",
-      "status": "unfinished"
+      "status": "done"
     },
     {
       "bales": "1230",
       "type": "2kg",
       "title": "-",
       "formula": "50*6+52*12+51*6",
-      "status": "unfinished"
+      "status": "done"
     },
     {
       "bales": "1200",
