@@ -62,7 +62,7 @@
       "time": "10:15",
       "bay": "Bay 1",
       "invoice": "",
-      "status": "unfinished"
+      "status": "done"
     },
     {
       "bales": "1150",
@@ -161,7 +161,7 @@
       "dateDisplay": "",
       "bay": "",
       "invoice": "",
-      "status": "unfinished"
+      "status": "done"
     },
     {
       "bales": "1150",
@@ -173,7 +173,7 @@
       "dateDisplay": "",
       "bay": "",
       "invoice": "",
-      "status": "unfinished"
+      "status": "done"
     },
     {
       "bales": "1230",
@@ -365,7 +365,7 @@
       "dateDisplay": "",
       "bay": "",
       "invoice": "",
-      "status": "unfinished"
+      "status": "done"
     },
     {
       "bales": "1230",
@@ -504,7 +504,7 @@
       "dateDisplay": "",
       "bay": "",
       "invoice": "",
-      "status": "unfinished"
+      "status": "done"
     },
     {
       "bales": "1150",
