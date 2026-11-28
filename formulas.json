@@ -1,6 +1,18 @@
 {
   "formulas": [
     {
+      "bales": "590",
+      "type": "2kg",
+      "title": "10 wheeler",
+      "formula": "40*2+50*6+45*4+30",
+      "plate": "KCW 369H",
+      "date": "2026-11-28",
+      "dateDisplay": "28 Nov 2026",
+      "bay": "5",
+      "invoice": "",
+      "status": "unfinished"
+    },
+    {
       "bales": "2280",
       "type": "0.5kg",
       "title": "GIL",
