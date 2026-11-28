@@ -1,6 +1,18 @@
 {
   "formulas": [
     {
+      "bales": "1160",
+      "type": "0.5kg",
+      "title": "Gil",
+      "formula": "70*2+90*6+80*6",
+      "plate": "KCL 277X",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "4",
+      "invoice": "",
+      "status": "unfinished"
+    },
+    {
       "bales": "590",
       "type": "2kg",
       "title": "10 wheeler",
