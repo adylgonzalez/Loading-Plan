@@ -1,6 +1,18 @@
 {
   "formulas": [
     {
+      "bales": "1200",
+      "type": "2kg+1kg",
+      "title": "2kg 200 1kg 1000",
+      "formula": "49*5+62*11+55*3+54*2",
+      "plate": "KCL 978Y",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "6",
+      "invoice": "Stanely kassim",
+      "status": "unfinished"
+    },
+    {
       "bales": "1160",
       "type": "0.5kg",
       "title": "Gil",
