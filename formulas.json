@@ -1,6 +1,18 @@
 {
   "formulas": [
     {
+      "bales": "1230",
+      "type": "2kg+1kg",
+      "title": "2kg 230 1kg 1000",
+      "formula": "52*6+51*18",
+      "plate": "KDX 069W",
+      "date": "2026-11-28",
+      "dateDisplay": "28 Nov 2026",
+      "bay": "4",
+      "invoice": "Lusweti/ Barongo",
+      "status": "unfinished"
+    },
+    {
       "bales": "590",
       "type": "2kg",
       "title": "10 wheeler",
