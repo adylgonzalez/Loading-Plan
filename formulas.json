@@ -1,6 +1,18 @@
 {
   "formulas": [
     {
+      "bales": "1230",
+      "type": "2kg+1kg",
+      "title": ".",
+      "formula": "50*3+60*18",
+      "plate": "KCV 934H",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "6",
+      "invoice": "Chege isogol",
+      "status": "unfinished"
+    },
+    {
       "bales": "500",
       "type": "2kg+1kg",
       "title": ".",
