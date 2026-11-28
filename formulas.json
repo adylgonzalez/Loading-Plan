@@ -1,6 +1,18 @@
 {
   "formulas": [
     {
+      "bales": "2300",
+      "type": "0.5kg",
+      "title": "GIL",
+      "formula": "90*5+99*18+68",
+      "plate": "KCM 109Y",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "5",
+      "invoice": "",
+      "status": "unfinished"
+    },
+    {
       "bales": "1230",
       "type": "1kg",
       "title": ".",
