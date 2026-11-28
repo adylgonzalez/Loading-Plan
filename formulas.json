@@ -1,6 +1,18 @@
 {
   "formulas": [
     {
+      "bales": "1150",
+      "type": "2kg",
+      "title": ".",
+      "formula": "30*4+40*4+52*3+51*14",
+      "plate": "KCC 785W",
+      "date": "2026-11-28",
+      "dateDisplay": "28 Nov 2026",
+      "bay": "4",
+      "invoice": "",
+      "status": "unfinished"
+    },
+    {
       "bales": "960",
       "type": "2kg",
       "title": "Bulkstream",
