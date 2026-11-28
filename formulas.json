@@ -1,6 +1,18 @@
 {
   "formulas": [
     {
+      "bales": "2280",
+      "type": "0.5kg",
+      "title": "GIL",
+      "formula": "125*10+110*9+40",
+      "plate": "KCS 087Y",
+      "date": "2026-11-28",
+      "dateDisplay": "28 Nov 2026",
+      "bay": "6",
+      "invoice": "Stanely/ Kassim",
+      "status": "unfinished"
+    },
+    {
       "bales": "1230",
       "type": "2kg+1kg",
       "title": "2kg 230 1kg 1000",
