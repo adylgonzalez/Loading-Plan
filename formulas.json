@@ -1,6 +1,18 @@
 {
   "formulas": [
     {
+      "bales": "500",
+      "type": "2kg+1kg",
+      "title": ".",
+      "formula": "50*10",
+      "plate": "KDV 072Y",
+      "date": "",
+      "dateDisplay": "",
+      "bay": "",
+      "invoice": "Wesonga/stanely",
+      "status": "unfinished"
+    },
+    {
       "bales": "2300",
       "type": "0.5kg",
       "title": "GIL",
